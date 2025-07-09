@@ -1,75 +1,312 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
+import AudioRecorder from '../../components/AudioRecorder';
+import BriefResult from '../../components/BriefResult';
+import StructuredBriefImprovementModal from '../../components/StructuredBriefImprovementModal';
+import ProfessionalBriefDisplay from '../../components/ProfessionalBriefDisplay';
+import TranscriptionResult from '../../components/TranscriptionResult';
+import BriefValidationAlert from '../../components/BriefValidationAlert';
+import { useBriefGeneration } from '../../hooks/useBriefGeneration';
+import { useBriefStorage } from '../../hooks/useBriefStorage';
+import { useWhisperTranscription } from '../../hooks/useWhisperTranscription';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+/**
+ * Pantalla principal: grabar audio y mostrar transcripción automática.
+ */
+const AudioToTextScreen: React.FC = () => {
+  const [audioUri, setAudioUri] = useState<string | null>(null);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [improvedBrief, setImprovedBrief] = useState<any | null>(null);
+  const [iaSuggestions, setIaSuggestions] = useState<string | null>(null);
+  const [useNewDisplay, setUseNewDisplay] = useState(true);
+  const [currentBriefId, setCurrentBriefId] = useState<string | null>(null);
 
-export default function HomeScreen() {
+  // Hook de transcripción automática
+  const { transcription, loading, error } = useWhisperTranscription(audioUri, !!audioUri);
+
+  // Hook de generación de brief (solo si hay transcripción)
+  const { brief, loading: loadingBrief, error: errorBrief } = useBriefGeneration(transcription, !!transcription);
+  const briefToShow = improvedBrief || brief;
+  const iaSuggestionsToShow = improvedBrief ? iaSuggestions : null;
+
+  // Hook de almacenamiento
+  const { saveBrief, updateBrief } = useBriefStorage();
+
+  // Recibe la URI del audio grabado desde el componente hijo
+  const handleAudioRecorded = (uri: string | null) => {
+    setAudioUri(uri);
+    // Reset previous results
+    setImprovedBrief(null);
+    setIaSuggestions(null);
+    setCurrentBriefId(null);
+  };
+
+  // Guardar brief automáticamente cuando esté listo
+  useEffect(() => {
+    if (brief && transcription && !loadingBrief && !errorBrief) {
+      const autoSave = async () => {
+        try {
+          const title = brief.projectTitle || `Brief ${new Date().toLocaleDateString()}`;
+          const briefId = await saveBrief(title, transcription, brief, audioUri || undefined);
+          setCurrentBriefId(briefId);
+          console.log('Brief guardado automáticamente:', briefId);
+        } catch (error) {
+          console.error('Error auto-saving brief:', error);
+          // No mostrar error al usuario para el auto-save, solo loggear
+        }
+      };
+      autoSave();
+    }
+  }, [brief, transcription, loadingBrief, errorBrief, audioUri, saveBrief]);
+
+  // Actualizar brief guardado cuando se mejore
+  useEffect(() => {
+    if (improvedBrief && currentBriefId) {
+      const updateSaved = async () => {
+        try {
+          await updateBrief(currentBriefId, {
+            brief: improvedBrief,
+            title: improvedBrief.projectTitle || `Brief ${new Date().toLocaleDateString()}`,
+          });
+          console.log('Brief actualizado automáticamente:', currentBriefId);
+        } catch (error) {
+          console.error('Error updating saved brief:', error);
+          // No mostrar error al usuario para el auto-update, solo loggear
+        }
+      };
+      updateSaved();
+    }
+  }, [improvedBrief, currentBriefId, updateBrief]);
+
+  const handleManualSave = () => {
+    if (briefToShow) {
+      Alert.prompt(
+        'Guardar Brief',
+        'Ingresa un título para este brief:',
+        async (title) => {
+          if (title) {
+            try {
+              const briefId = await saveBrief(title, transcription || '', briefToShow, audioUri || undefined);
+              Alert.alert('✅ Guardado', `Brief "${title}" guardado exitosamente`);
+              if (!currentBriefId) {
+                setCurrentBriefId(briefId);
+              }
+            } catch (saveError) {
+              console.error('Error saving brief:', saveError);
+              Alert.alert(
+                '❌ Error al Guardar', 
+                saveError instanceof Error ? saveError.message : 'No se pudo guardar el brief. Intenta nuevamente.',
+                [
+                  { text: 'Reintentar', onPress: () => handleManualSave() },
+                  { text: 'Cancelar', style: 'cancel' }
+                ]
+              );
+            }
+          }
+        },
+        'plain-text',
+        briefToShow.projectTitle || `Brief ${new Date().toLocaleDateString()}`
+      );
+    } else {
+      Alert.alert(
+        '⚠️ Sin Brief',
+        'No hay un brief disponible para guardar. Graba un audio primero.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.appTitle}>📊 BriefBoy</Text>
+          <Text style={styles.appSubtitle}>Generador de Briefs Publicitarios con IA</Text>
+        </View>
+        
+        <AudioRecorder onAudioRecorded={handleAudioRecorded} />
+        
+        <TranscriptionResult
+          loading={loading}
+          error={error}
+          transcription={transcription}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        
+        {briefToShow && !loadingBrief && !errorBrief && (
+          <BriefValidationAlert
+            brief={briefToShow}
+            onComplete={(completedBrief) => {
+              setImprovedBrief(completedBrief);
+              Alert.alert('✅ Completado', 'El brief ha sido completado automáticamente con contenido generado.');
+            }}
+          />
+        )}
+        
+        {useNewDisplay ? (
+          <ProfessionalBriefDisplay
+            brief={briefToShow}
+            loading={loadingBrief}
+            error={errorBrief}
+          />
+        ) : (
+          <BriefResult
+            brief={briefToShow}
+            loading={loadingBrief}
+            error={errorBrief}
+            iaSuggestions={iaSuggestionsToShow}
+          />
+        )}
+        
+        {brief && !loadingBrief && !errorBrief && (
+          <View style={styles.actionsContainer}>
+            <Pressable
+              style={styles.improveButton}
+              onPress={() => setShowChatModal(true)}
+            >
+              <Text style={styles.improveButtonText}>🔄 Mejora Estructurada</Text>
+            </Pressable>
+            
+            <Pressable
+              style={styles.toggleButton}
+              onPress={() => setUseNewDisplay(!useNewDisplay)}
+            >
+              <Text style={styles.toggleButtonText}>
+                {useNewDisplay ? '🔄 Vista Clásica' : '🎆 Vista Profesional'}
+              </Text>
+            </Pressable>
+          </View>
+        )}
+        
+        {briefToShow && (
+          <View style={styles.saveContainer}>
+            <Pressable
+              style={styles.saveButton}
+              onPress={handleManualSave}
+            >
+              <Text style={styles.saveButtonText}>
+                {currentBriefId ? '💾 Guardar Copia' : '💾 Guardar Brief'}
+              </Text>
+            </Pressable>
+            {currentBriefId && (
+              <Text style={styles.autoSaveText}>
+                ✅ Guardado automáticamente
+              </Text>
+            )}
+          </View>
+        )}
+      </ScrollView>
+      
+      <StructuredBriefImprovementModal
+        visible={showChatModal}
+        brief={brief}
+        onClose={() => setShowChatModal(false)}
+        onBriefImproved={b => { setImprovedBrief(b); }}
+      />
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
   },
-  stepContainer: {
-    gap: 8,
+  scrollContent: {
+    flexGrow: 1,
+    padding: 20,
+    paddingBottom: 40,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingTop: 20,
+  },
+  appTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#1e293b',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  appSubtitle: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    gap: 12,
+  },
+  improveButton: {
+    flex: 1,
+    backgroundColor: '#2563eb',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  improveButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  toggleButton: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  toggleButtonText: {
+    color: '#475569',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  saveButton: {
+    backgroundColor: '#16a34a',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  saveButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  autoSaveText: {
+    fontSize: 14,
+    color: '#16a34a',
+    marginTop: 8,
+    fontStyle: 'italic',
   },
 });
+
+export default AudioToTextScreen;

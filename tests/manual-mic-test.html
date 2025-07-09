@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Prueba Manual de Micrófono</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+    button { margin: 8px 0; padding: 8px 16px; font-size: 16px; }
+    audio { display: block; margin-top: 16px; width: 100%; }
+    .error { color: #d32f2f; margin-top: 12px; }
+    .uri { color: #888; font-size: 12px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h2>Prueba Manual de Micrófono</h2>
+  <p>Permite grabar audio desde tu micrófono y reproducirlo para verificar su funcionamiento.</p>
+  <button id="startBtn">Iniciar grabación</button>
+  <button id="stopBtn" disabled>Detener grabación</button>
+  <div id="status">Listo para grabar</div>
+  <audio id="audio" controls style="display:none;"></audio>
+  <div class="uri" id="uri"></div>
+  <div class="error" id="error"></div>
+
+  <script>
+    let mediaRecorder;
+    let audioChunks = [];
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const statusDiv = document.getElementById('status');
+    const audioElem = document.getElementById('audio');
+    const uriDiv = document.getElementById('uri');
+    const errorDiv = document.getElementById('error');
+
+    startBtn.onclick = async () => {
+      errorDiv.textContent = '';
+      uriDiv.textContent = '';
+      audioElem.style.display = 'none';
+      statusDiv.textContent = 'Solicitando permisos...';
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstart = () => {
+          statusDiv.textContent = 'Grabando...';
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+        };
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          audioElem.src = audioUrl;
+          audioElem.style.display = 'block';
+          uriDiv.textContent = 'URI temporal: ' + audioUrl;
+          statusDiv.textContent = 'Grabación lista';
+          startBtn.disabled = false;
+          stopBtn.disabled = true;
+        };
+        mediaRecorder.start();
+      } catch (err) {
+        errorDiv.textContent = 'No se pudo acceder al micrófono: ' + err;
+        statusDiv.textContent = 'Error';
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    };
+
+    stopBtn.onclick = () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        statusDiv.textContent = 'Procesando grabación...';
+      }
+    };
+  </script>
+</body>
+</html>

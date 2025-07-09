@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1752075900500" clover="3.2.0">
+  <project timestamp="1752075900500" name="All files">
+    <metrics statements="47" coveredstatements="43" conditionals="58" coveredconditionals="47" methods="7" coveredmethods="7" elements="112" coveredelements="97" complexity="0" loc="47" ncloc="47" packages="1" files="1" classes="1"/>
+    <file name="briefUtils.ts" path="/Users/santiagogonzalez/BOTS y SCRIPTS/BriefBoy/briefBoy2/briefboy-app/hooks/briefUtils.ts">
+      <metrics statements="47" coveredstatements="43" conditionals="58" coveredconditionals="47" methods="7" coveredmethods="7"/>
+      <line num="3" count="1" type="stmt"/>
+      <line num="22" count="1" type="stmt"/>
+      <line num="23" count="72" type="cond" truecount="2" falsecount="0"/>
+      <line num="24" count="69" type="cond" truecount="2" falsecount="0"/>
+      <line num="25" count="44" type="cond" truecount="2" falsecount="0"/>
+      <line num="26" count="36" type="cond" truecount="2" falsecount="0"/>
+      <line num="27" count="34" type="cond" truecount="2" falsecount="0"/>
+      <line num="28" count="66" type="cond" truecount="2" falsecount="0"/>
+      <line num="30" count="2" type="cond" truecount="1" falsecount="1"/>
+      <line num="32" count="2" type="stmt"/>
+      <line num="33" count="12" type="cond" truecount="2" falsecount="0"/>
+      <line num="36" count="0" type="stmt"/>
+      <line num="38" count="8" type="cond" truecount="1" falsecount="1"/>
+      <line num="39" count="0" type="stmt"/>
+      <line num="42" count="1" type="stmt"/>
+      <line num="43" count="3" type="cond" truecount="1" falsecount="1"/>
+      <line num="44" count="3" type="stmt"/>
+      <line num="45" count="34" type="cond" truecount="2" falsecount="0"/>
+      <line num="46" count="1" type="stmt"/>
+      <line num="49" count="2" type="stmt"/>
+      <line num="52" count="1" type="stmt"/>
+      <line num="53" count="8" type="cond" truecount="1" falsecount="1"/>
+      <line num="54" count="8" type="cond" truecount="1" falsecount="1"/>
+      <line num="55" count="8" type="cond" truecount="4" falsecount="0"/>
+      <line num="56" count="5" type="stmt"/>
+      <line num="58" count="3" type="cond" truecount="4" falsecount="0"/>
+      <line num="59" count="2" type="stmt"/>
+      <line num="61" count="1" type="cond" truecount="3" falsecount="1"/>
+      <line num="62" count="1" type="stmt"/>
+      <line num="64" count="0" type="stmt"/>
+      <line num="67" count="1" type="stmt"/>
+      <line num="68" count="2" type="cond" truecount="3" falsecount="3"/>
+      <line num="69" count="2" type="cond" truecount="1" falsecount="1"/>
+      <line num="70" count="2" type="stmt"/>
+      <line num="71" count="4" type="cond" truecount="1" falsecount="1"/>
+      <line num="72" count="4" type="stmt"/>
+      <line num="73" count="4" type="stmt"/>
+      <line num="74" count="4" type="cond" truecount="6" falsecount="0"/>
+      <line num="75" count="1" type="stmt"/>
+      <line num="76" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="77" count="2" type="stmt"/>
+      <line num="79" count="1" type="stmt"/>
+      <line num="82" count="0" type="stmt"/>
+      <line num="85" count="2" type="stmt"/>
+      <line num="86" count="6" type="cond" truecount="2" falsecount="0"/>
+      <line num="87" count="2" type="stmt"/>
+      <line num="90" count="2" type="stmt"/>
+    </file>
+  </project>
+</coverage>
