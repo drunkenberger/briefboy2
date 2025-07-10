@@ -5,6 +5,7 @@ interface TranscriptionResultProps {
   loading: boolean;
   error: string | null;
   transcription: string | null;
+  isFromFile?: boolean;
 }
 
 /**
@@ -12,8 +13,9 @@ interface TranscriptionResultProps {
  * @param loading Estado de carga
  * @param error Mensaje de error (si existe)
  * @param transcription Texto transcrito (si existe)
+ * @param isFromFile Si la transcripción viene de un archivo subido
  */
-const TranscriptionResult: React.FC<TranscriptionResultProps> = ({ loading, error, transcription }) => {
+const TranscriptionResult: React.FC<TranscriptionResultProps> = ({ loading, error, transcription, isFromFile = false }) => {
   if (!loading && !error && !transcription) {
     return null; // No mostrar nada si no hay contenido
   }
@@ -24,8 +26,12 @@ const TranscriptionResult: React.FC<TranscriptionResultProps> = ({ loading, erro
         {loading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#2563eb" />
-            <Text style={styles.loadingTitle}>Transcribiendo audio...</Text>
-            <Text style={styles.loadingSubtitle}>Procesando con Whisper AI</Text>
+            <Text style={styles.loadingTitle}>
+              {isFromFile ? 'Procesando archivo...' : 'Transcribiendo audio...'}
+            </Text>
+            <Text style={styles.loadingSubtitle}>
+              {isFromFile ? 'Extrayendo contenido del archivo' : 'Procesando con Whisper AI'}
+            </Text>
           </View>
         )}
         
@@ -40,8 +46,10 @@ const TranscriptionResult: React.FC<TranscriptionResultProps> = ({ loading, erro
         {transcription && !loading && !error && (
           <View style={styles.transcriptionContainer}>
             <View style={styles.transcriptionHeader}>
-              <Text style={styles.transcriptionIcon}>📝</Text>
-              <Text style={styles.transcriptionTitle}>Transcripción Completada</Text>
+              <Text style={styles.transcriptionIcon}>{isFromFile ? '📁' : '📝'}</Text>
+              <Text style={styles.transcriptionTitle}>
+                Transcripción Completada {isFromFile ? '(desde archivo)' : ''}
+              </Text>
             </View>
             <View style={styles.transcriptionContent}>
               <Text style={styles.transcriptionText}>{transcription}</Text>
@@ -50,6 +58,11 @@ const TranscriptionResult: React.FC<TranscriptionResultProps> = ({ loading, erro
               <Text style={styles.transcriptionMeta}>
                 {transcription.length} caracteres • ~{Math.ceil(transcription.split(' ').length / 150)} min lectura
               </Text>
+              {isFromFile && (
+                <Text style={styles.fileIndicator}>
+                  📁 Transcrito desde archivo subido
+                </Text>
+              )}
             </View>
           </View>
         )}
@@ -146,6 +159,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
     fontStyle: 'italic',
+  },
+  fileIndicator: {
+    fontSize: 12,
+    color: '#7c3aed',
+    marginTop: 8,
+    fontWeight: '500',
   },
 });
 

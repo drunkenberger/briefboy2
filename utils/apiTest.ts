@@ -4,7 +4,7 @@
 
 export const testOpenAIConnection = async (): Promise<{ success: boolean; message: string }> => {
   try {
-    const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
     
     if (!apiKey) {
       return {

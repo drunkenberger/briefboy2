@@ -49,6 +49,7 @@ const BRIEF_FIELDS: BriefField[] = [
   { key: 'creativeStrategy.creativeMandatories', label: 'Elementos Obligatorios', type: 'array', placeholder: 'Elementos que deben incluirse obligatoriamente', required: false },
   
   // Canales
+  { key: 'channelStrategy.recommendedMix', label: 'Mix de Canales Recomendado', type: 'array', placeholder: 'Canales recomendados para la campaña', required: true },
   { key: 'channelStrategy.integratedApproach', label: 'Enfoque Integrado de Canales', type: 'textarea', placeholder: 'Cómo se integran los diferentes canales...', required: true },
   
   // Métricas
@@ -60,6 +61,12 @@ const BRIEF_FIELDS: BriefField[] = [
   { key: 'budgetConsiderations.estimatedRange', label: 'Rango Presupuestario', type: 'text', placeholder: 'Rango estimado de presupuesto', required: false },
   { key: 'budgetConsiderations.keyInvestments', label: 'Inversiones Clave', type: 'array', placeholder: 'Principales áreas de inversión', required: false },
   { key: 'budgetConsiderations.costOptimization', label: 'Optimización de Costos', type: 'array', placeholder: 'Estrategias para optimizar costos', required: false },
+  
+  // Riesgos
+  { key: 'riskAssessment.risks', label: 'Análisis de Riesgos', type: 'array', placeholder: 'Riesgos potenciales y mitigaciones', required: true },
+  
+  // Implementación
+  { key: 'implementationRoadmap.phases', label: 'Fases de Implementación', type: 'array', placeholder: 'Fases del proyecto', required: true },
   
   // Próximos Pasos
   { key: 'nextSteps', label: 'Próximos Pasos', type: 'array', placeholder: 'Acciones a seguir', required: true },
@@ -107,6 +114,13 @@ const EditableBriefView: React.FC<EditableBriefViewProps> = ({
   }, [brief, workingBrief]);
 
   const handleFieldChange = useCallback((field: string, value: any) => {
+    const timestamp = new Date().toLocaleTimeString();
+    console.log(`🔄 [${timestamp}] EditableBriefView - Actualizando campo:`, {
+      field,
+      value,
+      valueType: Array.isArray(value) ? 'array' : typeof value
+    });
+    
     const updatedBrief = { ...workingBrief };
     
     // Manejar campos anidados (e.g., 'targetAudience.primary')
@@ -119,6 +133,19 @@ const EditableBriefView: React.FC<EditableBriefViewProps> = ({
     } else {
       updatedBrief[field] = value;
     }
+    
+    // Verificar que el campo se actualizó correctamente
+    const verificacion = field.includes('.') 
+      ? updatedBrief[field.split('.')[0]][field.split('.')[1]]
+      : updatedBrief[field];
+    
+    console.log(`✅ Campo actualizado localmente:`, {
+      field,
+      valorAntes: field.includes('.') 
+        ? workingBrief[field.split('.')[0]]?.[field.split('.')[1]]
+        : workingBrief[field],
+      valorDespues: verificacion
+    });
     
     setWorkingBrief(updatedBrief);
     onBriefChange(updatedBrief);

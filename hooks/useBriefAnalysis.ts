@@ -41,11 +41,12 @@ export function useBriefAnalysis(brief: any) {
     setError(null);
     
     try {
-      const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+      const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
       if (!apiKey) {
         console.warn('No se encontró API key, usando análisis offline');
         const offlineAnalysis = createSimpleAnalysis(briefToAnalyze);
         setAnalysis(offlineAnalysis);
+        setLoading(false);
         return;
       }
       
@@ -58,6 +59,7 @@ export function useBriefAnalysis(brief: any) {
         console.warn('Usando análisis offline como fallback');
         const offlineAnalysis = createSimpleAnalysis(briefToAnalyze);
         setAnalysis(offlineAnalysis);
+        setLoading(false);
         return;
       }
       
@@ -163,25 +165,8 @@ Formato JSON requerido (copia exactamente esta estructura):
         console.error('Error parseando JSON:', parseError);
         console.error('Contenido recibido:', content);
         
-        // Crear un análisis básico como fallback
-        const fallbackAnalysis: BriefAnalysisResult = {
-          overallScore: 75,
-          completenessScore: 80,
-          qualityScore: 70,
-          professionalismScore: 75,
-          readinessScore: 70,
-          strengths: ['Brief tiene información básica'],
-          weaknesses: ['Necesita más detalles específicos'],
-          criticalIssues: ['Falta información detallada'],
-          recommendations: ['Agregar más detalles específicos', 'Revisar objetivos'],
-          sectionAnalysis: {
-            projectTitle: { score: 75, status: 'fair', issues: [], suggestions: ['Hacer más específico'] },
-            briefSummary: { score: 70, status: 'fair', issues: [], suggestions: ['Agregar más detalles'] },
-            strategicObjectives: { score: 70, status: 'fair', issues: ['Muy genéricos'], suggestions: ['Agregar KPIs específicos'] }
-          },
-          isReadyForProduction: false,
-          estimatedImprovementTime: '20-30 minutos'
-        };
+        // Crear un análisis real basado en el contenido del brief
+        const fallbackAnalysis = createSimpleAnalysis(briefToAnalyze);
         
         setAnalysis(fallbackAnalysis);
         console.warn('Usando análisis fallback debido a error de parsing');

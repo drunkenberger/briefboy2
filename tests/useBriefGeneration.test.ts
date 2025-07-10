@@ -53,7 +53,7 @@ async function waitForCondition(condition: () => boolean, timeout = 2000, interv
 describe('useBriefGeneration', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.EXPO_PUBLIC_OPENAI_API_KEY = 'test-key';
   });
 
   it('no hace nada si transcript es null', () => {
@@ -95,7 +95,7 @@ describe('useBriefGeneration', () => {
   });
 
   it('maneja error de API key faltante', () => {
-    process.env.OPENAI_API_KEY = '';
+    process.env.EXPO_PUBLIC_OPENAI_API_KEY = '';
     const { result } = renderHook(() => useBriefGeneration(mockTranscript));
     expect(result.current.loading).toBe(false);
     expect(result.current.brief).toBeNull();

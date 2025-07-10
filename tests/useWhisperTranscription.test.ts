@@ -22,7 +22,7 @@ async function waitForCondition(condition: () => boolean, timeout = 2000, interv
 describe('useWhisperTranscription', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.EXPO_PUBLIC_OPENAI_API_KEY = 'test-key';
   });
 
   it('no hace nada si audioUri es null', () => {
@@ -69,7 +69,7 @@ describe('useWhisperTranscription', () => {
   });
 
   it('maneja error de API key faltante', async () => {
-    process.env.OPENAI_API_KEY = '';
+    process.env.EXPO_PUBLIC_OPENAI_API_KEY = '';
     const { result } = renderHook(() => useWhisperTranscription(mockAudioUri));
     expect(result.current.loading).toBe(false);
     expect(result.current.transcription).toBeNull();

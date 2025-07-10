@@ -11,7 +11,7 @@ describe('useBriefAnalysis', () => {
 
   it('should initialize with null analysis', () => {
     const { result } = renderHook(() => useBriefAnalysis(null));
-    
+
     expect(result.current.analysis).toBeNull();
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeNull();
@@ -60,9 +60,9 @@ describe('useBriefAnalysis', () => {
     const { result, waitForNextUpdate } = renderHook(() => useBriefAnalysis(mockBrief));
 
     expect(result.current.loading).toBe(true);
-    
+
     await waitForNextUpdate();
-    
+
     expect(result.current.loading).toBe(false);
     expect(result.current.analysis).toEqual(mockAnalysis);
     expect(result.current.error).toBeNull();
@@ -82,7 +82,7 @@ describe('useBriefAnalysis', () => {
     const { result, waitForNextUpdate } = renderHook(() => useBriefAnalysis(mockBrief));
 
     await waitForNextUpdate();
-    
+
     expect(result.current.loading).toBe(false);
     expect(result.current.analysis).toBeNull();
     expect(result.current.error).toContain('Error HTTP 500');
@@ -108,7 +108,7 @@ describe('useBriefAnalysis', () => {
     const { result, waitForNextUpdate } = renderHook(() => useBriefAnalysis(mockBrief));
 
     await waitForNextUpdate();
-    
+
     expect(result.current.loading).toBe(false);
     expect(result.current.analysis).toBeNull();
     expect(result.current.error).toContain('Error al procesar el análisis');
@@ -118,7 +118,7 @@ describe('useBriefAnalysis', () => {
     const originalEnv = process.env;
     process.env = { ...originalEnv };
     delete process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-    delete process.env.OPENAI_API_KEY;
+    
 
     const mockBrief = {
       projectTitle: 'Test Project',
@@ -128,7 +128,7 @@ describe('useBriefAnalysis', () => {
     const { result, waitForNextUpdate } = renderHook(() => useBriefAnalysis(mockBrief));
 
     await waitForNextUpdate();
-    
+
     expect(result.current.loading).toBe(false);
     expect(result.current.analysis).toBeNull();
     expect(result.current.error).toContain('No se encontró la API key');
@@ -171,15 +171,15 @@ describe('useBriefAnalysis', () => {
     const { result, waitForNextUpdate } = renderHook(() => useBriefAnalysis(mockBrief));
 
     await waitForNextUpdate();
-    
+
     expect(result.current.analysis).toEqual(mockAnalysis);
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    
+
     // Call reAnalyze
     await act(async () => {
       result.current.reAnalyze();
     });
-    
+
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });
@@ -188,7 +188,7 @@ describe('useBriefAnalysis', () => {
 describe('useBriefAnalysis utility functions', () => {
   it('should return correct score colors', () => {
     const { getScoreColor } = require('../hooks/useBriefAnalysis');
-    
+
     expect(getScoreColor(95)).toBe('#10b981'); // Verde excelente
     expect(getScoreColor(85)).toBe('#3b82f6'); // Azul bueno
     expect(getScoreColor(75)).toBe('#f59e0b'); // Amarillo regular
@@ -198,7 +198,7 @@ describe('useBriefAnalysis utility functions', () => {
 
   it('should return correct status text', () => {
     const { getStatusText } = require('../hooks/useBriefAnalysis');
-    
+
     expect(getStatusText('excellent')).toBe('Excelente');
     expect(getStatusText('good')).toBe('Bueno');
     expect(getStatusText('fair')).toBe('Regular');
@@ -209,7 +209,7 @@ describe('useBriefAnalysis utility functions', () => {
 
   it('should return correct score emojis', () => {
     const { getScoreEmoji } = require('../hooks/useBriefAnalysis');
-    
+
     expect(getScoreEmoji(95)).toBe('🌟');
     expect(getScoreEmoji(85)).toBe('✅');
     expect(getScoreEmoji(75)).toBe('⚠️');

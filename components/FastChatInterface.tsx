@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
-import type { ChatMessage } from '../hooks/useFastChat';
+import React, { useEffect, useRef, useState } from 'react';
+import { FlatList, Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 interface FastChatInterfaceProps {
-  messages: ChatMessage[];
+  messages: { role: 'user' | 'assistant'; content: string }[];
   isTyping: boolean;
   sendMessage: (message: string) => Promise<void>;
-  isConnected: boolean;
   error: string | null;
   onBriefGenerated: (brief: any) => void;
+  userInput: string;
+  setUserInput: (text: string) => void;
 }
 
 /**
@@ -18,11 +18,11 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
   messages,
   isTyping,
   sendMessage,
-  isConnected,
   error,
   onBriefGenerated,
+  userInput,
+  setUserInput,
 }) => {
-  const [inputText, setInputText] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
@@ -43,7 +43,7 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 100);
     });
-    
+
     const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
       setKeyboardHeight(0);
     });
@@ -55,33 +55,23 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
   }, []);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim() || isTyping) return;
-    
-    const messageToSend = inputText.trim();
-    setInputText('');
-    
+    if (!userInput.trim() || isTyping) return;
+
     try {
-      await sendMessage(messageToSend);
+      await sendMessage(userInput);
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
 
-  const renderMessage = ({ item }: { item: ChatMessage }) => {
+  const renderMessage = ({ item }: { item: { role: 'user' | 'assistant'; content: string } }) => {
     const isUser = item.role === 'user';
-    const time = new Date(item.timestamp).toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
 
     return (
       <View style={[styles.messageContainer, isUser ? styles.userMessageContainer : styles.assistantMessageContainer]}>
         <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
           <Text style={[styles.messageText, isUser ? styles.userText : styles.assistantText]}>
             {item.content}
-          </Text>
-          <Text style={[styles.messageTime, isUser ? styles.userTime : styles.assistantTime]}>
-            {time}
           </Text>
         </View>
       </View>
@@ -90,11 +80,11 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
 
   const renderTypingIndicator = () => {
     if (!isTyping) return null;
-    
+
     return (
       <View style={[styles.messageContainer, styles.assistantMessageContainer]}>
         <View style={[styles.messageBubble, styles.assistantBubble, styles.typingBubble]}>
-          <View style={styles.typingIndicator}>
+          <View style={styles.typingIndicator} testID="typing-indicator">
             <View style={[styles.typingDot, styles.typingDot1]} />
             <View style={[styles.typingDot, styles.typingDot2]} />
             <View style={[styles.typingDot, styles.typingDot3]} />
@@ -104,47 +94,14 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
     );
   };
 
-  const renderQuickReplies = () => {
-    if (messages.length <= 1) {
-      return (
-        <View style={styles.quickRepliesContainer}>
-          <Text style={styles.quickRepliesTitle}>Sugerencias rápidas:</Text>
-          <View style={styles.quickRepliesGrid}>
-            <QuickReplyButton 
-              text="Mejorar objetivos"
-              onPress={() => setInputText('Ayúdame a mejorar los objetivos estratégicos del brief')}
-            />
-            <QuickReplyButton 
-              text="Mensajes clave"
-              onPress={() => setInputText('¿Cómo puedo hacer los mensajes clave más impactantes?')}
-            />
-            <QuickReplyButton 
-              text="Audiencia objetivo"
-              onPress={() => setInputText('¿Está bien definida la audiencia objetivo?')}
-            />
-            <QuickReplyButton 
-              text="Estrategia de canales"
-              onPress={() => setInputText('¿Qué opinas de la estrategia de canales propuesta?')}
-            />
-          </View>
-        </View>
-      );
-    }
-    return null;
-  };
+
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       {/* Estado de conexión */}
-      {!isConnected && (
-        <View style={styles.connectionStatus}>
-          <Text style={styles.connectionStatusText}>🔴 Sin conexión - Reintentando...</Text>
-        </View>
-      )}
-      
       {error && (
         <View style={styles.errorBanner}>
           <Text style={styles.errorText}>⚠️ {error}</Text>
@@ -156,22 +113,19 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
         ref={flatListRef}
         data={messages}
         renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => `msg-${index}`}
         style={styles.messagesList}
         contentContainerStyle={styles.messagesContainer}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={renderTypingIndicator}
       />
 
-      {/* Respuestas rápidas */}
-      {renderQuickReplies()}
-
       {/* Input para escribir */}
       <View style={[styles.inputContainer, { paddingBottom: keyboardHeight > 0 ? 8 : 16 }]}>
         <TextInput
           style={styles.textInput}
-          value={inputText}
-          onChangeText={setInputText}
+          value={userInput}
+          onChangeText={setUserInput}
           placeholder="Escribe tu mensaje..."
           placeholderTextColor="#9ca3af"
           multiline
@@ -180,12 +134,12 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
           onSubmitEditing={handleSendMessage}
           blurOnSubmit={false}
         />
-        <Pressable 
-          style={[styles.sendButton, (!inputText.trim() || isTyping) && styles.sendButtonDisabled]}
+        <Pressable
+          style={[styles.sendButton, (!userInput.trim() || isTyping) && styles.sendButtonDisabled]}
           onPress={handleSendMessage}
-          disabled={!inputText.trim() || isTyping}
+          disabled={!userInput.trim() || isTyping}
         >
-          <Text style={[styles.sendButtonText, (!inputText.trim() || isTyping) && styles.sendButtonTextDisabled]}>
+          <Text style={[styles.sendButtonText, (!userInput.trim() || isTyping) && styles.sendButtonTextDisabled]}>
             {isTyping ? '...' : '↗️'}
           </Text>
         </Pressable>
@@ -194,11 +148,7 @@ const FastChatInterface: React.FC<FastChatInterfaceProps> = ({
   );
 };
 
-const QuickReplyButton: React.FC<{ text: string; onPress: () => void }> = ({ text, onPress }) => (
-  <Pressable style={styles.quickReplyButton} onPress={onPress}>
-    <Text style={styles.quickReplyText}>{text}</Text>
-  </Pressable>
-);
+
 
 const styles = StyleSheet.create({
   container: {
@@ -274,16 +224,6 @@ const styles = StyleSheet.create({
   assistantText: {
     color: '#1e293b',
   },
-  messageTime: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  userTime: {
-    color: '#e2e8f0',
-  },
-  assistantTime: {
-    color: '#9ca3af',
-  },
   typingIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -305,37 +245,7 @@ const styles = StyleSheet.create({
   typingDot3: {
     animationDelay: '0.4s',
   },
-  quickRepliesContainer: {
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  quickRepliesTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-    marginBottom: 8,
-  },
-  quickRepliesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  quickReplyButton: {
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  quickReplyText: {
-    color: '#475569',
-    fontSize: 14,
-    fontWeight: '500',
-  },
+
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',

@@ -39,7 +39,7 @@ describe('useChatWithAI (lógica pura)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.EXPO_PUBLIC_OPENAI_API_KEY = 'test-key';
   });
 
   it('flujo exitoso: mejora el brief y lo marca como completo', async () => {

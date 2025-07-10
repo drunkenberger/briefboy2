@@ -51,6 +51,14 @@ export function useStructuredChat(
   const [completedQuestions, setCompletedQuestions] = useState<Set<string>>(new Set());
   const { evaluateBrief } = useBriefCompletionEvaluator();
 
+  // Definir campos que deben ser arrays (centralizado)
+  const getArrayFields = useCallback(() => [
+    'strategicObjectives', 'targetAudience.insights', 'creativeStrategy.messageHierarchy', 
+    'creativeStrategy.creativeMandatories', 'channelStrategy.recommendedMix', 'successMetrics.primary', 'successMetrics.secondary',
+    'budgetConsiderations.keyInvestments', 'budgetConsiderations.costOptimization', 
+    'riskAssessment.risks', 'implementationRoadmap.phases', 'nextSteps', 'appendix.assumptions', 'appendix.references'
+  ], []);
+
   // Definir todos los campos del brief de manera centralizada
   const getAllBriefFields = useCallback(() => [
     // Básicos
@@ -125,7 +133,7 @@ export function useStructuredChat(
     console.log('Preguntas generadas después de filtros inteligentes:', sortedQuestions.length, sortedQuestions.map(q => `${q.field}: ${q.question.substring(0, 50)}...`));
     
     return sortedQuestions;
-  }, [getAllBriefFields]);
+  }, [getArrayFields]);
   
   // Función para generar preguntas adicionales basadas en campos faltantes o débiles
   const generateAdditionalQuestions = useCallback((briefData: any, completedQuestionsSet?: Set<string>): StructuredQuestion[] => {
@@ -428,102 +436,391 @@ export function useStructuredChat(
     }
   }, [brief, analysis, generateStructuredQuestions]);
 
+  // Función para verificar integridad del brief
+  const verifyBriefIntegrity = useCallback((brief: any, source: string) => {
+    if (!brief) return;
+    
+    const timestamp = new Date().toLocaleTimeString();
+    const camposCriticos = [
+      'projectTitle', 'briefSummary', 'businessChallenge', 
+      'strategicObjectives', 'targetAudience', 'creativeStrategy'
+    ];
+    
+    const camposPresentes = camposCriticos.filter(campo => {
+      const valor = brief[campo];
+      return valor !== undefined && valor !== null && 
+             (Array.isArray(valor) ? valor.length > 0 : 
+              typeof valor === 'object' ? Object.keys(valor).length > 0 : 
+              typeof valor === 'string' ? valor.trim().length > 0 : true);
+    });
+    
+    console.log(`🔍 [${timestamp}] VERIFICACIÓN DE INTEGRIDAD - ${source}:`, {
+      totalCampos: Object.keys(brief).length,
+      camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
+      camposFaltantes: camposCriticos.filter(c => !camposPresentes.includes(c)),
+      // Verificar campos problemáticos específicos
+      businessChallenge: brief.businessChallenge ? '✅' : '❌',
+      targetAudiencePrimary: brief.targetAudience?.primary ? '✅' : '❌',
+      targetAudienceSecondary: brief.targetAudience?.secondary ? '✅' : '❌',
+      bigIdea: brief.creativeStrategy?.bigIdea ? '✅' : '❌',
+      // Muestra de contenido
+      muestraContenido: {
+        projectTitle: brief.projectTitle?.substring(0, 30) + '...',
+        businessChallenge: brief.businessChallenge?.substring(0, 30) + '...',
+        targetAudiencePrimary: brief.targetAudience?.primary?.substring(0, 30) + '...'
+      }
+    });
+    
+    return camposPresentes.length;
+  }, []);
+
   // Monitorear cambios en workingBrief para debugging
   useEffect(() => {
-    const timestamp = new Date().toLocaleTimeString();
     if (workingBrief) {
-      console.log(`🔍 [${timestamp}] WorkingBrief actualizado en hook:`, {
-        fieldCount: Object.keys(workingBrief).length,
-        hasProjectTitle: !!workingBrief.projectTitle,
-        hasStrategicObjectives: !!workingBrief.strategicObjectives,
-        hasTargetAudience: !!workingBrief.targetAudience,
-        sampleFields: {
-          projectTitle: workingBrief.projectTitle,
-          strategicObjectives: workingBrief.strategicObjectives
-        }
-      });
+      verifyBriefIntegrity(workingBrief, 'Hook State Update');
     }
-  }, [workingBrief]);
+  }, [workingBrief, verifyBriefIntegrity]);
 
-  // Procesar respuesta del usuario y actualizar brief
+  // Función de validación para verificar campos antes de actualizar
+  const validateFieldUpdate = useCallback((field: string, value: any, currentBrief: any) => {
+    const fieldConfig = getAllBriefFields().find(f => f.key === field);
+    const shouldBeArray = getArrayFields().includes(field);
+    
+    // Validar tipo de dato
+    if (shouldBeArray && !Array.isArray(value) && typeof value === 'string') {
+      // Convertir string a array si es necesario
+      return value.split(/[\n,]+/).map(item => item.trim()).filter(item => item.length > 0);
+    }
+    
+    // Validar campos requeridos
+    if (fieldConfig?.required && (!value || (Array.isArray(value) && value.length === 0))) {
+      console.warn(`⚠️ Campo requerido vacío: ${field}`);
+    }
+    
+    return value;
+  }, [getAllBriefFields, getArrayFields]);
+
+  // Sistema de respaldo con múltiples modelos de IA - DECLARAR PRIMERO
+  const callOpenAI = useCallback(async (systemPrompt: string, userMessage: string) => {
+    const openaiApiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+    if (!openaiApiKey) {
+      throw new Error('No se encontró la API key de OpenAI');
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiApiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage },
+        ],
+        temperature: 0.1,
+        max_tokens: 3000,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenAI Error HTTP ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices?.[0]?.message?.content;
+
+    if (!aiResponse) {
+      throw new Error('No se recibió respuesta de OpenAI');
+    }
+
+    const parsedResponse = JSON.parse(aiResponse);
+    if (!parsedResponse.updatedBrief) {
+      throw new Error('La respuesta de OpenAI no tiene updatedBrief');
+    }
+
+    return parsedResponse;
+  }, []);
+
+  const callClaude = useCallback(async (systemPrompt: string, userMessage: string) => {
+    const claudeApiKey = process.env.EXPO_PUBLIC_CLAUDE_API_KEY;
+    if (!claudeApiKey) {
+      throw new Error('No se encontró la API key de Claude');
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': claudeApiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 3000,
+        messages: [
+          { role: 'user', content: `${systemPrompt}\n\n${userMessage}` },
+        ],
+        temperature: 0.1,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Claude Error HTTP ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.content?.[0]?.text;
+
+    if (!aiResponse) {
+      throw new Error('No se recibió respuesta de Claude');
+    }
+
+    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No se encontró JSON válido en la respuesta de Claude');
+    }
+
+    const parsedResponse = JSON.parse(jsonMatch[0]);
+    if (!parsedResponse.updatedBrief) {
+      throw new Error('La respuesta de Claude no tiene updatedBrief');
+    }
+
+    return parsedResponse;
+  }, []);
+
+  const callGemini = useCallback(async (systemPrompt: string, userMessage: string) => {
+    const geminiApiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      throw new Error('No se encontró la API key de Gemini');
+    }
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${userMessage}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 3000,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini Error HTTP ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!aiResponse) {
+      throw new Error('No se recibió respuesta de Gemini');
+    }
+
+    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No se encontró JSON válido en la respuesta de Gemini');
+    }
+
+    const parsedResponse = JSON.parse(jsonMatch[0]);
+    if (!parsedResponse.updatedBrief) {
+      throw new Error('La respuesta de Gemini no tiene updatedBrief');
+    }
+
+    return parsedResponse;
+  }, []);
+
+  const callAIToUpdateBrief = useCallback(async (
+    userResponse: string,
+    questionId: string,
+    briefField: string,
+    currentBrief: any
+  ) => {
+    const arrayFields = ['strategicObjectives', 'targetAudience.insights', 'creativeStrategy.messageHierarchy', 
+                        'creativeStrategy.creativeMandatories', 'channelStrategy.recommendedMix', 'successMetrics.primary', 
+                        'successMetrics.secondary', 'budgetConsiderations.keyInvestments', 'budgetConsiderations.costOptimization', 
+                        'riskAssessment.risks', 'implementationRoadmap.phases', 'nextSteps', 'appendix.assumptions', 'appendix.references'];
+
+    const isArrayField = arrayFields.includes(briefField);
+
+    const systemPrompt = `Eres un experto en marketing que actualiza briefs basado en respuestas del usuario.
+
+BRIEF ACTUAL:
+${JSON.stringify(currentBrief, null, 2)}
+
+CAMPO A ACTUALIZAR: ${briefField}
+TIPO DE CAMPO: ${isArrayField ? 'ARRAY' : 'STRING'}
+RESPUESTA DEL USUARIO: ${userResponse}
+
+INSTRUCCIONES CRÍTICAS:
+1. Actualiza ÚNICAMENTE el campo "${briefField}" del brief
+2. Si el campo es "${briefField}" y es de tipo ARRAY, convierte la respuesta en un array válido
+3. Si el campo es "${briefField}" y es de tipo STRING, mantén como string
+4. Para campos anidados (con punto), crea la estructura correcta
+5. Mantén el resto del brief EXACTAMENTE igual
+6. Mejora profesionalmente la información del usuario
+7. SIEMPRE devuelve JSON válido
+
+FORMATO DE RESPUESTA OBLIGATORIO:
+{
+  "updatedBrief": {brief_completo_actualizado},
+  "followUpMessage": "✅ [Campo actualizado] - información procesada correctamente"
+}`;
+
+    const userMessage = `Campo: ${briefField}\nTipo: ${isArrayField ? 'ARRAY' : 'STRING'}\nRespuesta: ${userResponse}`;
+
+    // Intentar con OpenAI primero
+    try {
+      console.log('🤖 Intentando con OpenAI...');
+      const result = await callOpenAI(systemPrompt, userMessage);
+      console.log('✅ OpenAI funcionó correctamente');
+      return { ...result, aiModel: 'OpenAI' };
+    } catch (openaiError) {
+      console.warn('⚠️ OpenAI falló:', openaiError instanceof Error ? openaiError.message : String(openaiError));
+    }
+
+    // Intentar con Claude como respaldo
+    try {
+      console.log('🤖 Intentando con Claude (respaldo)...');
+      const result = await callClaude(systemPrompt, userMessage);
+      console.log('✅ Claude funcionó correctamente');
+      return { ...result, aiModel: 'Claude' };
+    } catch (claudeError) {
+      console.warn('⚠️ Claude falló:', claudeError instanceof Error ? claudeError.message : String(claudeError));
+    }
+
+    // Intentar con Gemini como último respaldo
+    try {
+      console.log('🤖 Intentando con Gemini (último respaldo)...');
+      const result = await callGemini(systemPrompt, userMessage);
+      console.log('✅ Gemini funcionó correctamente');
+      return { ...result, aiModel: 'Gemini' };
+    } catch (geminiError) {
+      console.warn('⚠️ Gemini falló:', geminiError instanceof Error ? geminiError.message : String(geminiError));
+    }
+
+    // Si todos fallan, lanzar error
+    throw new Error('Todos los modelos de IA fallaron');
+  }, [callOpenAI, callClaude, callGemini]);
+
+  // Procesar respuesta del usuario y actualizar brief - MODO HÍBRIDO (IA + FALLBACK)
   const processUserResponse = useCallback(async (message: string, questionId: string, briefField: string, currentWorkingBrief: any) => {
-    console.log('🔄 Procesando respuesta del usuario:', {
+    console.log('🔄 PROCESANDO RESPUESTA (HÍBRIDO):', {
       message: message.substring(0, 50) + '...',
       briefField,
-      currentBrief: currentWorkingBrief,
       briefFieldCount: Object.keys(currentWorkingBrief || {}).length
     });
     
+    // PRIMERO: Intentar procesar con IA
     try {
-      // Llamar a la API para procesar la respuesta y actualizar el brief
-      const response = await callAIToUpdateBrief(message, questionId, briefField, currentWorkingBrief);
-      
-      console.log('🤖 Respuesta de IA recibida:', response);
-      
-      if (response.updatedBrief) {
-        const normalizedBrief = normalizeBrief(response.updatedBrief);
+      const aiResponse = await callAIToUpdateBrief(message, questionId, briefField, currentWorkingBrief);
+      if (aiResponse.updatedBrief) {
+        console.log('✅ IA procesó exitosamente la respuesta');
         
-        console.log('✅ Brief actualizado correctamente via IA:', {
-          field: briefField,
-          oldValue: getFieldValue(currentWorkingBrief, briefField),
-          newValue: getFieldValue(normalizedBrief, briefField),
-          briefUpdated: true
-        });
+        // Verificar que el campo se actualizó correctamente
+        const fieldValue = briefField.includes('.') 
+          ? aiResponse.updatedBrief[briefField.split('.')[0]]?.[briefField.split('.')[1]]
+          : aiResponse.updatedBrief[briefField];
         
-        return {
-          message: response.followUpMessage || '¡Perfecto! Información actualizada correctamente.',
-          updatedBrief: normalizedBrief
-        };
-      } else {
-        console.warn('⚠️ IA no devolvió brief actualizado, usando fallback');
-        throw new Error('No updated brief received from AI');
+        if (fieldValue !== undefined && fieldValue !== null && 
+            !(Array.isArray(fieldValue) && fieldValue.length === 0) &&
+            !(typeof fieldValue === 'string' && fieldValue.trim() === '')) {
+          
+          return {
+            message: aiResponse.followUpMessage || '✅ Información procesada y mejorada por IA.',
+            updatedBrief: normalizeBrief(aiResponse.updatedBrief),
+            aiModel: aiResponse.aiModel || 'IA'
+          };
+        } else {
+          console.warn('⚠️ IA no actualizó el campo correctamente, usando fallback');
+        }
       }
     } catch (error) {
-      console.error('❌ Error processing user response:', error);
-      console.log('🔧 Usando método fallback para actualizar brief');
-      
-      // Fallback: actualizar directamente el campo si la IA falla
-      const updatedBrief = { ...currentWorkingBrief };
-      
-      // Determinar si el campo debe ser un array basado en su configuración
-      const shouldBeArray = ['strategicObjectives', 'targetAudience.insights', 'creativeStrategy.messageHierarchy', 
-                            'creativeStrategy.creativeMandatories', 'successMetrics.primary', 'successMetrics.secondary',
-                            'budgetConsiderations.keyInvestments', 'budgetConsiderations.costOptimization', 
-                            'riskAssessment.risks', 'nextSteps', 'appendix.assumptions', 'appendix.references'].includes(briefField);
-      
-      // Procesar el valor según el tipo esperado
-      let processedValue = message;
-      if (shouldBeArray) {
-        // Para arrays, dividir por líneas o comas y limpiar
+      console.warn('⚠️ IA falló, usando método directo como fallback:', error instanceof Error ? error.message : String(error));
+    }
+    
+    // SEGUNDO: Fallback directo si IA falla
+    console.log('🔄 Usando método directo como fallback...');
+    
+    const updatedBrief = { ...currentWorkingBrief };
+    const shouldBeArray = getArrayFields().includes(briefField);
+    
+    let processedValue;
+    if (shouldBeArray) {
+      if (Array.isArray(message)) {
+        processedValue = message;
+      } else if (typeof message === 'string') {
         processedValue = message.split(/[\n,]+/).map(item => item.trim()).filter(item => item.length > 0);
+      } else {
+        processedValue = [String(message)];
       }
+    } else {
+      processedValue = typeof message === 'string' ? message : String(message);
+    }
+    
+    if (briefField.includes('.')) {
+      const [parent, child] = briefField.split('.');
+      if (!updatedBrief[parent]) {
+        updatedBrief[parent] = {};
+      }
+      updatedBrief[parent][child] = processedValue;
+    } else {
+      updatedBrief[briefField] = processedValue;
+    }
+    
+    const normalizedBrief = normalizeBrief(updatedBrief);
+    
+    // Verificación final
+    const fieldValue = briefField.includes('.') 
+      ? normalizedBrief[briefField.split('.')[0]]?.[briefField.split('.')[1]]
+      : normalizedBrief[briefField];
+    
+    console.log('✅ BRIEF ACTUALIZADO (FALLBACK):', {
+      field: briefField,
+      valorOriginal: message,
+      valorProcesado: processedValue,
+      valorFinal: fieldValue,
+      campoExiste: fieldValue !== undefined,
+      isArray: Array.isArray(fieldValue),
+      longitudArray: Array.isArray(fieldValue) ? fieldValue.length : 'N/A',
+      briefFieldCount: Object.keys(normalizedBrief).length,
+      updateMethod: 'FALLBACK_DIRECTO',
+      timestamp: new Date().toLocaleTimeString()
+    });
+    
+    // Garantizar que el campo se actualizó
+    if (fieldValue === undefined || fieldValue === null || 
+        (Array.isArray(fieldValue) && fieldValue.length === 0) ||
+        (typeof fieldValue === 'string' && fieldValue.trim() === '')) {
+      console.error(`❌ ERROR CRÍTICO: Campo ${briefField} no se actualizó ni con IA ni con fallback`);
       
+      // Forzar actualización como último recurso
       if (briefField.includes('.')) {
         const [parent, child] = briefField.split('.');
-        if (!updatedBrief[parent]) {
-          updatedBrief[parent] = {};
-        }
-        updatedBrief[parent][child] = processedValue;
+        normalizedBrief[parent] = normalizedBrief[parent] || {};
+        normalizedBrief[parent][child] = processedValue;
       } else {
-        updatedBrief[briefField] = processedValue;
+        normalizedBrief[briefField] = processedValue;
       }
-      
-      const normalizedBrief = normalizeBrief(updatedBrief);
-      
-      console.log('✅ Brief actualizado con fallback:', {
-        field: briefField,
-        newValue: processedValue,
-        briefUpdated: true,
-        fallbackUsed: true,
-        finalBriefFieldCount: Object.keys(normalizedBrief).length
-      });
-      
-      return {
-        message: '✅ Información guardada en tu brief. Continuemos.',
-        updatedBrief: normalizedBrief
-      };
     }
-  }, [getAllBriefFields]);
+    
+    return {
+      message: '✅ Información guardada correctamente en tu brief.',
+      updatedBrief: normalizedBrief
+    };
+  }, [getArrayFields, callAIToUpdateBrief]);
   
   // Función auxiliar para obtener el valor de un campo (incluyendo anidados)
   const getFieldValue = (briefData: any, fieldKey: string) => {
@@ -589,33 +886,48 @@ export function useStructuredChat(
       // Usar el brief actualizado directamente de la respuesta
       const briefToEvaluate = responseData.updatedBrief;
       
-      // IMPORTANTE: Actualizar workingBrief y notificar al modal de manera centralizada
+      // ACTUALIZACIÓN ATÓMICA: Estado local + Modal
+      console.log('🔁 SINCRONIZANDO ESTADO:', {
+        campo: currentQuestion.field,
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      // 1. Actualizar estado local del hook
       setWorkingBrief(briefToEvaluate);
       
-      // Usar setTimeout para asegurar que el estado se actualiza antes de notificar
-      setTimeout(() => {
-        onBriefChange(briefToEvaluate);
-        
-        // Verificación adicional: confirmar que el campo se actualizó correctamente
-        const verificationValue = getFieldValue(briefToEvaluate, currentQuestion.field);
-        console.log('🔍 Verificación post-actualización:', {
-          field: currentQuestion.field,
-          valueSet: !!verificationValue,
-          actualValue: verificationValue,
-          briefFieldCount: Object.keys(briefToEvaluate).length,
-          briefSynced: true
+      // 2. Notificar al modal inmediatamente
+      onBriefChange(briefToEvaluate);
+      
+      // 3. Verificación exhaustiva
+      const verificationValue = getFieldValue(briefToEvaluate, currentQuestion.field);
+      const updateSuccess = verificationValue !== undefined && verificationValue !== null && 
+                           (Array.isArray(verificationValue) ? verificationValue.length > 0 : true);
+      
+      console.log('🎯 VERIFICACIÓN POST-ACTUALIZACIÓN:', {
+        campo: currentQuestion.field,
+        actualizacionExitosa: updateSuccess,
+        valor: verificationValue,
+        tipo: Array.isArray(verificationValue) ? 'array' : typeof verificationValue,
+        longitud: Array.isArray(verificationValue) ? verificationValue.length : 
+                 typeof verificationValue === 'string' ? verificationValue.length : 'N/A',
+        briefCompleto: Object.keys(briefToEvaluate).length + ' campos',
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      // 4. Alerta si hay problemas (excepto campos opcionales)
+      const camposOpcionales = ['targetAudience.secondary', 'creativeStrategy.creativeMandatories', 
+                               'budgetConsiderations.estimatedRange', 'appendix.assumptions'];
+      
+      if (!updateSuccess && !camposOpcionales.includes(currentQuestion.field)) {
+        console.error('🚨 FALLO CRÍTICO EN ACTUALIZACIÓN:', {
+          campo: currentQuestion.field,
+          mensajeUsuario: messageContent,
+          valorEsperado: 'algún valor',
+          valorObtenido: verificationValue,
+          briefAntes: Object.keys(workingBrief || {}).length + ' campos',
+          briefDespues: Object.keys(briefToEvaluate).length + ' campos'
         });
-        
-        // Verificación de integridad: asegurar que el brief se mantené consistente
-        if (!verificationValue && currentQuestion.field !== 'targetAudience.secondary') {
-          console.warn('⚠️ PROBLEMA DE SINCRONIZACIÓN DETECTADO:', {
-            field: currentQuestion.field,
-            expectedValue: 'algún valor',
-            actualValue: verificationValue,
-            briefState: briefToEvaluate
-          });
-        }
-      }, 0);
+      }
       
       console.log('🔄 SendMessage: Brief actualizado y sincronizado:', {
         field: currentQuestion.field,
@@ -776,119 +1088,6 @@ He analizado toda la información y el brief está listo para producción. ¿Hay
     }
   }, [questions, currentQuestionIndex, processUserResponse, workingBrief]);
 
-  // Función para llamar a la IA y actualizar el brief
-  const callAIToUpdateBrief = async (
-    userResponse: string,
-    questionId: string,
-    briefField: string,
-    currentBrief: any
-  ) => {
-    const openaiApiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
-    if (!openaiApiKey) {
-      throw new Error('No se encontró la API key de OpenAI');
-    }
-
-    const systemPrompt = `Eres un experto en marketing que actualiza briefs basado en respuestas del usuario.
-
-BRIEF ACTUAL:
-${JSON.stringify(currentBrief, null, 2)}
-
-CAMPO A ACTUALIZAR: ${briefField}
-PREGUNTA ID: ${questionId}
-RESPUESTA DEL USUARIO: ${userResponse}
-
-INSTRUCCIONES:
-1. Actualiza específicamente el campo "${briefField}" del brief con la información proporcionada
-2. Si el campo tiene un punto (ej: "targetAudience.primary"), actualiza el objeto anidado correctamente
-3. Mantén el resto del brief intacto
-4. Mejora y estructura la información del usuario de forma profesional
-5. IMPORTANTE: Los siguientes campos DEBEN ser arrays: strategicObjectives, targetAudience.insights, creativeStrategy.messageHierarchy, creativeStrategy.creativeMandatories, successMetrics.primary, successMetrics.secondary, budgetConsiderations.keyInvestments, budgetConsiderations.costOptimization, riskAssessment.risks, nextSteps, appendix.assumptions, appendix.references
-6. Para campos tipo array, convierte la respuesta del usuario en un array de elementos separados
-7. Para campos de texto, mantén como string
-8. Devuelve el brief completo actualizado en formato JSON
-9. Proporciona un mensaje de confirmación corto
-
-IMPORTANTE: 
-- Para campos anidados como "targetAudience.primary", asegúrate de crear/actualizar la estructura: {"targetAudience": {"primary": "nuevo_valor"}}
-- Para arrays, divide la respuesta del usuario en elementos individuales (por líneas, comas, etc.)
-- Preserva todos los demás campos exactamente como están
-- Si el campo "${briefField}" debe ser array según la lista anterior, SIEMPRE devolólvelo como array
-
-Formato de respuesta (JSON válido):
-{
-  "updatedBrief": {brief_actualizado_completo},
-  "followUpMessage": "mensaje_de_confirmacion"
-}`;
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userResponse },
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
-        response_format: { type: "json_object" },
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Error HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content;
-
-    if (!aiResponse) {
-      throw new Error('No se recibió respuesta de la IA');
-    }
-
-    try {
-      const parsedResponse = JSON.parse(aiResponse);
-      console.log('Respuesta de IA parseada:', parsedResponse);
-      return parsedResponse;
-    } catch (error) {
-      console.error('Error parsing AI response:', error);
-      
-      // Fallback: actualizar manualmente
-      const updatedBrief = { ...currentBrief };
-      
-      // Determinar si el campo debe ser un array
-      const shouldBeArray = ['strategicObjectives', 'targetAudience.insights', 'creativeStrategy.messageHierarchy', 
-                            'creativeStrategy.creativeMandatories', 'successMetrics.primary', 'successMetrics.secondary',
-                            'budgetConsiderations.keyInvestments', 'budgetConsiderations.costOptimization', 
-                            'riskAssessment.risks', 'nextSteps', 'appendix.assumptions', 'appendix.references'].includes(briefField);
-      
-      // Procesar el valor según el tipo esperado
-      let processedValue = userResponse;
-      if (shouldBeArray) {
-        // Para arrays, dividir por líneas o comas y limpiar
-        processedValue = userResponse.split(/[\n,]+/).map(item => item.trim()).filter(item => item.length > 0);
-      }
-      
-      if (briefField.includes('.')) {
-        const [parent, child] = briefField.split('.');
-        if (!updatedBrief[parent]) {
-          updatedBrief[parent] = {};
-        }
-        updatedBrief[parent][child] = processedValue;
-      } else {
-        updatedBrief[briefField] = processedValue;
-      }
-      
-      return {
-        updatedBrief,
-        followUpMessage: 'Información actualizada correctamente.',
-      };
-    }
-  };
-
   const clearChat = useCallback(() => {
     setMessages([]);
     setQuestions([]);
@@ -915,7 +1114,7 @@ Formato de respuesta (JSON válido):
     error,
     progress: {
       current: completedQuestions.size,
-      total: questions.length,
+      total: questions.length
     },
     onBriefUpdate,
   };

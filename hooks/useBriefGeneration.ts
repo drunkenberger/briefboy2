@@ -1,127 +1,156 @@
 import { useEffect, useState } from 'react';
 
-const SYSTEM_PROMPT = `You are Elena Rodriguez, a seasoned Marketing Director with 15+ years of experience at top agencies like Ogilvy, Wieden+Kennedy, and BBDO. You specialize in creating world-class Marketing Briefs that win awards and drive exceptional business results.
+const SYSTEM_PROMPT = `You are Elena Rodriguez, a seasoned Marketing Director with 15+ years of experience. Your task is to CREATE a comprehensive Marketing Brief (not analyze one) from a meeting transcription.
 
-Your expertise includes:
-- Strategic brand positioning and competitive analysis
-- Consumer psychology and behavioral insights
-- Multi-channel campaign orchestration
-- Performance marketing and attribution modeling
-- Creative direction and brand storytelling
-- Crisis management and reputation building
+**IMPORTANT:** You are NOT analyzing an existing brief. You are CREATING a new marketing brief from scratch based on the transcription.
 
-Your task is to analyze meeting transcriptions and create a comprehensive, professional Marketing Brief that any creative team or marketing professional would be proud to execute.
-
-**ANALYSIS FRAMEWORK:**
-1. **Strategic Foundation**: Extract business objectives, brand positioning, and competitive context
-2. **Consumer Insights**: Identify target personas, motivations, and behavioral triggers
-3. **Creative Strategy**: Define the big idea, messaging hierarchy, and creative direction
-4. **Channel Strategy**: Recommend optimal media mix with rationale and synergies
-5. **Implementation Roadmap**: Create phased approach with timelines and dependencies
-6. **Success Metrics**: Define KPIs, measurement framework, and optimization approach
-7. **Risk Management**: Identify potential challenges and mitigation strategies
+**YOUR TASK:**
+1. Read the transcription of a marketing meeting/discussion
+2. Extract key information about the campaign/project
+3. CREATE a complete Marketing Brief with all sections filled
+4. Use your marketing expertise to fill any gaps
 
 **PROFESSIONAL STANDARDS:**
-- Think like a seasoned strategist who understands both creativity and business
-- Provide actionable insights that go beyond obvious recommendations
-- Consider cultural context, market dynamics, and consumer trends
-- Balance ambition with realistic execution capabilities
-- Include specific tactical recommendations with clear rationale
-- Ensure all recommendations are measurable and time-bound
+*   Create actionable insights and specific, measurable recommendations
+*   Fill any strategic gaps with professional recommendations based on industry best practices
+*   Ensure ALL fields in the JSON output are populated with detailed, specific content
+*   NEVER leave fields empty - always provide comprehensive content for every field
+*   If information is missing from the transcription, use your marketing expertise to create examples withrealistic content but let the user know that the information is missing.
 
 **OUTPUT FORMAT:**
-Respond with ONLY valid JSON in this exact structure - no additional text or explanations:
+Respond with ONLY a valid JSON object in the following comprehensive structure. Do not include any additional text, explanations, or markdown formatting.
 
 {
-  "projectTitle": "Clear, compelling project name",
-  "briefSummary": "Executive summary (2-3 sentences)",
-  "businessChallenge": "Core business problem or opportunity",
-  "strategicObjectives": ["Primary business goals"],
+  "projectTitle": "Specific campaign or project name",
+  "briefSummary": "2-3 sentence executive summary describing the campaign goal and strategy",
+  "businessChallenge": "Detailed description of the main business challenge this campaign must solve",
+  "strategicObjectives": [
+    "Specific, measurable business objective 1",
+    "Specific, measurable business objective 2",
+    "Specific, measurable business objective 3"
+  ],
   "targetAudience": {
-    "primary": "Main target segment with demographics and psychographics",
-    "secondary": "Secondary audience if applicable",
-    "insights": ["Key consumer insights and motivations"]
+    "primary": "Detailed description of the primary target audience including demographics, psychographics, behaviors, and needs",
+    "secondary": "Description of secondary audience (if applicable)",
+    "insights": [
+      "Key insight about the audience 1",
+      "Key insight about the audience 2",
+      "Key insight about the audience 3"
+    ]
   },
-  "brandPositioning": "How the brand should be perceived relative to competition",
+  "brandPositioning": "Clear statement of how the brand positions itself in the market and in the mind of consumers",
   "creativeStrategy": {
-    "bigIdea": "Central creative concept",
-    "messageHierarchy": ["Primary message", "Supporting messages"],
-    "toneAndManner": "Brand voice and personality",
-    "creativeMandatories": ["Must-have elements"]
+    "bigIdea": "The central creative concept that will guide the entire campaign",
+    "messageHierarchy": [
+      "Primary message",
+      "Secondary supporting message",
+      "Tertiary message/CTA"
+    ],
+    "toneAndManner": "Description of how the communication should sound and feel",
+    "creativeMandatories": [
+      "Mandatory element 1 (logo, tagline, etc.)",
+      "Mandatory element 2"
+    ]
   },
   "channelStrategy": {
-    "recommendedMix": [{
-      "channel": "Channel name",
-      "rationale": "Why this channel",
-      "allocation": "Budget/effort %",
-      "kpis": ["Channel-specific metrics"]
-    }],
-    "integratedApproach": "How channels work together"
-  },
-  "implementationRoadmap": {
-    "phases": [{
-      "phase": "Phase name",
-      "duration": "Timeline",
-      "deliverables": ["Key outputs"],
-      "dependencies": ["Required inputs"]
-    }],
-    "criticalPath": "Most important sequence of activities"
+    "recommendedMix": [
+      {
+        "channel": "Channel name (e.g., Instagram)",
+        "allocation": "Budget % or amount",
+        "rationale": "Why this channel",
+        "kpis": ["KPI 1", "KPI 2"]
+      }
+    ],
+    "integratedApproach": "How all channels will work together in an integrated way"
   },
   "successMetrics": {
-    "primary": ["Main KPIs"],
-    "secondary": ["Supporting metrics"],
-    "measurementFramework": "How success will be tracked"
+    "primary": [
+      "Primary KPI 1 (e.g., 20% increase in brand awareness)",
+      "Primary KPI 2"
+    ],
+    "secondary": [
+      "Secondary KPI 1",
+      "Secondary KPI 2"
+    ],
+    "measurementFramework": "How success will be measured and tracked"
   },
   "budgetConsiderations": {
-    "estimatedRange": "Budget range if mentioned",
-    "keyInvestments": ["Priority spend areas"],
-    "costOptimization": ["Efficiency opportunities"]
+    "estimatedRange": "Total budget range (e.g., $100K-$150K)",
+    "keyInvestments": [
+      "Major investment area 1",
+      "Major investment area 2"
+    ],
+    "costOptimization": [
+      "Cost optimization strategy 1",
+      "Cost optimization strategy 2"
+    ]
   },
   "riskAssessment": {
-    "risks": [{
-      "risk": "Potential challenge",
-      "likelihood": "High/Medium/Low",
-      "impact": "High/Medium/Low",
-      "mitigation": "How to address"
-    }]
+    "risks": [
+      {
+        "risk": "Risk description",
+        "likelihood": "High/Medium/Low",
+        "impact": "High/Medium/Low",
+        "mitigation": "Mitigation strategy"
+      }
+    ]
   },
-  "nextSteps": ["Immediate actions required"],
+  "implementationRoadmap": {
+    "phases": [
+      {
+        "phase": "Phase 1: Planning",
+        "duration": "2 weeks",
+        "deliverables": ["Deliverable 1", "Deliverable 2"],
+        "dependencies": ["Dependency 1"]
+      }
+    ]
+  },
+  "nextSteps": [
+    "Immediate next step 1",
+    "Next step 2",
+    "Next step 3"
+  ],
   "appendix": {
-    "assumptions": ["Key assumptions made"],
-    "references": ["Industry benchmarks or research cited"],
-    "glossary": ["Technical terms explained"]
+    "assumptions": [
+      "Key assumption 1",
+      "Key assumption 2"
+    ],
+    "references": [
+      "Reference or source 1",
+      "Reference or source 2"
+    ]
   }
 }`;
 
 function buildUserPrompt(transcription: string) {
-  return `**TRANSCRIPTION ANALYSIS REQUEST**
+  return `**MARKETING BRIEF CREATION REQUEST**
 
-Analyze the following meeting transcription/strategic notes and create a world-class Marketing Brief:
+Based on the following meeting transcription, CREATE a comprehensive Marketing Brief from scratch:
 
 ---
 "${transcription}"
 ---
 
-**CONTEXT:**
-This transcription contains strategic discussions about a marketing initiative. Extract all relevant information including:
-- Business objectives and challenges
-- Target audience details
-- Brand positioning requirements
-- Channel preferences and constraints
-- Budget considerations
-- Timeline requirements
-- Success metrics
-- Any specific mandatories or constraints
+**INSTRUCTIONS:**
+This transcription contains discussions about a marketing campaign/project. Your job is to CREATE (not analyze) a complete Marketing Brief by:
 
-**DELIVERABLE:**
-Create a comprehensive Marketing Brief that:
-1. Synthesizes the key strategic insights
-2. Provides clear direction for creative development
-3. Includes specific, measurable recommendations
-4. Addresses potential challenges proactively
-5. Enables immediate action by the marketing team
+1. **Extracting key information** from the transcription about:
+   - Campaign/project details
+   - Business objectives and challenges
+   - Target audience insights
+   - Brand positioning and messaging
+   - Channel preferences and budget
+   - Timeline and success metrics
 
-Apply your expertise to fill in strategic gaps and provide professional recommendations based on industry best practices.`;
+2. **Creating complete content** for each brief section:
+   - Write detailed descriptions, not just bullet points
+   - Provide specific, actionable recommendations
+   - Fill gaps with your marketing expertise but let the user know that the information is missing and that you are adding examples with realistic content.
+   - Make it production-ready
+
+3. **Delivering a complete brief** that marketing teams can use immediately
+
+**REMEMBER:** You are CREATING a new Marketing Brief, not analyzing an existing one. Generate comprehensive content for each field based on the transcription and your professional expertise.`;
 }
 
 interface UseBriefGenerationResult {
@@ -144,236 +173,291 @@ export function useBriefGeneration(transcript: string | null, enabled: boolean =
   useEffect(() => {
     if (!transcript || !enabled) return;
     let cancelled = false;
-    const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY || process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      setError('No se encontró la API key de OpenAI');
+    // Verificar que al menos una API key esté disponible
+    const openaiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+    const claudeKey = process.env.EXPO_PUBLIC_CLAUDE_API_KEY;
+    const geminiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+
+    if (!openaiKey && !claudeKey && !geminiKey) {
+      setError('No se encontró ninguna API key configurada (OpenAI, Claude o Gemini)');
       setLoading(false);
       setBrief(null);
       return;
     }
+
+    console.log('[BriefGeneration] APIs disponibles:', {
+      openai: !!openaiKey,
+      claude: !!claudeKey,
+      gemini: !!geminiKey
+    });
     const generateBrief = async () => {
       try {
         setLoading(true);
         setError(null);
         setBrief(null);
-        console.log('[BriefGeneration] Enviando petición a OpenAI:', {
-          endpoint: 'https://api.openai.com/v1/chat/completions',
-          apiKey: apiKey ? '***' : '[NO API KEY]',
-          transcript,
+        console.log('[BriefGeneration] Enviando petición a IA:', {
+          openai: !!openaiKey,
+          claude: !!claudeKey,
+          gemini: !!geminiKey,
+          transcriptLength: transcript.length,
+          transcriptPreview: transcript.substring(0, 200) + '...',
         });
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o',
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPT },
-              { role: 'user', content: buildUserPrompt(transcript) },
-            ],
-            temperature: 0.2,
-            max_tokens: 2500,
-          }),
-        });
-        console.log('[BriefGeneration] Status respuesta OpenAI:', response.status);
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('[BriefGeneration] Error HTTP:', response.status, errorText);
-          setError(`Error HTTP ${response.status}: ${errorText}`);
-          setBrief({ _raw: errorText });
-          setLoading(false);
-          return;
+        // Intentar con múltiples modelos como respaldo
+        let response;
+        let lastError;
+
+        // Primer intento: OpenAI GPT-4o-mini (más rápido y barato)
+        if (openaiKey) {
+          try {
+            console.log('🤖 Intentando generar brief con OpenAI GPT-4o-mini...');
+            response = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${openaiKey}`,
+              },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini',
+              messages: [
+                { role: 'system', content: SYSTEM_PROMPT },
+                { role: 'user', content: buildUserPrompt(transcript) },
+              ],
+              temperature: 0.2,
+              max_tokens: 3000,
+              response_format: { type: "json_object" },
+            }),
+          });
+
+          if (response.ok) {
+            console.log('✅ OpenAI GPT-4o-mini funcionó correctamente');
+          } else {
+            const errorText = await response.text();
+            throw new Error(`OpenAI Error ${response.status}: ${errorText}`);
+          }
+          } catch (openaiError) {
+            console.warn('⚠️ OpenAI falló:', openaiError);
+            lastError = openaiError;
+          }
+        } else {
+          console.log('⚠️ OpenAI API key no disponible, saltando...');
         }
+
+        // Segundo intento: Claude (solo si no hay respuesta exitosa)
+        if (!response?.ok && claudeKey) {
+          try {
+            console.log('🤖 Intentando generar brief con Claude...');
+            response = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': claudeKey,
+                'anthropic-version': '2023-06-01',
+              },
+              body: JSON.stringify({
+                model: 'claude-3-haiku-20240307',
+                max_tokens: 3000,
+                messages: [
+                  { role: 'user', content: `${SYSTEM_PROMPT}\n\n${buildUserPrompt(transcript)}` },
+                ],
+                temperature: 0.2,
+              }),
+            });
+
+            if (response.ok) {
+              console.log('✅ Claude funcionó correctamente');
+            } else {
+              const errorText = await response.text();
+              throw new Error(`Claude Error ${response.status}: ${errorText}`);
+            }
+          } catch (claudeError) {
+            console.warn('⚠️ Claude falló:', claudeError);
+            lastError = claudeError;
+          }
+        } else if (!claudeKey) {
+          console.log('⚠️ Claude API key no disponible, saltando...');
+        }
+
+        // Tercer intento: Gemini (solo si no hay respuesta exitosa)
+        if (!response?.ok && geminiKey) {
+          try {
+            console.log('🤖 Intentando generar brief con Gemini...');
+            response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiKey}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [{
+                    text: `${SYSTEM_PROMPT}\n\n${buildUserPrompt(transcript)}`
+                  }]
+                }],
+                generationConfig: {
+                  temperature: 0.2,
+                  maxOutputTokens: 3000,
+                },
+              }),
+            });
+
+            if (response.ok) {
+              console.log('✅ Gemini funcionó correctamente');
+            } else {
+              const errorText = await response.text();
+              throw new Error(`Gemini Error ${response.status}: ${errorText}`);
+            }
+          } catch (geminiError) {
+            console.warn('⚠️ Gemini falló:', geminiError);
+            lastError = geminiError;
+          }
+        } else if (!geminiKey) {
+          console.log('⚠️ Gemini API key no disponible, saltando...');
+        }
+
+        // Verificar si todos los intentos fallaron
+        if (!response?.ok) {
+          console.error('❌ Todos los modelos de IA fallaron');
+          throw new Error(`Todos los modelos de IA fallaron. Último error: ${lastError instanceof Error ? lastError.message : 'Error desconocido'}`);
+        }
+
+        console.log('[BriefGeneration] ✅ Respuesta exitosa recibida:', response.status);
+
         const data = await response.json();
-        console.log('[BriefGeneration] Data recibida de OpenAI:', data);
-        if (!data.choices || !data.choices[0]?.message?.content) {
-          setError('La respuesta de OpenAI no tiene contenido.');
-          setBrief({ _raw: JSON.stringify(data) });
-          setLoading(false);
-          return;
+        console.log('[BriefGeneration] Data recibida:', data);
+
+        let content = '';
+
+        // Extraer contenido según el modelo usado
+        if (data.choices && data.choices[0]?.message?.content) {
+          // OpenAI response
+          content = data.choices[0].message.content;
+        } else if (data.content && data.content[0]?.text) {
+          // Claude response
+          content = data.content[0].text;
+        } else if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+          // Gemini response
+          content = data.candidates[0].content.parts[0].text;
         }
-        const content = data.choices?.[0]?.message?.content;
-        console.log('[BriefGeneration] Content recibido:', content);
-        if (!content) throw new Error('No se recibió contenido de OpenAI');
-        // Intentar extraer el primer bloque JSON válido de la respuesta
-        let parsed = null;
+
+        console.log('[BriefGeneration] Content recibido (primeros 500 chars):', content?.substring(0, 500) + '...');
+        console.log('[BriefGeneration] Content completo:', content);
+        if (!content) {
+          console.error('[BriefGeneration] Error crítico: No hay contenido');
+          throw new Error('No se recibió contenido válido de ningún modelo');
+        }
+
+        if (content.trim().length === 0) {
+          console.error('[BriefGeneration] Error crítico: Contenido vacío');
+          throw new Error('El contenido recibido está vacío');
+        }
+
+        let parsed: any = null;
         let jsonError = '';
         try {
-          // Eliminar posibles backticks y etiquetas de bloque
-          let cleaned = content.trim();
-          // Si viene con triple backticks, extraer el bloque
-          const match = cleaned.match(/```(?:json)?([\s\S]*?)```/i);
-          if (match) {
-            cleaned = match[1].trim();
+          console.log('[BriefGeneration] Intentando parsear JSON...');
+
+          // Limpiar el contenido primero
+          let cleanContent = content.trim();
+
+          // Remover markdown code blocks si existen
+          cleanContent = cleanContent.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+
+          // Buscar el JSON válido
+          const jsonStart = cleanContent.indexOf('{');
+          const jsonEnd = cleanContent.lastIndexOf('}');
+
+          if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
           }
-          // Buscar el primer bloque que parezca JSON
-          const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            cleaned = jsonMatch[0];
+
+          console.log('[BriefGeneration] Contenido limpio para parsear:', cleanContent.substring(0, 100) + '...');
+
+          parsed = JSON.parse(cleanContent);
+          console.log('[BriefGeneration] JSON parseado exitosamente:', Object.keys(parsed));
+          console.log('[BriefGeneration] Contenido del brief generado:', {
+            title: parsed.title,
+            summary: parsed.summary ? parsed.summary.substring(0, 100) + '...' : 'VACÍO',
+            objectives: parsed.objectives,
+            targetAudience: parsed.targetAudience,
+            keyMessages: parsed.keyMessages
+          });
+
+          // Validar que NO es un análisis (detectar si contiene campos de análisis)
+          const analysisFields = ['overallScore', 'completenessScore', 'qualityScore', 'strengths', 'weaknesses', 'criticalIssues', 'sectionAnalysis'];
+          const isAnalysis = analysisFields.some(field => parsed.hasOwnProperty(field));
+
+          if (isAnalysis) {
+            console.error('[BriefGeneration] ❌ IA devolvió un análisis en lugar de un brief');
+            throw new Error("La IA devolvió un análisis del brief en lugar de crear un brief. Reintentando...");
           }
-          parsed = JSON.parse(cleaned);
+
+          // Validar que tiene campos mínimos del brief (soportando nuevo y viejo formato)
+          const hasOldFormat = parsed.title || parsed.summary || parsed.objectives;
+          const hasNewFormat = parsed.projectTitle || parsed.briefSummary || parsed.strategicObjectives;
+
+          if (!hasOldFormat && !hasNewFormat) {
+            throw new Error("El JSON parseado no contiene campos esenciales del brief");
+          }
+
+          // Validar que los campos tienen contenido real (no están vacíos)
+          const hasEmptyFields = [];
+          if (!parsed.title || parsed.title.trim() === '') hasEmptyFields.push('title');
+          if (!parsed.summary || parsed.summary.trim() === '') hasEmptyFields.push('summary');
+          if (!parsed.objectives || parsed.objectives.length === 0) hasEmptyFields.push('objectives');
+          if (!parsed.targetAudience || parsed.targetAudience.length === 0) hasEmptyFields.push('targetAudience');
+          if (!parsed.keyMessages || parsed.keyMessages.length === 0) hasEmptyFields.push('keyMessages');
+          if (!parsed.channels || parsed.channels.length === 0) hasEmptyFields.push('channels');
+          if (!parsed.success || parsed.success.length === 0) hasEmptyFields.push('success');
+
+          if (hasEmptyFields.length > 0) {
+            console.warn('[BriefGeneration] ⚠️ Campos vacíos detectados:', hasEmptyFields);
+            // No fallar, pero logear para debugging
+          }
+
         } catch (e: any) {
+          console.error('[BriefGeneration] Error parseando JSON:', e.message);
+          console.error('[BriefGeneration] Contenido que falló:', content.substring(0, 300));
           jsonError = e.message;
         }
+
         // Si el parsing falla, mostrar un brief mínimo con el error y el contenido bruto
         if (!parsed) {
+          console.error('[BriefGeneration] Falló el parsing, creando brief de error');
           if (!cancelled) setBrief({
-            title: 'Brief parcial o error',
-            summary: '',
-            objectives: [],
-            problemStatement: '',
+            title: '⚠️ Error en generación de brief',
+            summary: `Error parseando respuesta de IA: ${jsonError}`,
+            objectives: ['Revisar transcripción', 'Verificar contenido de entrada'],
+            problemStatement: 'Error técnico en la generación del brief',
             targetAudience: [],
-            successMetrics: [],
-            requirements: {},
-            keyMessages: [],
-            timeline: '',
-            channelsAndTactics: {},
-            riskAnalysis: {},
+            successMetrics: ['Contenido válido generado'],
+            requirements: {
+              functional: ['Revisar entrada'],
+              nonFunctional: [],
+              technical: [],
+              security: []
+            },
+            keyMessages: ['Error en procesamiento'],
+            timeline: 'Requiere revisión',
+            channelsAndTactics: { overview: 'Error en generación', channels: [] },
+            riskAnalysis: { risks: ['Error técnico'], mitigations: ['Revisar entrada'] },
             dependencies: [],
             assumptions: [],
             outOfScope: [],
             campaignPhases: [],
-            _error: 'La respuesta de OpenAI no es un JSON válido.',
-            _raw: content,
+            _error: `Error de parsing: ${jsonError}`,
+            _raw: content.substring(0, 500) + '...',
             _jsonError: jsonError,
           });
+          setLoading(false);
           return;
         }
-        // --- Mapeo de estructura por secciones a estructura plana ---
-        function mapSectionedBrief(obj: any): any {
-          if (!obj || typeof obj !== 'object') return obj;
-          if (obj.title || obj.summary) return obj;
-          const mapped: any = {
-            title: obj["Campaign Title"] || obj["title"] || '',
-            summary: obj["Summary"] || obj["summary"] || '',
-            objectives: obj["Objectives"] || obj["objectives"] || [],
-            problemStatement: obj["Problem Statement"] || obj["problem"] || obj["problemStatement"] || '',
-            targetAudience: [],
-            successMetrics: [],
-            requirements: {
-              functional: [],
-              nonFunctional: [],
-              technical: [],
-              security: [],
-            },
-            keyMessages: obj["Key Messages"] || obj["keyMessages"] || [],
-            callToAction: '',
-            timeline: obj["Timeline"] || obj["timeline"] || '',
-            channelsAndTactics: {
-              overview: '',
-              components: [],
-              technologies: [],
-              integrations: [],
-              channels: [], // [{channel, justification}]
-            },
-            riskAnalysis: {
-              risks: [],
-              mitigations: [],
-            },
-            dependencies: obj["Dependencies"] || [],
-            assumptions: obj["Assumptions"] || [],
-            outOfScope: obj["Out Of Scope"] || obj["outOfScope"] || [],
-            campaignPhases: [],
-            _raw: JSON.stringify(obj, null, 2),
-            _extra: {},
-          };
-          // Strategic Analysis
-          if (obj["Strategic Analysis"]) {
-            const sa = obj["Strategic Analysis"];
-            mapped.summary = mapped.summary || sa["Brand Positioning"] || '';
-            mapped.objectives = mapped.objectives.length ? mapped.objectives : (sa["Strategic Objectives"] || []);
-            mapped.keyMessages = mapped.keyMessages.length ? mapped.keyMessages : (sa["Key Insights"] || []);
-          }
-          // Risk Assessment
-          if (obj["Risk Assessment"]) {
-            const ra = obj["Risk Assessment"];
-            if (Array.isArray(ra.Risks)) mapped.riskAnalysis.risks = ra.Risks;
-            if (Array.isArray(ra.Mitigations)) mapped.riskAnalysis.mitigations = ra.Mitigations;
-            if (Array.isArray(ra.Risks)) {
-              mapped.riskAnalysis.mitigations = ra.Risks.map((r: any) => r["Mitigation"] || r["Mitigation Strategy"] || '').filter(Boolean);
-            }
-          }
-          // Campaign Planning
-          if (obj["Campaign Planning"]) {
-            const cp = obj["Campaign Planning"];
-            if (Array.isArray(cp.Phases)) {
-              mapped.campaignPhases = cp.Phases.map((phase: any) => ({
-                phase: phase["Phase"] || phase["Name"] || '',
-                duration: phase["Duration"] || '',
-                deliverables: phase["Deliverables"] || [],
-              }));
-            }
-            if (cp.Timeline) mapped.timeline = mapped.timeline || cp.Timeline;
-          }
-          // Target Audience Considerations
-          if (obj["Target Audience Considerations"]) {
-            const ta = obj["Target Audience Considerations"];
-            mapped.targetAudience = ta["Target Audience Segments"] || mapped.targetAudience;
-            mapped.successMetrics = ta["Success Metrics"] || mapped.successMetrics;
-          }
-          // Channel & Tactics Specifications
-          if (obj["Channel & Tactics Specifications"]) {
-            const ct = obj["Channel & Tactics Specifications"];
-            if (ct.Overview) mapped.channelsAndTactics.overview = ct.Overview;
-            // Channels: array de objetos con Channel y Justification
-            if (Array.isArray(ct.Channels)) {
-              mapped.channelsAndTactics.channels = ct.Channels.map((c: any) => ({
-                channel: c["Channel"] || '',
-                justification: c["Justification"] || '',
-              }));
-            }
-            // Messaging: Key Messages y Call to Action
-            if (ct.Messaging) {
-              if (Array.isArray(ct.Messaging["Key Messages"])) mapped.keyMessages = ct.Messaging["Key Messages"];
-              if (ct.Messaging["Call to Action"]) mapped.callToAction = ct.Messaging["Call to Action"];
-            }
-            if (ct.Channels && !Array.isArray(ct.Channels)) {
-              // Si Channels es objeto, mantener compatibilidad anterior
-              let components: string[] = [];
-              let technologies: string[] = [];
-              let integrations: string[] = [];
-              Object.entries(ct.Channels).forEach(([channel, data]: [string, any]) => {
-                if (data.Messaging) components.push(`${channel}: ${data.Messaging}`);
-                if (Array.isArray(data.Tactics)) components = components.concat(data.Tactics.map((t: string) => `${channel}: ${t}`));
-                if (Array.isArray(data.Technologies)) technologies = technologies.concat(data.Technologies);
-                if (Array.isArray(data.Integrations)) integrations = integrations.concat(data.Integrations);
-              });
-              mapped.channelsAndTactics.components = components;
-              mapped.channelsAndTactics.technologies = technologies;
-              mapped.channelsAndTactics.integrations = integrations;
-            }
-          }
-          // Requirements
-          if (obj["Requirements"]) {
-            const req = obj["Requirements"];
-            mapped.requirements.functional = req.Functional || req.functional || mapped.requirements.functional;
-            mapped.requirements.nonFunctional = req.NonFunctional || req.nonFunctional || mapped.requirements.nonFunctional;
-            mapped.requirements.technical = req.Technical || req.technical || mapped.requirements.technical;
-            mapped.requirements.security = req.Security || req.security || mapped.requirements.security;
-          }
-          // Integrations y tecnologías a nivel raíz
-          if (obj["Integrations"]) mapped.channelsAndTactics.integrations = mapped.channelsAndTactics.integrations.concat(obj["Integrations"]);
-          if (obj["Technologies"]) mapped.channelsAndTactics.technologies = mapped.channelsAndTactics.technologies.concat(obj["Technologies"]);
-          // Fases de campaña (soportar variantes)
-          if (obj["Campaign Phases"]) mapped.campaignPhases = mapped.campaignPhases.length ? mapped.campaignPhases : obj["Campaign Phases"];
-          if (obj["campaignPhases"]) mapped.campaignPhases = mapped.campaignPhases.length ? mapped.campaignPhases : obj["campaignPhases"];
-          // Guardar cualquier campo no reconocido en _extra
-          const known = [
-            "Campaign Title","title","Summary","summary","Objectives","objectives","Problem Statement","problem","problemStatement","Strategic Analysis","Risk Assessment","Campaign Planning","Target Audience Considerations","Channel & Tactics Specifications","Requirements","Timeline","Dependencies","Assumptions","Out Of Scope","Integrations","Technologies","Key Messages","keyMessages","Success Metrics","Campaign Phases","campaignPhases"
-          ];
-          Object.keys(obj).forEach(k => {
-            if (!known.includes(k)) mapped._extra[k] = obj[k];
-          });
-          return mapped;
+
+        // Si el JSON es válido, mostrar el brief generado
+        console.log('[BriefGeneration] ✅ Brief generado exitosamente');
+        console.log('[BriefGeneration] Campos encontrados:', Object.keys(parsed));
+        console.log('[BriefGeneration] Brief completo que se va a guardar:', JSON.stringify(parsed, null, 2));
+        if (!cancelled) {
+          setBrief(parsed);
         }
-        // Si la estructura es por secciones, mapear
-        if (parsed && !parsed.title && (parsed["Strategic Analysis"] || parsed["Risk Assessment"])) {
-          parsed = mapSectionedBrief(parsed);
-        }
-        // Si el JSON es válido pero le faltan campos, igual mostrar lo que haya
-        if (!cancelled) setBrief(parsed);
       } catch (e: any) {
         console.error('[BriefGeneration] Error de red/fetch:', e);
         setError('Error de red o fetch: ' + (e?.message || e));

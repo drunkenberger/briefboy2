@@ -1,9 +1,10 @@
 import { Audio } from 'expo-av';
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Animated } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface AudioRecorderProps {
   onAudioRecorded?: (uri: string | null) => void;
+  onTranscriptionRequested?: (uri: string) => void;
 }
 
 /**
@@ -11,7 +12,10 @@ interface AudioRecorderProps {
  * Permite iniciar y detener la grabación, mostrando el estado actual.
  * Llama a onAudioRecorded(uri) cuando termina la grabación.
  */
-const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioRecorded }) => {
+const AudioRecorder: React.FC<AudioRecorderProps> = ({
+  onAudioRecorded,
+  onTranscriptionRequested
+}: AudioRecorderProps) => {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedUri, setRecordedUri] = useState<string | null>(null);
@@ -23,25 +27,25 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioRecorded }) => {
     try {
       setError(null);
       const { status } = await Audio.requestPermissionsAsync();
-      
+
       if (status !== 'granted') {
         setError('Se requieren permisos de micrófono para grabar.');
         return;
       }
-      
+
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-      
+
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      
+
       setRecording(recording);
       setIsRecording(true);
       setRecordingDuration(0);
-      
+
       // Animar el botón de grabación
       Animated.loop(
         Animated.sequence([
@@ -57,15 +61,15 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioRecorded }) => {
           }),
         ])
       ).start();
-      
+
       // Contador de duración
       const durationInterval = setInterval(() => {
         setRecordingDuration(prev => prev + 1);
       }, 1000);
-      
+
       // Guardar el interval para limpiarlo después
       (recording as any).durationInterval = durationInterval;
-      
+
     } catch (error: any) {
       console.error('Error starting recording:', error);
       setError('No se pudo iniciar la grabación. Verifica los permisos.');
@@ -75,27 +79,55 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioRecorded }) => {
   const stopRecording = async () => {
     try {
       if (!recording) return;
-      
+
       // Limpiar el interval de duración
       if ((recording as any).durationInterval) {
         clearInterval((recording as any).durationInterval);
       }
-      
+
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecordedUri(uri || null);
       setRecording(null);
       setIsRecording(false);
-      
+
       // Detener animación
       pulseAnimation.stopAnimation();
       pulseAnimation.setValue(1);
-      
+
+      // Ya no enviamos automáticamente el audio, solo notificamos que se grabó
       if (onAudioRecorded) onAudioRecorded(uri || null);
     } catch (error: any) {
       console.error('Error stopping recording:', error);
       setError('No se pudo detener la grabación.');
     }
+  };
+
+  const handleTranscriptionRequest = () => {
+    if (recordedUri && onTranscriptionRequested) {
+      const uriLength = recordedUri.length;
+      const preview = uriLength > 50 ?
+        `${recordedUri.substring(0, 30)}...${recordedUri.substring(uriLength - 20)}` :
+        recordedUri;
+
+      console.log('🎤 AudioRecorder: Solicitando transcripción de audio grabado:', {
+        length: uriLength,
+        preview: preview,
+        fullUri: recordedUri
+      });
+      onTranscriptionRequested(recordedUri);
+    } else {
+      console.error('❌ AudioRecorder: No se puede transcribir -', {
+        hasRecordedUri: !!recordedUri,
+        hasCallback: !!onTranscriptionRequested
+      });
+    }
+  };
+
+  const resetRecording = () => {
+    setRecordedUri(null);
+    setRecordingDuration(0);
+    setError(null);
   };
 
   const formatDuration = (seconds: number) => {
@@ -109,7 +141,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioRecorded }) => {
       <View style={styles.recorderCard}>
         <Text style={styles.title}>🎙️ Grabadora de Audio</Text>
         <Text style={styles.subtitle}>Graba tu reunión o notas para generar un brief profesional</Text>
-        
+
         <View style={styles.recordingArea}>
           <Animated.View style={[styles.recordButton, { transform: [{ scale: pulseAnimation }] }]}>
             <Pressable
@@ -121,18 +153,18 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioRecorded }) => {
               </Text>
             </Pressable>
           </Animated.View>
-          
+
           <View style={styles.statusContainer}>
             <Text style={styles.statusText}>
               {isRecording ? 'Grabando...' : recordedUri ? 'Grabación completada' : 'Listo para grabar'}
             </Text>
-            
+
             {isRecording && (
               <Text style={styles.durationText}>
                 {formatDuration(recordingDuration)}
               </Text>
             )}
-            
+
             {recordedUri && !isRecording && (
               <Text style={styles.successText}>
                 ✅ Audio guardado correctamente
@@ -140,13 +172,31 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onAudioRecorded }) => {
             )}
           </View>
         </View>
-        
+
+        {recordedUri && !isRecording && (
+          <View style={styles.actionContainer}>
+            <Pressable
+              style={styles.transcribeButton}
+              onPress={handleTranscriptionRequest}
+            >
+              <Text style={styles.transcribeButtonText}>🎤 Transcribir Audio</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.resetButton}
+              onPress={resetRecording}
+            >
+              <Text style={styles.resetButtonText}>🔄 Nuevo Audio</Text>
+            </Pressable>
+          </View>
+        )}
+
         {error && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>❌ {error}</Text>
           </View>
         )}
-        
+
         <View style={styles.instructionsContainer}>
           <Text style={styles.instructionsTitle}>💡 Consejos:</Text>
           <Text style={styles.instructionsText}>• Habla claro y con volumen normal</Text>
@@ -249,6 +299,48 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#dc2626',
     fontWeight: '500',
+  },
+  actionContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 16,
+    gap: 12,
+  },
+  transcribeButton: {
+    flex: 1,
+    backgroundColor: '#16a34a',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  transcribeButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  resetButton: {
+    flex: 1,
+    backgroundColor: '#6b7280',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  resetButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   instructionsContainer: {
     backgroundColor: '#f0f9ff',

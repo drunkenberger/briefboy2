@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useBriefAnalysis } from '../hooks/useBriefAnalysis';
+import { useChatWithAI } from '../hooks/useChatWithAI';
 import BriefAnalysisDisplay from './BriefAnalysisDisplay';
 import FastChatInterface from './FastChatInterface';
-import { useBriefAnalysis } from '../hooks/useBriefAnalysis';
-import { useFastChat } from '../hooks/useFastChat';
 
 interface BriefImprovementModalProps {
   visible: boolean;
@@ -26,32 +26,38 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState<ModalStep>('analysis');
   const [improvedBrief, setImprovedBrief] = useState<any>(null);
-  
+
   // Hook para analisis del brief
   const { analysis, loading: analysisLoading, error: analysisError, reAnalyze } = useBriefAnalysis(brief);
-  
-  // Hook para chat rapido
-  const { 
-    messages, 
-    isTyping, 
-    sendMessage, 
-    clearChat, 
-    isConnected, 
-    error: chatError 
-  } = useFastChat(brief, analysis);
 
-  const handleStartImprovement = () => {
-    setCurrentStep('chat');
+  // Hook para chat con IA
+  const {
+    messages,
+    userInput,
+    setUserInput,
+    sendMessage,
+    loading: isTyping,
+    improvedBrief: newImprovedBrief
+  } = useChatWithAI(brief, brief.transcription || '');
+
+  useEffect(() => {
+    if (newImprovedBrief) {
+      setImprovedBrief(newImprovedBrief);
+    }
+  }, [newImprovedBrief]);
+
+  const handleCloseModal = () => {
+    setCurrentStep('analysis');
+    setImprovedBrief(null);
+    onClose();
   };
 
   const handleBackToAnalysis = () => {
     setCurrentStep('analysis');
   };
 
-  const handleCloseModal = () => {
-    setCurrentStep('analysis');
-    clearChat();
-    onClose();
+  const handleStartImprovement = () => {
+    setCurrentStep('chat');
   };
 
   const handleApplyImprovements = () => {
@@ -68,7 +74,7 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
       presentationStyle="pageSheet"
       onRequestClose={handleCloseModal}
     >
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
@@ -76,35 +82,35 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
         <View style={styles.header}>
           <View style={styles.headerContent}>
             {currentStep === 'chat' && (
-              <Pressable 
-                style={styles.backButton} 
+              <Pressable
+                style={styles.backButton}
                 onPress={handleBackToAnalysis}
               >
                 <Text style={styles.backButtonText}>← Analisis</Text>
               </Pressable>
             )}
-            
+
             <Text style={styles.headerTitle}>
               {currentStep === 'analysis' ? '📊 Analisis del Brief' : '💬 Mejorar Brief'}
             </Text>
-            
-            <Pressable 
-              style={styles.closeButton} 
+
+            <Pressable
+              style={styles.closeButton}
               onPress={handleCloseModal}
             >
               <Text style={styles.closeButtonText}>✕</Text>
             </Pressable>
           </View>
-          
+
           {/* Indicador de paso */}
           <View style={styles.stepIndicator}>
             <View style={[
-              styles.stepDot, 
+              styles.stepDot,
               currentStep === 'analysis' ? styles.stepDotActive : styles.stepDotInactive
             ]} />
             <View style={styles.stepLine} />
             <View style={[
-              styles.stepDot, 
+              styles.stepDot,
               currentStep === 'chat' ? styles.stepDotActive : styles.stepDotInactive
             ]} />
           </View>
@@ -125,9 +131,10 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
               messages={messages}
               isTyping={isTyping}
               sendMessage={sendMessage}
-              isConnected={isConnected}
-              error={chatError}
+              error={null}
               onBriefGenerated={setImprovedBrief}
+              userInput={userInput}
+              setUserInput={setUserInput}
             />
           )}
         </View>
@@ -136,8 +143,8 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
         {currentStep === 'chat' && improvedBrief && (
           <View style={styles.chatFooter}>
             <Text style={styles.successText}>✅ Brief mejorado generado</Text>
-            <Pressable 
-              style={styles.applyButton} 
+            <Pressable
+              style={styles.applyButton}
               onPress={handleApplyImprovements}
             >
               <Text style={styles.applyButtonText}>🚀 Aplicar Mejoras</Text>

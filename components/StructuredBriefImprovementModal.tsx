@@ -69,16 +69,28 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     });
     
     if (updatedBrief) {
-      setIsUpdatingBrief(true);
+      // ACTUALIZACIÓN INMEDIATA sin demoras
       setWorkingBrief(updatedBrief);
+      setIsUpdatingBrief(true);
       
-      // Simular tiempo de actualización visual
+      // Verificar inmediatamente que el brief tiene contenido
+      const hasContent = Object.keys(updatedBrief).some(key => {
+        const value = updatedBrief[key];
+        return value && (typeof value === 'string' ? value.trim() : true);
+      });
+      
+      console.log(`✅ [${timestamp}] Modal SINCRONIZADO:`, {
+        hasContent,
+        fieldCount: Object.keys(updatedBrief).length,
+        briefUpdated: true
+      });
+      
+      // Feedback visual mínimo
       setTimeout(() => {
         setIsUpdatingBrief(false);
-        console.log(`✅ [${timestamp}] Modal terminó actualización visual, workingBrief sincronizado`);
-      }, 500);
+      }, 1000);
     } else {
-      console.warn(`⚠️ [${timestamp}] Modal recibió actualización vacía o nula`);
+      console.error(`❌ [${timestamp}] Modal recibió brief NULO - esto es un error crítico`);
     }
   }
 
@@ -113,18 +125,41 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     });
     
     if (workingBrief) {
-      onBriefImproved(workingBrief);
-      console.log('✅ Mejoras aplicadas correctamente');
-      
-      // Mostrar feedback visual al usuario
+      // Mostrar feedback visual INMEDIATAMENTE
       setImprovementsApplied(true);
       setIsUpdatingBrief(true);
+      
+      // Verificar integridad antes de aplicar
+      const camposCriticos = ['projectTitle', 'briefSummary', 'businessChallenge', 'strategicObjectives'];
+      const camposPresentes = camposCriticos.filter(campo => {
+        const valor = workingBrief[campo];
+        return valor !== undefined && valor !== null && 
+               (Array.isArray(valor) ? valor.length > 0 : 
+                typeof valor === 'object' ? Object.keys(valor).length > 0 : 
+                typeof valor === 'string' ? valor.trim().length > 0 : true);
+      });
+      
+      console.log('🚀 APLICANDO MEJORAS - Verificación previa:', {
+        totalCampos: Object.keys(workingBrief).length,
+        camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
+        businessChallenge: workingBrief.businessChallenge ? '✅' : '❌',
+        targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅' : '❌',
+        bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅' : '❌',
+        timestamp: new Date().toLocaleTimeString()
+      });
+      
+      // Aplicar las mejoras
+      onBriefImproved(workingBrief);
+      console.log('✅ Mejoras aplicadas correctamente al brief principal');
+      
+      // Mantener el feedback visual por más tiempo
       setTimeout(() => {
         setIsUpdatingBrief(false);
-        setTimeout(() => {
-          setImprovementsApplied(false);
-        }, 2000);
-      }, 1000);
+      }, 2000);
+      
+      setTimeout(() => {
+        setImprovementsApplied(false);
+      }, 4000);
       
       // NO cerrar el modal automáticamente - mantener la vista abierta
       // handleCloseModal();
@@ -134,6 +169,10 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
   }, [workingBrief, onBriefImproved, brief]);
 
   const handleManualBriefChange = useCallback((updatedBrief: any) => {
+    console.log('🖊️ Cambio manual desde EditableBriefView:', {
+      timestamp: new Date().toLocaleTimeString(),
+      camposActualizados: Object.keys(updatedBrief).length
+    });
     setWorkingBrief(updatedBrief);
   }, []);
 
@@ -246,11 +285,45 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
               <Text style={styles.footerSubtext}>
                 {improvementsApplied ? '✅ ¡Mejoras guardadas correctamente!' : 'También puedes editarlo manualmente en el panel derecho'}
               </Text>
+              <Pressable 
+                style={styles.debugButton}
+                onPress={() => {
+                  console.log('🔧 FORZANDO SINCRONIZACIÓN MANUAL...');
+                  if (workingBrief) {
+                    setIsUpdatingBrief(true);
+                    
+                    // Verificar integridad del brief actual
+                    const camposCriticos = ['projectTitle', 'briefSummary', 'businessChallenge', 'strategicObjectives', 'targetAudience', 'creativeStrategy'];
+                    const camposPresentes = camposCriticos.filter(campo => {
+                      const valor = workingBrief[campo];
+                      return valor !== undefined && valor !== null && 
+                             (Array.isArray(valor) ? valor.length > 0 : 
+                              typeof valor === 'object' ? Object.keys(valor).length > 0 : 
+                              typeof valor === 'string' ? valor.trim().length > 0 : true);
+                    });
+                    
+                    console.log('🔄 ESTADO ACTUAL DEL BRIEF:', {
+                      totalCampos: Object.keys(workingBrief).length,
+                      camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
+                      businessChallenge: workingBrief.businessChallenge ? '✅ Presente' : '❌ Falta',
+                      targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅ Presente' : '❌ Falta',
+                      targetAudienceSecondary: workingBrief.targetAudience?.secondary ? '✅ Presente' : '❌ Falta',
+                      bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅ Presente' : '❌ Falta',
+                      briefCompleto: workingBrief
+                    });
+                    
+                    setTimeout(() => setIsUpdatingBrief(false), 1000);
+                  }
+                }}
+              >
+                <Text style={styles.debugButtonText}>🔧 Debug Sync</Text>
+              </Pressable>
             </View>
             <Pressable 
               style={[
                 styles.applyButton,
-                improvementsApplied && styles.applyButtonSuccess
+                improvementsApplied && styles.applyButtonSuccess,
+                (workingBrief && workingBrief !== brief) && styles.applyButtonHasChanges
               ]} 
               onPress={handleApplyImprovements}
             >
@@ -258,7 +331,12 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
                 styles.applyButtonText,
                 improvementsApplied && styles.applyButtonTextSuccess
               ]}>
-                {improvementsApplied ? '✅ Mejoras Aplicadas!' : '🚀 Aplicar Mejoras'}
+                {improvementsApplied 
+                  ? '✅ ¡Mejoras Aplicadas!' 
+                  : (workingBrief && workingBrief !== brief) 
+                    ? '🚀 Aplicar Mejoras (•)' 
+                    : '🚀 Aplicar Mejoras'
+                }
               </Text>
             </Pressable>
           </View>
@@ -415,8 +493,37 @@ const styles = StyleSheet.create({
   applyButtonSuccess: {
     backgroundColor: '#059669',
   },
+  applyButtonHasChanges: {
+    backgroundColor: '#2563eb',
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
   applyButtonTextSuccess: {
     color: '#ffffff',
+  },
+  successIndicator: {
+    backgroundColor: '#d1fae5',
+    borderBottomColor: '#10b981',
+  },
+  successText: {
+    color: '#065f46',
+    fontWeight: '600',
+  },
+  debugButton: {
+    backgroundColor: '#6b7280',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  debugButtonText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '500',
   },
 });
 

@@ -52,7 +52,7 @@ async function waitForCondition(condition: () => boolean, timeout = 2000, interv
 describe('useChatWithAI', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.OPENAI_API_KEY = 'test-key';
+    process.env.EXPO_PUBLIC_OPENAI_API_KEY = 'test-key';
   });
 
   it('inicializa el chat con mensaje de bienvenida', () => {

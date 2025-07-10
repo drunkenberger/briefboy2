@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator } from 'react-native';
 import AudioRecorder from '../../components/AudioRecorder';
 import BriefResult from '../../components/BriefResult';
 import StructuredBriefImprovementModal from '../../components/StructuredBriefImprovementModal';
 import ProfessionalBriefDisplay from '../../components/ProfessionalBriefDisplay';
 import TranscriptionResult from '../../components/TranscriptionResult';
 import BriefValidationAlert from '../../components/BriefValidationAlert';
+import FileUploadButton from '../../components/FileUploadButton';
 import { useBriefGeneration } from '../../hooks/useBriefGeneration';
 import { useBriefStorage } from '../../hooks/useBriefStorage';
 import { useWhisperTranscription } from '../../hooks/useWhisperTranscription';
+import { checkApiKeysOnStartup } from '../../utils/apiKeyValidator';
 
 /**
  * Pantalla principal: grabar audio y mostrar transcripción automática.
@@ -20,26 +22,90 @@ const AudioToTextScreen: React.FC = () => {
   const [iaSuggestions, setIaSuggestions] = useState<string | null>(null);
   const [useNewDisplay, setUseNewDisplay] = useState(true);
   const [currentBriefId, setCurrentBriefId] = useState<string | null>(null);
+  const [manualTranscription, setManualTranscription] = useState<string | null>(null);
+  const [isFromFile, setIsFromFile] = useState(false);
 
-  // Hook de transcripción automática
-  const { transcription, loading, error } = useWhisperTranscription(audioUri, !!audioUri);
+  // Hook de transcripción automática (solo si hay audio)
+  const { transcription: autoTranscription, loading, error } = useWhisperTranscription(
+    audioUri,
+    !!audioUri
+  );
 
-  // Hook de generación de brief (solo si hay transcripción)
-  const { brief, loading: loadingBrief, error: errorBrief } = useBriefGeneration(transcription, !!transcription);
+  // Usar transcripción manual (desde archivo) o automática (desde grabación)
+  const transcription = manualTranscription || autoTranscription;
+
+  // Debug logging para transcripciones
+  useEffect(() => {
+    console.log('📝 Estado de transcripciones:', {
+      manualTranscription: manualTranscription ? manualTranscription.substring(0, 50) + '...' : 'null',
+      autoTranscription: autoTranscription ? autoTranscription.substring(0, 50) + '...' : 'null',
+      finalTranscription: transcription ? transcription.substring(0, 50) + '...' : 'null',
+      loading,
+      error,
+      audioUri: audioUri ? audioUri.substring(0, 50) + '...' : 'null'
+    });
+  }, [manualTranscription, autoTranscription, transcription, loading, error, audioUri]);
+
+  // Hook de generación de brief - SOLO después de que termine la transcripción
+  const shouldGenerateBrief = !!transcription && !loading;
+  const { brief, loading: loadingBrief, error: errorBrief } = useBriefGeneration(transcription, shouldGenerateBrief);
   const briefToShow = improvedBrief || brief;
   const iaSuggestionsToShow = improvedBrief ? iaSuggestions : null;
 
   // Hook de almacenamiento
   const { saveBrief, updateBrief } = useBriefStorage();
 
+  // Verificar API keys en desarrollo
+  useEffect(() => {
+    checkApiKeysOnStartup();
+  }, []);
+
   // Recibe la URI del audio grabado desde el componente hijo
   const handleAudioRecorded = (uri: string | null) => {
-    setAudioUri(uri);
+    console.log('🎤 handleAudioRecorded: Recibida URI de audio:', uri ? uri.substring(0, 100) + '...' : 'null');
+
+    // Solo guardamos la URI, no iniciamos transcripción automática
+    setAudioUri(null); // No activamos el hook automáticamente
     // Reset previous results
     setImprovedBrief(null);
     setIaSuggestions(null);
     setCurrentBriefId(null);
+    setManualTranscription(null);
+    setIsFromFile(false);
   };
+
+  // Maneja la solicitud de transcripción del audio grabado
+  const handleTranscriptionRequested = (uri: string) => {
+    console.log('🎤 index.tsx: handleTranscriptionRequested recibida:', uri.substring(0, 100) + '...');
+
+    // Reset estado previo
+    setImprovedBrief(null);
+    setIaSuggestions(null);
+    setCurrentBriefId(null);
+    setManualTranscription(null);
+    setIsFromFile(false);
+
+    // Activar transcripción
+    console.log('🎤 index.tsx: Configurando audioUri para activar hook');
+    setAudioUri(uri);
+  };
+
+  // Maneja la transcripción desde archivo de texto/documento
+  const handleFileTranscription = (fileTranscription: string) => {
+    console.log('📥 handleFileTranscription: Recibida transcripción de archivo:', fileTranscription.substring(0, 100) + '...');
+
+    // Reset estado previo
+    setAudioUri(null);
+    setImprovedBrief(null);
+    setIaSuggestions(null);
+    setCurrentBriefId(null);
+
+    // Establecer transcripción desde archivo
+    setManualTranscription(fileTranscription);
+    setIsFromFile(true);
+  };
+
+
 
   // Guardar brief automáticamente cuando esté listo
   useEffect(() => {
@@ -94,7 +160,7 @@ const AudioToTextScreen: React.FC = () => {
             } catch (saveError) {
               console.error('Error saving brief:', saveError);
               Alert.alert(
-                '❌ Error al Guardar', 
+                '❌ Error al Guardar',
                 saveError instanceof Error ? saveError.message : 'No se pudo guardar el brief. Intenta nuevamente.',
                 [
                   { text: 'Reintentar', onPress: () => handleManualSave() },
@@ -118,7 +184,7 @@ const AudioToTextScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -126,15 +192,57 @@ const AudioToTextScreen: React.FC = () => {
           <Text style={styles.appTitle}>📊 BriefBoy</Text>
           <Text style={styles.appSubtitle}>Generador de Briefs Publicitarios con IA</Text>
         </View>
-        
-        <AudioRecorder onAudioRecorded={handleAudioRecorded} />
-        
+
+        <AudioRecorder
+          onAudioRecorded={handleAudioRecorded}
+          onTranscriptionRequested={handleTranscriptionRequested}
+        />
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>O</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <FileUploadButton
+          onTranscriptionComplete={handleFileTranscription}
+          isLoading={loading || loadingBrief}
+        />
+
         <TranscriptionResult
           loading={loading}
           error={error}
           transcription={transcription}
+          isFromFile={isFromFile}
         />
-        
+
+        {transcription && !brief && loadingBrief && !loading && (
+          <View style={styles.briefGenerationContainer}>
+            <View style={styles.briefGenerationCard}>
+              <ActivityIndicator size="large" color="#9333ea" />
+              <Text style={styles.briefGenerationTitle}>Generando Brief...</Text>
+              <Text style={styles.briefGenerationSubtitle}>
+                IA analizando la transcripción y creando el brief publicitario
+              </Text>
+              {isFromFile && (
+                <Text style={styles.fileIndicator}>
+                  📁 Procesando contenido de archivo subido
+                </Text>
+              )}
+            </View>
+          </View>
+        )}
+
+        {transcription && errorBrief && (
+          <View style={styles.briefGenerationContainer}>
+            <View style={styles.briefGenerationCard}>
+              <Text style={styles.errorIcon}>❌</Text>
+              <Text style={styles.briefGenerationErrorTitle}>Error generando brief</Text>
+              <Text style={styles.briefGenerationErrorText}>{errorBrief}</Text>
+            </View>
+          </View>
+        )}
+
         {briefToShow && !loadingBrief && !errorBrief && (
           <BriefValidationAlert
             brief={briefToShow}
@@ -144,7 +252,7 @@ const AudioToTextScreen: React.FC = () => {
             }}
           />
         )}
-        
+
         {useNewDisplay ? (
           <ProfessionalBriefDisplay
             brief={briefToShow}
@@ -159,7 +267,7 @@ const AudioToTextScreen: React.FC = () => {
             iaSuggestions={iaSuggestionsToShow}
           />
         )}
-        
+
         {brief && !loadingBrief && !errorBrief && (
           <View style={styles.actionsContainer}>
             <Pressable
@@ -168,7 +276,7 @@ const AudioToTextScreen: React.FC = () => {
             >
               <Text style={styles.improveButtonText}>🔄 Mejora Estructurada</Text>
             </Pressable>
-            
+
             <Pressable
               style={styles.toggleButton}
               onPress={() => setUseNewDisplay(!useNewDisplay)}
@@ -179,7 +287,7 @@ const AudioToTextScreen: React.FC = () => {
             </Pressable>
           </View>
         )}
-        
+
         {briefToShow && (
           <View style={styles.saveContainer}>
             <Pressable
@@ -198,7 +306,7 @@ const AudioToTextScreen: React.FC = () => {
           </View>
         )}
       </ScrollView>
-      
+
       <StructuredBriefImprovementModal
         visible={showChatModal}
         brief={brief}
@@ -234,6 +342,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#64748b',
     textAlign: 'center',
+    fontWeight: '500',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e7eb',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    color: '#9ca3af',
     fontWeight: '500',
   },
   actionsContainer: {
@@ -306,6 +430,58 @@ const styles = StyleSheet.create({
     color: '#16a34a',
     marginTop: 8,
     fontStyle: 'italic',
+  },
+  briefGenerationContainer: {
+    marginTop: 16,
+    width: '100%',
+  },
+  briefGenerationCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    borderLeftWidth: 4,
+    borderLeftColor: '#9333ea',
+  },
+  briefGenerationTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  briefGenerationSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  briefGenerationErrorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#dc2626',
+    marginBottom: 8,
+  },
+  briefGenerationErrorText: {
+    fontSize: 14,
+    color: '#991b1b',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  errorIcon: {
+    fontSize: 32,
+    marginBottom: 12,
+  },
+  fileIndicator: {
+    fontSize: 12,
+    color: '#7c3aed',
+    marginTop: 8,
+    fontWeight: '500',
   },
 });
 
