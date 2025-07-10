@@ -8,10 +8,10 @@ import {
   Text, 
   View
 } from 'react-native';
-import BriefAnalysisDisplay from './BriefAnalysisDisplay';
+import EducationalBriefAnalysis from './EducationalBriefAnalysis';
 import StructuredChatInterface from './StructuredChatInterface';
 import EditableBriefView from './EditableBriefView';
-import { useBriefAnalysis } from '../hooks/useBriefAnalysis';
+import { useEducationalBriefAnalysis } from '../hooks/useEducationalBriefAnalysis';
 import { useStructuredChat } from '../hooks/useStructuredChat';
 
 interface StructuredBriefImprovementModalProps {
@@ -39,7 +39,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
   const [improvementsApplied, setImprovementsApplied] = useState(false);
   
   // Hook para análisis del brief
-  const { analysis, loading: analysisLoading, error: analysisError, reAnalyze } = useBriefAnalysis(brief);
+  const { analysis, loading: analysisLoading, error: analysisError, reAnalyze } = useEducationalBriefAnalysis(brief);
   
   // Hook para chat estructurado
   const { 
@@ -94,7 +94,8 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     }
   }
 
-  const handleStartStructuredImprovement = useCallback(() => {
+  const handleStartStructuredImprovement = useCallback((selectedAreas: string[]) => {
+    console.log('🎯 Iniciando mejoras estructuradas para áreas:', selectedAreas);
     setCurrentStep('structured-improvement');
     setWorkingBrief(brief);
     setImprovementsApplied(false);
@@ -228,7 +229,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         {/* Contenido principal */}
         <View style={styles.content}>
           {currentStep === 'analysis' ? (
-            <BriefAnalysisDisplay
+            <EducationalBriefAnalysis
               analysis={analysis}
               loading={analysisLoading}
               error={analysisError}

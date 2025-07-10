@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useBriefAnalysis } from '../hooks/useBriefAnalysis';
+import { useEducationalBriefAnalysis } from '../hooks/useEducationalBriefAnalysis';
 import { useChatWithAI } from '../hooks/useChatWithAI';
-import BriefAnalysisDisplay from './BriefAnalysisDisplay';
+import EducationalBriefAnalysis from './EducationalBriefAnalysis';
 import FastChatInterface from './FastChatInterface';
 
 interface BriefImprovementModalProps {
@@ -27,8 +27,8 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
   const [currentStep, setCurrentStep] = useState<ModalStep>('analysis');
   const [improvedBrief, setImprovedBrief] = useState<any>(null);
 
-  // Hook para analisis del brief
-  const { analysis, loading: analysisLoading, error: analysisError, reAnalyze } = useBriefAnalysis(brief);
+  // Hook para analisis educativo del brief
+  const { analysis, loading: analysisLoading, error: analysisError, reAnalyze } = useEducationalBriefAnalysis(brief);
 
   // Hook para chat con IA
   const {
@@ -56,7 +56,8 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
     setCurrentStep('analysis');
   };
 
-  const handleStartImprovement = () => {
+  const handleStartImprovement = (selectedAreas: string[]) => {
+    console.log('🎯 Iniciando mejoras para áreas seleccionadas:', selectedAreas);
     setCurrentStep('chat');
   };
 
@@ -119,12 +120,13 @@ const BriefImprovementModal: React.FC<BriefImprovementModalProps> = ({
         {/* Contenido principal */}
         <View style={styles.content}>
           {currentStep === 'analysis' ? (
-            <BriefAnalysisDisplay
+            <EducationalBriefAnalysis
               analysis={analysis}
               loading={analysisLoading}
               error={analysisError}
               onStartImprovement={handleStartImprovement}
               onReAnalyze={reAnalyze}
+              brief={brief}
             />
           ) : (
             <FastChatInterface
