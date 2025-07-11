@@ -26,6 +26,7 @@ export interface UseStructuredChatResult {
   isTyping: boolean;
   sendMessage: (message: string) => Promise<void>;
   clearChat: () => void;
+  initializeChat: () => void;
   isConnected: boolean;
   error: string | null;
   progress: { current: number; total: number };
@@ -402,6 +403,7 @@ export function useStructuredChat(
   // Inicializar chat y preguntas
   useEffect(() => {
     if (brief && analysis && messages.length === 0) {
+      console.log('🚀 Inicializando chat estructurado...');
       const generatedQuestions = generateStructuredQuestions(brief, analysis);
       setQuestions(generatedQuestions);
       setWorkingBrief(normalizeBrief(brief));
@@ -432,6 +434,9 @@ export function useStructuredChat(
         };
         
         setMessages([welcomeMessage, firstQuestion]);
+        console.log('✅ Chat inicializado con', generatedQuestions.length, 'preguntas');
+      } else {
+        console.log('⚠️ No se generaron preguntas - brief podría estar completo');
       }
     }
   }, [brief, analysis, generateStructuredQuestions]);
@@ -537,12 +542,18 @@ export function useStructuredChat(
       throw new Error('No se recibió respuesta de OpenAI');
     }
 
-    const parsedResponse = JSON.parse(aiResponse);
-    if (!parsedResponse.updatedBrief) {
-      throw new Error('La respuesta de OpenAI no tiene updatedBrief');
+    try {
+      const parsedResponse = JSON.parse(aiResponse);
+      if (!parsedResponse.updatedBrief) {
+        console.error('❌ Respuesta sin updatedBrief:', aiResponse);
+        throw new Error('La respuesta de OpenAI no tiene updatedBrief');
+      }
+      return parsedResponse;
+    } catch (parseError) {
+      console.error('❌ Error parseando JSON de OpenAI:', aiResponse);
+      console.error('Error detallado:', parseError);
+      throw new Error(`Error parseando respuesta JSON: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
     }
-
-    return parsedResponse;
   }, []);
 
   const callClaude = useCallback(async (systemPrompt: string, userMessage: string) => {
@@ -734,6 +745,15 @@ FORMATO DE RESPUESTA OBLIGATORIO:
           ? aiResponse.updatedBrief[briefField.split('.')[0]]?.[briefField.split('.')[1]]
           : aiResponse.updatedBrief[briefField];
         
+        // Log específico para channelStrategy
+        if (briefField.includes('channelStrategy')) {
+          console.log('🔍 Verificando actualización de channelStrategy:');
+          console.log('Campo:', briefField);
+          console.log('Valor recibido:', fieldValue);
+          console.log('Tipo de dato:', Array.isArray(fieldValue) ? 'array' : typeof fieldValue);
+          console.log('Brief completo channelStrategy:', aiResponse.updatedBrief.channelStrategy);
+        }
+        
         if (fieldValue !== undefined && fieldValue !== null && 
             !(Array.isArray(fieldValue) && fieldValue.length === 0) &&
             !(typeof fieldValue === 'string' && fieldValue.trim() === '')) {
@@ -745,6 +765,7 @@ FORMATO DE RESPUESTA OBLIGATORIO:
           };
         } else {
           console.warn('⚠️ IA no actualizó el campo correctamente, usando fallback');
+          console.warn('Campo:', briefField, 'Valor:', fieldValue);
         }
       }
     } catch (error) {
@@ -776,6 +797,15 @@ FORMATO DE RESPUESTA OBLIGATORIO:
         updatedBrief[parent] = {};
       }
       updatedBrief[parent][child] = processedValue;
+      
+      // Log específico para depuración
+      console.log(`📝 Actualizando campo anidado ${briefField}:`, {
+        parent,
+        child,
+        valorProcesado: processedValue,
+        tipoEsperado: shouldBeArray ? 'array' : 'string',
+        objetoPadre: updatedBrief[parent]
+      });
     } else {
       updatedBrief[briefField] = processedValue;
     }
@@ -1104,12 +1134,76 @@ He analizado toda la información y el brief está listo para producción. ¿Hay
     console.log('onBriefUpdate called with:', normalizedBrief);
   }, [onBriefChange]);
 
+  const initializeChat = useCallback(() => {
+    console.log('🔄 Reinicializando chat estructurado...');
+    
+    // Limpiar estado actual
+    setMessages([]);
+    setQuestions([]);
+    setCurrentQuestionIndex(0);
+    setCompletedQuestions(new Set());
+    setError(null);
+    setIsConnected(true);
+    setIsTyping(false);
+    
+    // Inicializar con el brief actual
+    if (brief && analysis) {
+      const generatedQuestions = generateStructuredQuestions(brief, analysis);
+      setQuestions(generatedQuestions);
+      setWorkingBrief(normalizeBrief(brief));
+      
+      if (generatedQuestions.length > 0) {
+        const welcomeMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `¡Hola! Voy a hacerte preguntas específicas para completar y mejorar tu brief hasta alcanzar el 100% de completitud.
+
+📊 **Nuevo sistema inteligente:**
+- Analizo TODOS los campos del brief (no solo 5 preguntas)
+- Continúo hasta que el brief esté completamente optimizado
+- Muestro tu progreso en tiempo real
+- El brief se actualiza automáticamente, pero puedes editarlo manualmente
+
+**Empecemos con las primeras optimizaciones:**`,
+          timestamp: Date.now(),
+        };
+        
+        const firstQuestion: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: generatedQuestions[0].question,
+          timestamp: Date.now(),
+          questionId: generatedQuestions[0].id,
+          briefField: generatedQuestions[0].field,
+        };
+        
+        setMessages([welcomeMessage, firstQuestion]);
+        console.log('✅ Chat reinicializado con', generatedQuestions.length, 'preguntas');
+      } else {
+        console.log('⚠️ No se generaron preguntas - brief podría estar completo');
+        
+        // Mostrar mensaje de brief completo
+        const completeBriefMessage: ChatMessage = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `¡Excelente! Tu brief parece estar muy completo. 
+
+¿Hay algún aspecto específico que te gustaría revisar o mejorar?`,
+          timestamp: Date.now(),
+        };
+        
+        setMessages([completeBriefMessage]);
+      }
+    }
+  }, [brief, analysis, generateStructuredQuestions]);
+
   return {
     messages,
     currentQuestion: questions[currentQuestionIndex] || null,
     isTyping,
     sendMessage,
     clearChat,
+    initializeChat,
     isConnected,
     error,
     progress: {

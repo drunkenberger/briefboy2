@@ -48,6 +48,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     isTyping, 
     sendMessage, 
     clearChat, 
+    initializeChat,
     isConnected, 
     error: chatError,
     progress,
@@ -99,7 +100,12 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     setCurrentStep('structured-improvement');
     setWorkingBrief(brief);
     setImprovementsApplied(false);
-  }, [brief]);
+    
+    // Inicializar el chat estructurado
+    setTimeout(() => {
+      initializeChat();
+    }, 100);
+  }, [brief, initializeChat]);
 
   const handleBackToAnalysis = useCallback(() => {
     setCurrentStep('analysis');
@@ -149,9 +155,35 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         timestamp: new Date().toLocaleTimeString()
       });
       
-      // Aplicar las mejoras
-      onBriefImproved(workingBrief);
-      console.log('✅ Mejoras aplicadas correctamente al brief principal');
+      // Crear brief consolidado con mejoras aplicadas
+      const consolidatedBrief = {
+        ...brief, // Brief original como base
+        ...workingBrief, // Aplicar todas las mejoras
+        
+        // Asegurar que los campos críticos estén presentes
+        briefSummary: workingBrief.briefSummary || brief?.briefSummary || '',
+        updatedAt: new Date().toISOString(),
+        improvedAt: new Date().toISOString(),
+        
+        // Metadata de mejoras
+        improvementMetadata: {
+          originalBriefFields: brief ? Object.keys(brief).length : 0,
+          improvedBriefFields: Object.keys(workingBrief).length,
+          improvementDate: new Date().toISOString(),
+          structuredImprovementApplied: true
+        }
+      };
+      
+      console.log('🎯 Brief consolidado creado:', {
+        originalFields: brief ? Object.keys(brief).length : 0,
+        improvedFields: Object.keys(workingBrief).length,
+        consolidatedFields: Object.keys(consolidatedBrief).length,
+        hasBriefSummary: !!consolidatedBrief.briefSummary
+      });
+      
+      // Aplicar las mejoras consolidadas
+      onBriefImproved(consolidatedBrief);
+      console.log('✅ Brief consolidado aplicado correctamente');
       
       // Mantener el feedback visual por más tiempo
       setTimeout(() => {

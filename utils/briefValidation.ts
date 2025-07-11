@@ -123,6 +123,8 @@ export function normalizeBrief(brief: any): NormalizedBrief {
     // Mapear channels a channelStrategy
     channelStrategy: brief.channels || brief.channelStrategy ? {
       ...brief.channelStrategy,
+      recommendedMix: extractArrayField(brief.channelStrategy?.recommendedMix || brief.channels || []),
+      integratedApproach: extractStringField(brief.channelStrategy?.integratedApproach || ''),
       channels: brief.channels || brief.channelStrategy?.channels || []
     } : undefined,
 
@@ -150,6 +152,11 @@ export function normalizeBrief(brief: any): NormalizedBrief {
     targetAudienceType: typeof brief.targetAudience,
     targetAudienceContent: brief.targetAudience,
     hasCreativeStrategy: !!normalizedBrief.creativeStrategy,
+    channelStrategy: {
+      original: brief.channelStrategy,
+      normalized: normalizedBrief.channelStrategy,
+      recommendedMix: normalizedBrief.channelStrategy?.recommendedMix
+    },
     totalFields: Object.keys(normalizedBrief).length
   });
 

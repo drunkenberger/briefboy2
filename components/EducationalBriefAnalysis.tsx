@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, Modal } from 'react-native';
-import { 
-  EducationalAnalysisResult, 
-  BriefHealthCheck, 
-  AnalysisInsight, 
-  VerbalScore, 
-  OverallAssessment, 
-  ReadinessLevel 
+import {
+  EducationalAnalysisResult,
+  BriefHealthCheck,
+  AnalysisInsight,
+  VerbalScore,
+  OverallAssessment,
+  ReadinessLevel,
+  ActionPlan,
+  ActionPhase,
+  DetailedTask,
+  TaskResource
 } from '../hooks/useEducationalBriefAnalysis';
 
 interface EducationalBriefAnalysisProps {
@@ -71,12 +75,12 @@ const EducationalBriefAnalysis: React.FC<EducationalBriefAnalysisProps> = ({
     <View style={styles.container}>
       {/* Header con grade y navegación */}
       <View style={styles.header}>
-        <BriefGradeDisplay 
+        <BriefGradeDisplay
           assessment={analysis.overallAssessment}
           score={analysis.overallScore}
           readinessLevel={analysis.readinessLevel}
         />
-        <ViewModeNavigation 
+        <ViewModeNavigation
           currentMode={viewMode}
           onModeChange={setViewMode}
         />
@@ -110,10 +114,10 @@ const EducationalBriefAnalysis: React.FC<EducationalBriefAnalysisProps> = ({
 
         {viewMode === 'action-plan' && (
           <ActionPlanSection
-            priorityActions={analysis.priorityActions}
+            actionPlan={analysis.actionPlan}
             selectedActions={selectedActions}
             onToggleAction={(actionId) => {
-              setSelectedActions(prev => 
+              setSelectedActions(prev =>
                 prev.includes(actionId)
                   ? prev.filter(id => id !== actionId)
                   : [...prev, actionId]
@@ -126,7 +130,7 @@ const EducationalBriefAnalysis: React.FC<EducationalBriefAnalysisProps> = ({
       {/* Footer con CTA */}
       <View style={styles.footer}>
         {viewMode === 'action-plan' && selectedActions.length > 0 ? (
-          <Pressable 
+          <Pressable
             style={styles.primaryButton}
             onPress={() => onStartImprovement(selectedActions)}
           >
@@ -136,17 +140,17 @@ const EducationalBriefAnalysis: React.FC<EducationalBriefAnalysisProps> = ({
           </Pressable>
         ) : (
           <View style={styles.footerButtons}>
-            <Pressable 
+            <Pressable
               style={styles.secondaryButton}
               onPress={onReAnalyze}
             >
               <Text style={styles.secondaryButtonText}>🔄 Re-analizar</Text>
             </Pressable>
-            <Pressable 
+            <Pressable
               style={styles.primaryButton}
-              onPress={() => setViewMode('action-plan')}
+              onPress={() => onStartImprovement([])}
             >
-              <Text style={styles.primaryButtonText}>📋 Ver plan de acción</Text>
+              <Text style={styles.primaryButtonText}>✨ Mejora Estructurada</Text>
             </Pressable>
           </View>
         )}
@@ -320,21 +324,21 @@ const ProgressIndicator: React.FC<{
   return (
     <View style={styles.progressCard}>
       <Text style={styles.progressTitle}>🎯 Tu progreso</Text>
-      
+
       {progress.completedWell.length > 0 && (
         <View style={styles.progressSection}>
           <Text style={styles.progressLabel}>✅ Áreas que dominas:</Text>
           <Text style={styles.progressText}>{progress.completedWell.join(', ')}</Text>
         </View>
       )}
-      
+
       {progress.improvementAreas.length > 0 && (
         <View style={styles.progressSection}>
           <Text style={styles.progressLabel}>🎯 Áreas de oportunidad:</Text>
           <Text style={styles.progressText}>{progress.improvementAreas.join(', ')}</Text>
         </View>
       )}
-      
+
       <View style={styles.progressSection}>
         <Text style={styles.progressLabel}>🚀 Siguiente paso:</Text>
         <Text style={styles.nextMilestone}>{progress.nextMilestone}</Text>
@@ -417,7 +421,7 @@ const DetailedSection: React.FC<{
       <Text style={styles.sectionSubtitle}>
         Toca cualquier insight para ver ejemplos y explicaciones
       </Text>
-      
+
       {healthChecks.map((healthCheck, index) => (
         <DetailedHealthCheckCard
           key={index}
@@ -443,9 +447,9 @@ const DetailedHealthCheckCard: React.FC<{
         </View>
         <Text style={styles.detailedScore}>{healthCheck.verbalScore.replace('-', ' ')}</Text>
       </View>
-      
+
       <Text style={styles.detailedExplanation}>{healthCheck.explanation}</Text>
-      
+
       <View style={styles.insightsContainer}>
         {healthCheck.insights.map((insight, index) => (
           <Pressable
@@ -472,19 +476,19 @@ const LearnSection: React.FC<{
   return (
     <View style={styles.learnSection}>
       <Text style={styles.sectionTitle}>🎓 Centro de aprendizaje</Text>
-      
+
       <LearningCard
         title="💡 ¿Sabías que...?"
         items={didYouKnow}
         color="#3b82f6"
       />
-      
+
       <LearningCard
         title="✅ Mejores prácticas"
         items={bestPractices}
         color="#10b981"
       />
-      
+
       <LearningCard
         title="⚠️ Errores comunes"
         items={commonMistakes}
@@ -514,63 +518,252 @@ const LearningCard: React.FC<{
 
 // Sección de plan de acción
 const ActionPlanSection: React.FC<{
-  priorityActions: any[];
+  actionPlan: ActionPlan;
   selectedActions: string[];
   onToggleAction: (actionId: string) => void;
-}> = ({ priorityActions, selectedActions, onToggleAction }) => {
+}> = ({ actionPlan, selectedActions, onToggleAction }) => {
   return (
     <View style={styles.actionPlanSection}>
-      <Text style={styles.sectionTitle}>📋 Tu plan de acción</Text>
-      <Text style={styles.sectionSubtitle}>
-        Selecciona las áreas en las que quieres trabajar
-      </Text>
-      
-      {priorityActions.map((action, index) => (
-        <ActionCard
-          key={action.id}
-          action={action}
-          isSelected={selectedActions.includes(action.id)}
-          onToggle={() => onToggleAction(action.id)}
+      <Text style={styles.sectionTitle}>📋 Tu plan de acción personalizado</Text>
+
+      {/* Resumen del plan */}
+      <View style={styles.planSummaryCard}>
+        <Text style={styles.planSummaryTitle}>📊 Resumen del plan</Text>
+        <Text style={styles.planSummaryText}>{actionPlan.summary}</Text>
+
+        <View style={styles.planMetrics}>
+          <View style={styles.planMetric}>
+            <Text style={styles.planMetricLabel}>Tiempo estimado</Text>
+            <Text style={styles.planMetricValue}>{actionPlan.estimatedTimeTotal}</Text>
+          </View>
+          <View style={styles.planMetric}>
+            <Text style={styles.planMetricLabel}>Dificultad</Text>
+            <Text style={[styles.planMetricValue, { color: getDifficultyColor(actionPlan.difficulty) }]}>
+              {getDifficultyLabel(actionPlan.difficulty)}
+            </Text>
+          </View>
+          <View style={styles.planMetric}>
+            <Text style={styles.planMetricLabel}>Mejora esperada</Text>
+            <Text style={[styles.planMetricValue, { color: '#10b981' }]}>
+              {actionPlan.expectedImprovement}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Fases del plan */}
+      {actionPlan.phases.map((phase: ActionPhase, index: number) => (
+        <PhaseCard
+          key={phase.id}
+          phase={phase}
+          phaseNumber={index + 1}
+          selectedActions={selectedActions}
+          onToggleAction={onToggleAction}
         />
       ))}
     </View>
   );
 };
 
-const ActionCard: React.FC<{
-  action: any;
-  isSelected: boolean;
-  onToggle: () => void;
-}> = ({ action, isSelected, onToggle }) => {
+const PhaseCard: React.FC<{
+  phase: ActionPhase;
+  phaseNumber: number;
+  selectedActions: string[];
+  onToggleAction: (actionId: string) => void;
+}> = ({ phase, phaseNumber, selectedActions, onToggleAction }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
-    <Pressable
-      style={[
-        styles.actionCard,
-        isSelected && styles.selectedActionCard
-      ]}
-      onPress={onToggle}
-    >
-      <View style={styles.actionHeader}>
-        <View style={styles.actionSelection}>
-          <View style={[
-            styles.actionCheckbox,
-            isSelected && styles.checkedActionBox
-          ]}>
-            {isSelected && <Text style={styles.actionCheckmark}>✓</Text>}
+    <View style={styles.phaseCard}>
+      <Pressable
+        style={styles.phaseHeader}
+        onPress={() => setIsExpanded(!isExpanded)}
+      >
+        <View style={styles.phaseHeaderLeft}>
+          <View style={[styles.phaseNumber, { backgroundColor: getPriorityColor(phase.priority) }]}>
+            <Text style={styles.phaseNumberText}>{phaseNumber}</Text>
           </View>
-          <Text style={styles.actionTitle}>{action.title}</Text>
+          <View style={styles.phaseHeaderInfo}>
+            <Text style={styles.phaseTitle}>{phase.title}</Text>
+            <Text style={styles.phaseSubtitle}>{phase.description}</Text>
+          </View>
         </View>
-        <View style={styles.actionBadges}>
-          <Text style={styles.actionImpact}>{action.impact}</Text>
-          <Text style={styles.actionTime}>{action.timeToComplete}</Text>
+        <View style={styles.phaseHeaderRight}>
+          <Text style={styles.phaseTime}>{phase.estimatedTime}</Text>
+          <Text style={styles.phaseExpand}>{isExpanded ? '▼' : '▶'}</Text>
         </View>
-      </View>
-      
-      <Text style={styles.actionWhy}>Por qué: {action.why}</Text>
-      <Text style={styles.actionHow}>Cómo: {action.how}</Text>
-    </Pressable>
+      </Pressable>
+
+      {isExpanded && (
+        <View style={styles.phaseContent}>
+          <View style={styles.phaseMetrics}>
+            <View style={styles.phaseMetric}>
+              <Text style={styles.phaseMetricLabel}>Impacto esperado</Text>
+              <Text style={styles.phaseMetricValue}>{phase.expectedImpact}</Text>
+            </View>
+            <View style={styles.phaseMetric}>
+              <Text style={styles.phaseMetricLabel}>Dificultad</Text>
+              <Text style={[styles.phaseMetricValue, { color: getDifficultyColor(phase.difficulty) }]}>
+                {getDifficultyLabel(phase.difficulty)}
+              </Text>
+            </View>
+          </View>
+
+          {phase.prerequisites && phase.prerequisites.length > 0 && (
+            <View style={styles.phasePrerequisites}>
+              <Text style={styles.phasePrerequisitesTitle}>🔑 Requisitos previos:</Text>
+              {phase.prerequisites.map((prereq: string, index: number) => (
+                <Text key={index} style={styles.phasePrerequisiteItem}>• {prereq}</Text>
+              ))}
+            </View>
+          )}
+
+          {phase.tasks.map((task: DetailedTask, taskIndex: number) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              taskNumber={taskIndex + 1}
+              isSelected={selectedActions.includes(task.id)}
+              onToggle={() => onToggleAction(task.id)}
+            />
+          ))}
+
+          {phase.tips && phase.tips.length > 0 && (
+            <View style={styles.phaseTips}>
+              <Text style={styles.phaseTipsTitle}>💡 Consejos para esta fase:</Text>
+              {phase.tips.map((tip: string, index: number) => (
+                <Text key={index} style={styles.phaseTipItem}>• {tip}</Text>
+              ))}
+            </View>
+          )}
+        </View>
+      )}
+    </View>
   );
 };
+
+const TaskCard: React.FC<{
+  task: DetailedTask;
+  taskNumber: number;
+  isSelected: boolean;
+  onToggle: () => void;
+}> = ({ task, taskNumber, isSelected, onToggle }) => {
+  const [showDetails, setShowDetails] = useState(false);
+
+  return (
+    <View style={[styles.taskCard, isSelected && styles.selectedTaskCard]}>
+      <Pressable
+        style={styles.taskHeader}
+        onPress={onToggle}
+      >
+        <View style={styles.taskSelection}>
+          <View style={[
+            styles.taskCheckbox,
+            isSelected && styles.checkedTaskBox
+          ]}>
+            {isSelected && <Text style={styles.taskCheckmark}>✓</Text>}
+          </View>
+          <Text style={styles.taskNumber}>{taskNumber}.</Text>
+          <Text style={styles.taskTitle}>{task.title}</Text>
+        </View>
+      </Pressable>
+
+      <Text style={styles.taskDescription}>{task.description}</Text>
+
+      {task.example && (
+        <View style={styles.taskExample}>
+          <Text style={styles.taskExampleTitle}>💡 Ejemplo:</Text>
+          <Text style={styles.taskExampleText}>{task.example}</Text>
+        </View>
+      )}
+
+      {isSelected && (
+        <View style={styles.taskDetails}>
+          <Pressable
+            style={styles.taskDetailsToggle}
+            onPress={() => setShowDetails(!showDetails)}
+          >
+            <Text style={styles.taskDetailsToggleText}>
+              {showDetails ? '▼ Ocultar detalles' : '▶ Ver checklist completo'}
+            </Text>
+          </Pressable>
+
+          {showDetails && (
+            <View style={styles.taskDetailsContent}>
+              <View style={styles.taskChecklist}>
+                <Text style={styles.taskChecklistTitle}>✅ Checklist:</Text>
+                {task.checklistItems.map((item: string, index: number) => (
+                  <Text key={index} style={styles.taskChecklistItem}>• {item}</Text>
+                ))}
+              </View>
+
+              <View style={styles.taskSuccess}>
+                <Text style={styles.taskSuccessTitle}>🎯 Criterios de éxito:</Text>
+                {task.successCriteria.map((criteria: string, index: number) => (
+                  <Text key={index} style={styles.taskSuccessItem}>• {criteria}</Text>
+                ))}
+              </View>
+
+              {task.resources && task.resources.length > 0 && (
+                <View style={styles.taskResources}>
+                  <Text style={styles.taskResourcesTitle}>📚 Recursos útiles:</Text>
+                  {task.resources.map((resource: TaskResource, index: number) => (
+                    <View key={index} style={styles.taskResourceItem}>
+                      <Text style={styles.taskResourceType}>{getResourceEmoji(resource.type)}</Text>
+                      <View style={styles.taskResourceContent}>
+                        <Text style={styles.taskResourceName}>{resource.title}</Text>
+                        <Text style={styles.taskResourceDescription}>{resource.description}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+      )}
+    </View>
+  );
+};
+
+// Helper functions
+function getDifficultyColor(difficulty: string): string {
+  switch (difficulty) {
+    case 'facil': return '#10b981';
+    case 'moderado': return '#f59e0b';
+    case 'desafiante': return '#ef4444';
+    default: return '#6b7280';
+  }
+}
+
+function getDifficultyLabel(difficulty: string): string {
+  switch (difficulty) {
+    case 'facil': return '😊 Fácil';
+    case 'moderado': return '⚡ Moderado';
+    case 'desafiante': return '🔥 Desafiante';
+    default: return difficulty;
+  }
+}
+
+function getPriorityColor(priority: string): string {
+  switch (priority) {
+    case 'critica': return '#ef4444';
+    case 'alta': return '#f59e0b';
+    case 'media': return '#3b82f6';
+    case 'baja': return '#10b981';
+    default: return '#6b7280';
+  }
+}
+
+function getResourceEmoji(type: string): string {
+  switch (type) {
+    case 'template': return '📋';
+    case 'example': return '💡';
+    case 'guide': return '📚';
+    case 'tool': return '🔧';
+    default: return '📄';
+  }
+}
 
 // Modal para mostrar insights detallados
 const InsightModal: React.FC<{
@@ -592,18 +785,18 @@ const InsightModal: React.FC<{
               <Text style={styles.modalCloseText}>✕</Text>
             </Pressable>
           </View>
-          
+
           <ScrollView style={styles.modalBody}>
             <Text style={styles.modalExplanation}>{insight.explanation}</Text>
-            
+
             <Text style={styles.modalSectionTitle}>💡 Por qué importa:</Text>
             <Text style={styles.modalText}>{insight.whyItMatters}</Text>
-            
+
             <Text style={styles.modalSectionTitle}>✅ Ejemplo de buena práctica:</Text>
             <View style={styles.exampleBox}>
               <Text style={styles.exampleText}>{insight.examples.good}</Text>
             </View>
-            
+
             {insight.examples.current && (
               <>
                 <Text style={styles.modalSectionTitle}>📝 Tu versión actual:</Text>
@@ -612,7 +805,7 @@ const InsightModal: React.FC<{
                 </View>
               </>
             )}
-            
+
             {insight.quickWin && (
               <>
                 <Text style={styles.modalSectionTitle}>⚡ Acción rápida:</Text>
@@ -1299,6 +1492,327 @@ const styles = StyleSheet.create({
   quickWinMeta: {
     fontSize: 12,
     color: '#047857',
+  },
+
+  // Nuevos estilos para el plan de acción mejorado
+  planSummaryCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  planSummaryTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  planSummaryText: {
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  planMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  planMetric: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  planMetricLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  planMetricValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+    textAlign: 'center',
+  },
+
+  // Estilos para las fases
+  phaseCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  phaseHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  phaseHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  phaseNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  phaseNumberText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  phaseHeaderInfo: {
+    flex: 1,
+  },
+  phaseTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  phaseSubtitle: {
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 18,
+  },
+  phaseHeaderRight: {
+    alignItems: 'flex-end',
+  },
+  phaseTime: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  phaseExpand: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  phaseContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  phaseMetrics: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 16,
+  },
+  phaseMetric: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+  phaseMetricLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  phaseMetricValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+    textAlign: 'center',
+  },
+  phasePrerequisites: {
+    backgroundColor: '#fef3c7',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  phasePrerequisitesTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#92400e',
+    marginBottom: 8,
+  },
+  phasePrerequisiteItem: {
+    fontSize: 12,
+    color: '#78350f',
+    marginBottom: 4,
+  },
+  phaseTips: {
+    backgroundColor: '#ecfdf5',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+  },
+  phaseTipsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#065f46',
+    marginBottom: 8,
+  },
+  phaseTipItem: {
+    fontSize: 12,
+    color: '#047857',
+    marginBottom: 4,
+  },
+
+  // Estilos para las tareas
+  taskCard: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  selectedTaskCard: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#3b82f6',
+  },
+  taskHeader: {
+    marginBottom: 8,
+  },
+  taskSelection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  taskCheckbox: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    backgroundColor: '#ffffff',
+    marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkedTaskBox: {
+    backgroundColor: '#3b82f6',
+    borderColor: '#3b82f6',
+  },
+  taskCheckmark: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  taskNumber: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginRight: 8,
+  },
+  taskTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+    flex: 1,
+  },
+  taskDescription: {
+    fontSize: 13,
+    color: '#475569',
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  taskExample: {
+    backgroundColor: '#f0f9ff',
+    borderRadius: 6,
+    padding: 8,
+    marginBottom: 8,
+  },
+  taskExampleTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0c4a6e',
+    marginBottom: 4,
+  },
+  taskExampleText: {
+    fontSize: 11,
+    color: '#0c4a6e',
+    lineHeight: 16,
+    fontStyle: 'italic',
+  },
+  taskDetails: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  taskDetailsToggle: {
+    paddingVertical: 4,
+  },
+  taskDetailsToggleText: {
+    fontSize: 12,
+    color: '#3b82f6',
+    fontWeight: '500',
+  },
+  taskDetailsContent: {
+    marginTop: 8,
+  },
+  taskChecklist: {
+    marginBottom: 12,
+  },
+  taskChecklistTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 6,
+  },
+  taskChecklistItem: {
+    fontSize: 11,
+    color: '#475569',
+    marginBottom: 3,
+  },
+  taskSuccess: {
+    marginBottom: 12,
+  },
+  taskSuccessTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 6,
+  },
+  taskSuccessItem: {
+    fontSize: 11,
+    color: '#475569',
+    marginBottom: 3,
+  },
+  taskResources: {
+    marginBottom: 12,
+  },
+  taskResourcesTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 6,
+  },
+  taskResourceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  taskResourceType: {
+    fontSize: 14,
+    marginRight: 8,
+  },
+  taskResourceContent: {
+    flex: 1,
+  },
+  taskResourceName: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  taskResourceDescription: {
+    fontSize: 10,
+    color: '#64748b',
   },
 });
 

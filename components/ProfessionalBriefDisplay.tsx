@@ -161,6 +161,14 @@ const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ bri
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <Text style={styles.projectTitle}>{getTitle()}</Text>
+        {brief?.improvementMetadata?.structuredImprovementApplied && (
+          <View style={styles.improvementBanner}>
+            <Text style={styles.improvementBannerText}>✨ Brief Mejorado con IA Estructurada</Text>
+            <Text style={styles.improvementBannerSubtext}>
+              Listo para producción - Mejorado el {new Date(brief.improvementMetadata.improvementDate).toLocaleDateString()}
+            </Text>
+          </View>
+        )}
         {getSummary() && <Text style={styles.briefSummary}>{getSummary()}</Text>}
       </View>
 
@@ -631,6 +639,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#475569',
     lineHeight: 24,
+  },
+  improvementBanner: {
+    backgroundColor: '#10b981',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 12,
+    marginBottom: 8,
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  improvementBannerText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#ffffff',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  improvementBannerSubtext: {
+    fontSize: 12,
+    color: '#dcfce7',
+    textAlign: 'center',
+    fontWeight: '500',
   },
   section: {
     backgroundColor: '#ffffff',

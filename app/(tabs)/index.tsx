@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator, Share } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import AudioRecorder from '../../components/AudioRecorder';
 import BriefResult from '../../components/BriefResult';
 import StructuredBriefImprovementModal from '../../components/StructuredBriefImprovementModal';
@@ -7,10 +8,12 @@ import ProfessionalBriefDisplay from '../../components/ProfessionalBriefDisplay'
 import TranscriptionResult from '../../components/TranscriptionResult';
 import BriefValidationAlert from '../../components/BriefValidationAlert';
 import FileUploadButton from '../../components/FileUploadButton';
+import FinalBriefEditorModal from '../../components/FinalBriefEditorModal';
 import { useBriefGeneration } from '../../hooks/useBriefGeneration';
 import { useBriefStorage } from '../../hooks/useBriefStorage';
 import { useWhisperTranscription } from '../../hooks/useWhisperTranscription';
 import { checkApiKeysOnStartup } from '../../utils/apiKeyValidator';
+import { FileExporter, Brief } from '../../utils/fileExporter';
 
 /**
  * Pantalla principal: grabar audio y mostrar transcripción automática.
@@ -24,6 +27,7 @@ const AudioToTextScreen: React.FC = () => {
   const [currentBriefId, setCurrentBriefId] = useState<string | null>(null);
   const [manualTranscription, setManualTranscription] = useState<string | null>(null);
   const [isFromFile, setIsFromFile] = useState(false);
+  const [showFinalBriefEditor, setShowFinalBriefEditor] = useState(false);
 
   // Hook de transcripción automática (solo si hay audio)
   const { transcription: autoTranscription, loading, error } = useWhisperTranscription(
@@ -34,7 +38,8 @@ const AudioToTextScreen: React.FC = () => {
   // Usar transcripción manual (desde archivo) o automática (desde grabación)
   const transcription = manualTranscription || autoTranscription;
 
-  // Debug logging para transcripciones
+  // Debug logging para transcripciones - DESACTIVADO TEMPORALMENTE
+  /*
   useEffect(() => {
     console.log('📝 Estado de transcripciones:', {
       manualTranscription: manualTranscription ? manualTranscription.substring(0, 50) + '...' : 'null',
@@ -45,19 +50,107 @@ const AudioToTextScreen: React.FC = () => {
       audioUri: audioUri ? audioUri.substring(0, 50) + '...' : 'null'
     });
   }, [manualTranscription, autoTranscription, transcription, loading, error, audioUri]);
+  */
 
   // Hook de generación de brief - SOLO después de que termine la transcripción
   const shouldGenerateBrief = !!transcription && !loading;
   const { brief, loading: loadingBrief, error: errorBrief } = useBriefGeneration(transcription, shouldGenerateBrief);
   const briefToShow = improvedBrief || brief;
   const iaSuggestionsToShow = improvedBrief ? iaSuggestions : null;
+  
+  // Debug logging para estado de briefs - DESACTIVADO TEMPORALMENTE
+  /*
+  useEffect(() => {
+    console.log('📊 Estado de briefs:', {
+      brief: brief ? Object.keys(brief).length : 0,
+      improvedBrief: improvedBrief ? Object.keys(improvedBrief).length : 0,
+      briefToShow: briefToShow ? Object.keys(briefToShow).length : 0,
+      briefKeys: brief ? Object.keys(brief) : [],
+      improvedBriefKeys: improvedBrief ? Object.keys(improvedBrief) : [],
+      briefToShowKeys: briefToShow ? Object.keys(briefToShow) : [],
+      timestamp: new Date().toLocaleTimeString()
+    });
+  }, [brief, improvedBrief, briefToShow]);
+  */
 
   // Hook de almacenamiento
-  const { saveBrief, updateBrief } = useBriefStorage();
+  const { saveBrief, updateBrief, clearOldBriefs, getStorageInfo } = useBriefStorage();
 
   // Verificar API keys en desarrollo
   useEffect(() => {
     checkApiKeysOnStartup();
+  }, []);
+
+  // Función utilitaria para detectar errores de quota de almacenamiento
+  const isQuotaExceededError = useCallback((error: any): boolean => {
+    if (!error) return false;
+    
+    // Verificar por nombre de error (método más confiable)
+    if (error.name === 'QuotaExceededError') return true;
+    
+    // Verificar por tipo de error de DOM
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') return true;
+    
+    // Verificar por código de error
+    if (error.code === 22) return true; // DOMException.QUOTA_EXCEEDED_ERR
+    
+    // Verificar mensajes comunes en inglés (fallback)
+    const message = error.message?.toLowerCase() || '';
+    if (message.includes('quota') || message.includes('storage') || message.includes('exceeded')) {
+      return true;
+    }
+    
+    return false;
+  }, []);
+
+  // Función reutilizable para exportar briefs
+  const handleExportBrief = useCallback(async (brief: any, format: 'txt' | 'md' | 'html' | 'json' | 'all' = 'txt') => {
+    console.log('🚀 handleExportBrief called with:', {
+      brief: !!brief,
+      format,
+      briefType: typeof brief,
+      briefKeys: brief ? Object.keys(brief) : null
+    });
+
+    if (!brief) {
+      console.error('❌ No brief available for export');
+      Alert.alert('⚠️ Error', 'No hay brief disponible para exportar');
+      return;
+    }
+
+    try {
+      console.log(`📤 Starting export as ${format.toUpperCase()}`);
+      switch (format) {
+        case 'txt':
+          console.log('📝 Calling FileExporter.downloadAsText');
+          await FileExporter.downloadAsText(brief);
+          break;
+        case 'md':
+          console.log('📝 Calling FileExporter.downloadAsMarkdown');
+          await FileExporter.downloadAsMarkdown(brief);
+          break;
+        case 'html':
+          console.log('🌐 Calling FileExporter.downloadAsHTML');
+          await FileExporter.downloadAsHTML(brief);
+          break;
+        case 'json':
+          console.log('📊 Calling FileExporter.downloadAsJSON');
+          await FileExporter.downloadAsJSON(brief);
+          break;
+        case 'all':
+          console.log('📦 Calling FileExporter.downloadAllFormats');
+          await FileExporter.downloadAllFormats(brief);
+          break;
+        default:
+          console.log('📝 Calling FileExporter.downloadAsText (default)');
+          await FileExporter.downloadAsText(brief);
+      }
+      console.log(`✅ Export completed successfully for ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error(`❌ Error exporting ${format.toUpperCase()}:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      Alert.alert('❌ Error', `No se pudo exportar el archivo ${format.toUpperCase()}: ${errorMessage}`);
+    }
   }, []);
 
   // Recibe la URI del audio grabado desde el componente hijo
@@ -107,7 +200,8 @@ const AudioToTextScreen: React.FC = () => {
 
 
 
-  // Guardar brief automáticamente cuando esté listo
+  // Guardar brief automáticamente cuando esté listo - DESACTIVADO TEMPORALMENTE
+  /*
   useEffect(() => {
     if (brief && transcription && !loadingBrief && !errorBrief) {
       const autoSave = async () => {
@@ -124,8 +218,10 @@ const AudioToTextScreen: React.FC = () => {
       autoSave();
     }
   }, [brief, transcription, loadingBrief, errorBrief, audioUri, saveBrief]);
+  */
 
-  // Actualizar brief guardado cuando se mejore
+  // Actualizar brief guardado cuando se mejore - DESACTIVADO TEMPORALMENTE
+  /*
   useEffect(() => {
     if (improvedBrief && currentBriefId) {
       const updateSaved = async () => {
@@ -143,35 +239,70 @@ const AudioToTextScreen: React.FC = () => {
       updateSaved();
     }
   }, [improvedBrief, currentBriefId, updateBrief]);
+  */
 
   const handleManualSave = () => {
     if (briefToShow) {
-      Alert.prompt(
+      // Usar Alert.alert con input manual ya que Alert.prompt no está disponible en web
+      Alert.alert(
         'Guardar Brief',
-        'Ingresa un título para este brief:',
-        async (title) => {
-          if (title) {
-            try {
-              const briefId = await saveBrief(title, transcription || '', briefToShow, audioUri || undefined);
-              Alert.alert('✅ Guardado', `Brief "${title}" guardado exitosamente`);
-              if (!currentBriefId) {
-                setCurrentBriefId(briefId);
+        'Se guardará con el título del proyecto actual',
+        [
+          {
+            text: 'Guardar',
+            onPress: async () => {
+              try {
+                const title = briefToShow.projectTitle || `Brief ${new Date().toLocaleDateString()}`;
+                const briefId = await saveBrief(title, transcription || '', briefToShow, audioUri || undefined);
+                Alert.alert('✅ Guardado', `Brief "${title}" guardado exitosamente`);
+                if (!currentBriefId) {
+                  setCurrentBriefId(briefId);
+                }
+              } catch (saveError) {
+                console.error('Error saving brief:', saveError);
+                
+                // Si es error de quota de almacenamiento, ofrecer limpiar
+                if (isQuotaExceededError(saveError)) {
+                  Alert.alert(
+                    '💾 Almacenamiento Lleno',
+                    'El almacenamiento está lleno. ¿Deseas limpiar briefs antiguos?',
+                    [
+                      { 
+                        text: 'Limpiar y Guardar', 
+                        onPress: async () => {
+                          try {
+                            await clearOldBriefs();
+                            // Reintentar guardar
+                            const title = briefToShow.projectTitle || `Brief ${new Date().toLocaleDateString()}`;
+                            const briefId = await saveBrief(title, transcription || '', briefToShow, audioUri || undefined);
+                            Alert.alert('✅ Guardado', `Brief "${title}" guardado exitosamente después de limpiar`);
+                            if (!currentBriefId) {
+                              setCurrentBriefId(briefId);
+                            }
+                          } catch (cleanError) {
+                            Alert.alert('❌ Error', 'No se pudo limpiar el almacenamiento');
+                          }
+                        }
+                      },
+                      { text: 'Cancelar', style: 'cancel' }
+                    ]
+                  );
+                } else {
+                  const errorMessage = saveError instanceof Error ? saveError.message : 'No se pudo guardar el brief. Intenta nuevamente.';
+                  Alert.alert(
+                    '❌ Error al Guardar',
+                    errorMessage,
+                    [
+                      { text: 'Reintentar', onPress: () => handleManualSave() },
+                      { text: 'Cancelar', style: 'cancel' }
+                    ]
+                  );
+                }
               }
-            } catch (saveError) {
-              console.error('Error saving brief:', saveError);
-              Alert.alert(
-                '❌ Error al Guardar',
-                saveError instanceof Error ? saveError.message : 'No se pudo guardar el brief. Intenta nuevamente.',
-                [
-                  { text: 'Reintentar', onPress: () => handleManualSave() },
-                  { text: 'Cancelar', style: 'cancel' }
-                ]
-              );
             }
-          }
-        },
-        'plain-text',
-        briefToShow.projectTitle || `Brief ${new Date().toLocaleDateString()}`
+          },
+          { text: 'Cancelar', style: 'cancel' }
+        ]
       );
     } else {
       Alert.alert(
@@ -191,6 +322,16 @@ const AudioToTextScreen: React.FC = () => {
         <View style={styles.header}>
           <Text style={styles.appTitle}>📊 BriefBoy</Text>
           <Text style={styles.appSubtitle}>Generador de Briefs Publicitarios con IA</Text>
+          
+          <Pressable
+            style={[styles.toggleButton, { marginTop: 12 }]}
+            onPress={() => {
+              console.log('🧪 TEST UI BUTTON PRESSED!');
+              Alert.alert('Test', 'El botón funciona correctamente');
+            }}
+          >
+            <Text style={styles.toggleButtonText}>🧪 Test UI</Text>
+          </Pressable>
         </View>
 
         <AudioRecorder
@@ -253,26 +394,35 @@ const AudioToTextScreen: React.FC = () => {
           />
         )}
 
-        {useNewDisplay ? (
-          <ProfessionalBriefDisplay
-            brief={briefToShow}
-            loading={loadingBrief}
-            error={errorBrief}
-          />
-        ) : (
-          <BriefResult
-            brief={briefToShow}
-            loading={loadingBrief}
-            error={errorBrief}
-            iaSuggestions={iaSuggestionsToShow}
-          />
+{briefToShow && !loadingBrief && !errorBrief && (
+          useNewDisplay ? (
+            <ProfessionalBriefDisplay
+              brief={briefToShow}
+              loading={loadingBrief}
+              error={errorBrief}
+            />
+          ) : (
+            <BriefResult
+              brief={briefToShow}
+              loading={loadingBrief}
+              error={errorBrief}
+            />
+          )
         )}
 
         {brief && !loadingBrief && !errorBrief && (
           <View style={styles.actionsContainer}>
             <Pressable
               style={styles.improveButton}
-              onPress={() => setShowChatModal(true)}
+              onPress={() => {
+                console.log('MEJORA ESTRUCTURADA PRESIONADO');
+                try {
+                  setShowChatModal(true);
+                } catch (error) {
+                  console.error('Error abriendo modal:', error);
+                  Alert.alert('Error', 'No se pudo abrir el modal');
+                }
+              }}
             >
               <Text style={styles.improveButtonText}>🔄 Mejora Estructurada</Text>
             </Pressable>
@@ -288,6 +438,95 @@ const AudioToTextScreen: React.FC = () => {
           </View>
         )}
 
+        {/* Sección especial para brief mejorado */}
+        {(improvedBrief || (briefToShow && briefToShow !== brief)) && (
+          <View style={styles.finalBriefContainer}>
+            <View style={styles.finalBriefHeader}>
+              <Text style={styles.finalBriefTitle}>✨ Brief Final Mejorado</Text>
+              <Text style={styles.finalBriefSubtitle}>
+                Listo para producción con mejoras aplicadas
+              </Text>
+            </View>
+            
+            <View style={styles.finalBriefActions}>
+              <Pressable
+                style={styles.finalBriefButton}
+                onPress={() => {
+                  // Debug logging antes de abrir el editor
+                  console.log('📝 Abriendo editor de brief final:', {
+                    improvedBriefExists: !!improvedBrief,
+                    improvedBriefFields: improvedBrief ? Object.keys(improvedBrief).length : 0,
+                    improvedBriefKeys: improvedBrief ? Object.keys(improvedBrief) : [],
+                    briefToShowExists: !!briefToShow,
+                    briefToShowFields: briefToShow ? Object.keys(briefToShow).length : 0,
+                    improvementMetadata: improvedBrief?.improvementMetadata || briefToShow?.improvementMetadata,
+                    timestamp: new Date().toLocaleTimeString()
+                  });
+                  
+                  // Mostrar editor específico para brief final
+                  setShowFinalBriefEditor(true);
+                }}
+              >
+                <Text style={styles.finalBriefButtonText}>📝 Editar Brief Final</Text>
+              </Pressable>
+              
+              <Pressable
+                style={styles.finalBriefButton}
+                onPress={() => {
+                  console.log('🔥 EXPORT TXT BUTTON PRESSED!');
+                  handleExportBrief(briefToShow, 'txt');
+                }}
+              >
+                <Text style={styles.finalBriefButtonText}>💾 Exportar TXT</Text>
+              </Pressable>
+              
+              <Pressable
+                style={[styles.finalBriefButton, { marginLeft: 8 }]}
+                onPress={async () => {
+                  console.log('📢 SHARE BUTTON PRESSED!');
+                  if (!briefToShow) {
+                    Alert.alert('⚠️ Error', 'No hay brief disponible para compartir');
+                    return;
+                  }
+                  try {
+                    const briefText = FileExporter.formatBriefAsText(briefToShow);
+                    await Share.share({
+                      message: briefText,
+                      title: `Brief: ${briefToShow.projectTitle || 'Sin título'}`
+                    });
+                  } catch (error) {
+                    console.error('Error sharing:', error);
+                    Alert.alert('❌ Error', 'No se pudo compartir el brief');
+                  }
+                }}
+              >
+                <Text style={styles.finalBriefButtonText}>📤 Compartir</Text>
+              </Pressable>
+              
+              <Pressable
+                style={[styles.finalBriefButton, { marginLeft: 8 }]}
+                onPress={async () => {
+                  console.log('📋 COPY BUTTON PRESSED!');
+                  if (!briefToShow) {
+                    Alert.alert('⚠️ Error', 'No hay brief disponible para copiar');
+                    return;
+                  }
+                  try {
+                    const briefText = FileExporter.formatBriefAsText(briefToShow);
+                    await Clipboard.setStringAsync(briefText);
+                    Alert.alert('✅ Copiado', 'Brief copiado al portapapeles con formato profesional');
+                  } catch (error) {
+                    console.error('Error copying text:', error);
+                    Alert.alert('❌ Error', 'No se pudo copiar el brief');
+                  }
+                }}
+              >
+                <Text style={styles.finalBriefButtonText}>📋 Copiar</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
+
         {briefToShow && (
           <View style={styles.saveContainer}>
             <Pressable
@@ -298,6 +537,57 @@ const AudioToTextScreen: React.FC = () => {
                 {currentBriefId ? '💾 Guardar Copia' : '💾 Guardar Brief'}
               </Text>
             </Pressable>
+            
+            <Pressable
+              style={[styles.saveButton, { backgroundColor: '#2563eb', marginTop: 12 }]}
+              onPress={() => {
+                console.log('📤 TXT EXPORT BUTTON PRESSED!');
+                handleExportBrief(briefToShow, 'txt');
+              }}
+            >
+              <Text style={styles.saveButtonText}>📤 Exportar como TXT</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.saveButton, { backgroundColor: '#10b981', marginTop: 8 }]}
+              onPress={() => {
+                console.log('📝 MD EXPORT BUTTON PRESSED!');
+                handleExportBrief(briefToShow, 'md');
+              }}
+            >
+              <Text style={styles.saveButtonText}>📝 Exportar como Markdown</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.saveButton, { backgroundColor: '#f59e0b', marginTop: 8 }]}
+              onPress={() => {
+                console.log('🌐 HTML EXPORT BUTTON PRESSED!');
+                handleExportBrief(briefToShow, 'html');
+              }}
+            >
+              <Text style={styles.saveButtonText}>🌐 Exportar como HTML</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.saveButton, { backgroundColor: '#8b5cf6', marginTop: 8 }]}
+              onPress={() => {
+                console.log('📊 JSON EXPORT BUTTON PRESSED!');
+                handleExportBrief(briefToShow, 'json');
+              }}
+            >
+              <Text style={styles.saveButtonText}>📊 Exportar como JSON</Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.saveButton, { backgroundColor: '#ef4444', marginTop: 8 }]}
+              onPress={() => {
+                console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
+                handleExportBrief(briefToShow, 'all');
+              }}
+            >
+              <Text style={styles.saveButtonText}>📦 Exportar TODOS los formatos</Text>
+            </Pressable>
+            
             {currentBriefId && (
               <Text style={styles.autoSaveText}>
                 ✅ Guardado automáticamente
@@ -311,7 +601,35 @@ const AudioToTextScreen: React.FC = () => {
         visible={showChatModal}
         brief={brief}
         onClose={() => setShowChatModal(false)}
-        onBriefImproved={b => { setImprovedBrief(b); }}
+        onBriefImproved={(improvedBrief) => { 
+          console.log('🎯 Brief mejorado recibido en index.tsx:', {
+            originalBrief: brief ? Object.keys(brief).length : 0,
+            improvedBrief: improvedBrief ? Object.keys(improvedBrief).length : 0,
+            changes: improvedBrief !== brief,
+            improvedBriefContent: improvedBrief,
+            hasImprovementMetadata: !!improvedBrief?.improvementMetadata
+          });
+          
+          // Asegurar que el brief mejorado se guarde correctamente
+          if (improvedBrief && typeof improvedBrief === 'object') {
+            setImprovedBrief(improvedBrief);
+            console.log('✅ Brief mejorado guardado en estado');
+          } else {
+            console.warn('⚠️ Brief mejorado inválido:', improvedBrief);
+          }
+        }}
+      />
+
+      <FinalBriefEditorModal
+        visible={showFinalBriefEditor}
+        brief={improvedBrief || briefToShow}
+        onClose={() => setShowFinalBriefEditor(false)}
+        onBriefUpdated={(updatedBrief) => {
+          console.log('📝 Brief final actualizado:', {
+            updatedFields: updatedBrief ? Object.keys(updatedBrief).length : 0
+          });
+          setImprovedBrief(updatedBrief);
+        }}
       />
     </View>
   );
@@ -482,6 +800,78 @@ const styles = StyleSheet.create({
     color: '#7c3aed',
     marginTop: 8,
     fontWeight: '500',
+  },
+  finalBriefContainer: {
+    backgroundColor: '#f0fdf4',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 16,
+    borderWidth: 2,
+    borderColor: '#10b981',
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  finalBriefHeader: {
+    marginBottom: 16,
+  },
+  finalBriefTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#065f46',
+    marginBottom: 4,
+  },
+  finalBriefSubtitle: {
+    fontSize: 14,
+    color: '#047857',
+    lineHeight: 20,
+  },
+  finalBriefActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  finalBriefButton: {
+    flex: 1,
+    backgroundColor: '#10b981',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  finalBriefButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  briefContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 20,
+    marginVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  briefTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  briefText: {
+    fontSize: 16,
+    color: '#475569',
+    lineHeight: 24,
+  },
+  briefLabel: {
+    fontWeight: '600',
+    color: '#1e293b',
   },
 });
 

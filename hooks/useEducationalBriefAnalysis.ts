@@ -66,7 +66,10 @@ export interface EducationalAnalysisResult {
   bestPractices: string[];
   commonMistakes: string[];
   
-  // Actionable insights
+  // Plan de acción detallado
+  actionPlan: ActionPlan;
+  
+  // Actionable insights (mantener para compatibilidad)
   priorityActions: {
     id: string;
     title: string;
@@ -82,6 +85,43 @@ export interface EducationalAnalysisResult {
     improvementAreas: string[];
     nextMilestone: string;
   };
+}
+
+export interface ActionPhase {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'critica' | 'alta' | 'media' | 'baja';
+  estimatedTime: string;
+  difficulty: 'facil' | 'moderado' | 'complejo';
+  expectedImpact: string;
+  tasks: DetailedTask[];
+  prerequisites?: string[];
+  tips: string[];
+}
+
+export interface ActionPlan {
+  summary: string;
+  estimatedTimeTotal: string;
+  difficulty: 'facil' | 'moderado' | 'desafiante';
+  expectedImprovement: string;
+  phases: ActionPhase[];
+}
+
+export interface TaskResource {
+  type: 'template' | 'example' | 'guide' | 'tool';
+  title: string;
+  description: string;
+}
+
+export interface DetailedTask {
+  id: string;
+  title: string;
+  description: string;
+  example?: string;
+  checklistItems: string[];
+  resources?: TaskResource[];
+  successCriteria: string[];
 }
 
 // Criterios educativos para evaluar cada sección
@@ -392,23 +432,11 @@ function performEducationalAnalysis(brief: any): EducationalAnalysisResult {
     "Presupuestos sin desglose - dificulta la optimización"
   ];
 
-  // Generar acciones prioritarias basadas en scores verbales
-  const priorityActions = healthChecks
-    .filter(hc => hc.verbalScore === 'puede-mejorar' || hc.verbalScore === 'necesita-trabajo' || hc.verbalScore === 'incompleto')
-    .slice(0, 3)
-    .map((hc, index) => {
-      const impactLevel = hc.verbalScore === 'incompleto' || hc.verbalScore === 'necesita-trabajo' ? 'alto' : 'medio';
-      const timeEstimate = impactLevel === 'alto' ? '15-30 minutos' : '10-15 minutos';
-      
-      return {
-        id: `action_${index}`,
-        title: `Mejora tu ${hc.category}`,
-        why: `Tu ${hc.category.toLowerCase()} está "${hc.verbalScore.replace('-', ' ')}" - hay gran potencial de mejora aquí`,
-        how: hc.insights[0]?.explanation || `Revisa los ejemplos en la sección de ${hc.category}`,
-        impact: impactLevel === 'alto' ? 'Alto impacto' : 'Impacto medio',
-        timeToComplete: timeEstimate
-      };
-    });
+  // Generar plan de acción detallado
+  const actionPlan = generateDetailedActionPlan(healthChecks, overallPercentage);
+  
+  // Generar acciones prioritarias basadas en scores verbales (mantener para compatibilidad)
+  const priorityActions = generateComprehensivePriorityActions(healthChecks, overallPercentage);
 
   return {
     overallAssessment,
@@ -418,6 +446,7 @@ function performEducationalAnalysis(brief: any): EducationalAnalysisResult {
     didYouKnow,
     bestPractices,
     commonMistakes,
+    actionPlan,
     priorityActions,
     progressIndicators: {
       completedWell: healthChecks.filter(hc => hc.status === 'excelente' || hc.status === 'bueno').map(hc => hc.category),
@@ -648,4 +677,669 @@ function getNextMilestone(percentage: number): string {
   if (percentage >= 60) return 'Desarrollar mejor las áreas débiles para mayor claridad';
   if (percentage >= 40) return 'Completar las secciones faltantes para tener una base sólida';
   return 'Definir los elementos fundamentales del brief';
+}
+
+function generateDetailedActionPlan(healthChecks: BriefHealthCheck[], overallPercentage: number): {
+  summary: string;
+  estimatedTimeTotal: string;
+  difficulty: 'facil' | 'moderado' | 'desafiante';
+  expectedImprovement: string;
+  phases: ActionPhase[];
+} {
+  const weakSections = healthChecks.filter(hc => 
+    hc.verbalScore === 'puede-mejorar' || 
+    hc.verbalScore === 'necesita-trabajo' || 
+    hc.verbalScore === 'incompleto'
+  );
+
+  const criticalSections = healthChecks.filter(hc => 
+    hc.verbalScore === 'incompleto' || 
+    hc.verbalScore === 'necesita-trabajo'
+  );
+
+  const phases: ActionPhase[] = [];
+  let totalEstimatedMinutes = 0;
+
+  // Fase 1: Corregir elementos críticos
+  if (criticalSections.length > 0) {
+    const criticalTasks: DetailedTask[] = criticalSections.map((section, index) => ({
+      id: `critical_${index}`,
+      title: `Desarrollar ${section.category}`,
+      description: `Esta sección está "${section.verbalScore.replace('-', ' ')}" y necesita atención inmediata para que tu brief tenga una base sólida.`,
+      example: getTaskExample(section.category),
+      checklistItems: getChecklistItems(section.category, section.verbalScore),
+      resources: getTaskResources(section.category),
+      successCriteria: getSuccessCriteria(section.category)
+    }));
+
+    phases.push({
+      id: 'phase_critical',
+      title: 'Fase 1: Elementos Fundamentales',
+      description: 'Primero asegurémonos de que tu brief tenga toda la información esencial. Sin estos elementos, será difícil avanzar.',
+      priority: 'critica',
+      estimatedTime: `${criticalSections.length * 15}-${criticalSections.length * 25} minutos`,
+      difficulty: 'moderado',
+      expectedImpact: `Mejorar el puntaje base en ${criticalSections.length * 8}-${criticalSections.length * 12} puntos`,
+      tasks: criticalTasks,
+      prerequisites: ['Tener acceso a información del proyecto', 'Conocer los objetivos del negocio'],
+      tips: [
+        'No te preocupes por la perfección inicialmente - primero completa, luego mejora',
+        'Usa ejemplos de proyectos similares como referencia',
+        'Pregunta a tu equipo si no tienes toda la información'
+      ]
+    });
+    
+    totalEstimatedMinutes += criticalSections.length * 20;
+  }
+
+  // Fase 2: Mejorar secciones existentes
+  const improvableSections = healthChecks.filter(hc => 
+    hc.verbalScore === 'puede-mejorar' || 
+    hc.verbalScore === 'regular' || 
+    hc.verbalScore === 'bueno'
+  );
+
+  if (improvableSections.length > 0) {
+    const improvementTasks: DetailedTask[] = improvableSections.map((section, index) => ({
+      id: `improve_${index}`,
+      title: `Optimizar ${section.category}`,
+      description: `Tu ${section.category.toLowerCase()} está "${section.verbalScore.replace('-', ' ')}". Vamos a pulirla para que sea más específica y efectiva.`,
+      example: getTaskExample(section.category),
+      checklistItems: getChecklistItems(section.category, section.verbalScore),
+      resources: getTaskResources(section.category),
+      successCriteria: getSuccessCriteria(section.category)
+    }));
+
+    phases.push({
+      id: 'phase_improve',
+      title: 'Fase 2: Optimización y Detalle',
+      description: 'Ahora que tienes las bases, vamos a refinar cada sección para que sea más específica y persuasiva.',
+      priority: 'alta',
+      estimatedTime: `${improvableSections.length * 10}-${improvableSections.length * 15} minutos`,
+      difficulty: 'facil',
+      expectedImpact: `Mejorar el puntaje en ${improvableSections.length * 5}-${improvableSections.length * 8} puntos`,
+      tasks: improvementTasks,
+      prerequisites: ['Haber completado la Fase 1'],
+      tips: [
+        'Sé específico con números y datos cuando sea posible',
+        'Piensa en cómo cada sección ayuda a vender tu idea',
+        'Usa el lenguaje que tu audiencia entiende'
+      ]
+    });
+    
+    totalEstimatedMinutes += improvableSections.length * 12;
+  }
+
+  // Fase 3: Pulido final y coherencia
+  phases.push({
+    id: 'phase_polish',
+    title: 'Fase 3: Pulido Final',
+    description: 'Revisemos todo junto para asegurar coherencia y que tu brief cuente una historia convincente.',
+    priority: 'media',
+    estimatedTime: '10-15 minutos',
+    difficulty: 'facil',
+    expectedImpact: 'Mejorar coherencia general y presentación',
+    tasks: [
+      {
+        id: 'polish_consistency',
+        title: 'Verificar coherencia general',
+        description: 'Asegúrate de que todos los elementos del brief trabajen juntos hacia el mismo objetivo.',
+        checklistItems: [
+          'Los objetivos estratégicos se alinean con el desafío de negocio',
+          'La audiencia objetivo es consistente en todas las secciones',
+          'Los canales elegidos son apropiados para la audiencia',
+          'Las métricas permiten medir el logro de los objetivos',
+          'El presupuesto es realista para el alcance propuesto'
+        ],
+        resources: [
+          {
+            type: 'guide',
+            title: 'Checklist de coherencia',
+            description: 'Lista de verificación para asegurar que tu brief sea consistente'
+          }
+        ],
+        successCriteria: [
+          'Todas las secciones se complementan entre sí',
+          'No hay contradicciones en la información',
+          'El brief cuenta una historia cohesiva'
+        ]
+      },
+      {
+        id: 'polish_presentation',
+        title: 'Mejorar presentación',
+        description: 'Ajustes finales para que tu brief se vea profesional y sea fácil de entender.',
+        checklistItems: [
+          'Revisar ortografía y gramática',
+          'Usar un tono consistente en todo el documento',
+          'Ordenar información de manera lógica',
+          'Agregar ejemplos específicos donde sea útil',
+          'Verificar que los números y datos sean precisos'
+        ],
+        resources: [
+          {
+            type: 'template',
+            title: 'Plantilla de revisión final',
+            description: 'Guía para el último repaso antes de presentar'
+          }
+        ],
+        successCriteria: [
+          'El brief es fácil de leer y entender',
+          'Se ve profesional y pulido',
+          'Cualquier stakeholder puede entender el contenido rápidamente'
+        ]
+      }
+    ],
+    tips: [
+      'Lee todo el brief de corrido para verificar que fluya naturalmente',
+      'Pídale a un colega que lo revise si es posible',
+      'Imprime o exporta para ver cómo se ve el formato final'
+    ]
+  });
+
+  totalEstimatedMinutes += 12;
+
+  // Calcular métricas del plan
+  const difficulty = totalEstimatedMinutes > 60 ? 'desafiante' : 
+                    totalEstimatedMinutes > 30 ? 'moderado' : 'facil';
+  
+  const expectedImprovementPoints = Math.min(
+    weakSections.length * 8 + (100 - overallPercentage) * 0.3,
+    100 - overallPercentage
+  );
+
+  const summary = generatePlanSummary(overallPercentage, weakSections.length, phases.length);
+
+  return {
+    summary,
+    estimatedTimeTotal: `${Math.round(totalEstimatedMinutes/5)*5}-${Math.round(totalEstimatedMinutes*1.2/5)*5} minutos`,
+    difficulty,
+    expectedImprovement: `Mejorar ${Math.round(expectedImprovementPoints)} puntos (${overallPercentage} → ${Math.min(100, overallPercentage + Math.round(expectedImprovementPoints))})`,
+    phases
+  };
+}
+
+function generatePlanSummary(currentScore: number, weakAreasCount: number, phaseCount: number): string {
+  if (currentScore >= 80) {
+    return `Tu brief ya está muy bien. Con algunos ajustes menores en ${weakAreasCount} área${weakAreasCount > 1 ? 's' : ''}, estará listo para presentar a cualquier stakeholder.`;
+  } else if (currentScore >= 60) {
+    return `Tu brief tiene una base sólida. Trabajando en ${weakAreasCount} área${weakAreasCount > 1 ? 's' : ''} clave durante ${phaseCount} fase${phaseCount > 1 ? 's' : ''}, tendrás un brief profesional y convincente.`;
+  } else if (currentScore >= 40) {
+    return `Tu brief está en construcción. Siguiendo este plan de ${phaseCount} fase${phaseCount > 1 ? 's' : ''}, desarrollarás las ${weakAreasCount} área${weakAreasCount > 1 ? 's' : ''} más importantes para tener un brief funcional y efectivo.`;
+  } else {
+    return `Empezamos desde cero, y eso está perfecto. Este plan te guiará paso a paso para construir un brief profesional, trabajando ${weakAreasCount} área${weakAreasCount > 1 ? 's' : ''} fundamentales en ${phaseCount} fase${phaseCount > 1 ? 's' : ''} bien estructuradas.`;
+  }
+}
+
+function getTaskExample(category: string): string {
+  const examples: { [key: string]: string } = {
+    'Claridad y Enfoque': 'Ejemplo: "Campaña de Awareness Digital para Marca EcoStyle - Lanzamiento Q1 2024"',
+    'Comunicación Ejecutiva': 'Ejemplo: "Aumentar reconocimiento de marca del 15% al 35% en millennials urbanos mediante contenido emocional en redes sociales, generando 50,000 impresiones y 2,000 interacciones durante Q1 2024."',
+    'Conocimiento del Cliente': 'Ejemplo: "Millennials urbanos (25-35 años), profesionales con ingresos $40K-$80K, valoran sostenibilidad, se informan por Instagram/TikTok, compran online, influenciados por reviews y valores de marca."',
+    'Visión Estratégica': 'Ejemplo: "1) Aumentar awareness del 15% al 35% en target, 2) Generar 2,000 leads calificados, 3) Posicionar como #1 en sostenibilidad del sector"',
+    'Dirección Creativa': 'Ejemplo: "Gran idea: \'Tu estilo, tu planeta\'. Tono: Inspirador pero accesible, auténtico sin ser predicativo. Cada pieza debe conectar moda con impacto ambiental."',
+    'Distribución Inteligente': 'Ejemplo: "Instagram 40% (alta engagement millennials), TikTok 30% (contenido viral), Email 20% (nurturing), Google Ads 10% (capture intent)"',
+    'Viabilidad Financiera': 'Ejemplo: "$50K-$75K total: 40% pauta digital, 30% producción contenido, 20% influencers, 10% herramientas y seguimiento"',
+    'Medición de Impacto': 'Ejemplo: "Reach 500K únicos, CTR >2.5%, 10K visitas web, 2K leads, NPS >8.0. Reportes semanales con dashboard tiempo real."'
+  };
+  
+  return examples[category] || `Revisa ejemplos similares en la industria para inspirarte`;
+}
+
+function getChecklistItems(category: string, verbalScore: VerbalScore): string[] {
+  const baseItems: { [key: string]: string[] } = {
+    'Claridad y Enfoque': [
+      'Incluir el tipo de proyecto (campaña, lanzamiento, activación)',
+      'Especificar el timeframe o período',
+      'Mencionar la audiencia principal',
+      'Usar un lenguaje claro y directo'
+    ],
+    'Comunicación Ejecutiva': [
+      'Responder QUÉ haremos exactamente',
+      'Especificar PARA QUIÉN es la campaña',
+      'Definir QUÉ LOGRAREMOS (objetivos cuantificables)',
+      'Incluir CUÁNDO se ejecutará',
+      'Mantener entre 2-3 oraciones máximo'
+    ],
+    'Conocimiento del Cliente': [
+      'Definir demographics (edad, género, ingresos)',
+      'Incluir psychographics (valores, intereses)',
+      'Especificar comportamientos de consumo',
+      'Mencionar canales donde se informan',
+      'Agregar insights específicos del segmento'
+    ],
+    'Visión Estratégica': [
+      'Hacer objetivos específicos y medibles',
+      'Incluir números y porcentajes cuando sea posible',
+      'Alinear con objetivos de negocio',
+      'Definir timeframe claro',
+      'Priorizar 2-4 objetivos principales'
+    ],
+    'Dirección Creativa': [
+      'Definir la "gran idea" central',
+      'Especificar tono y manera de comunicar',
+      'Incluir elementos mandatorios',
+      'Describir look & feel deseado',
+      'Dar ejemplos de ejecución'
+    ],
+    'Distribución Inteligente': [
+      'Seleccionar canales específicos',
+      'Justificar por qué cada canal',
+      'Incluir % de inversión por canal',
+      'Definir objetivos por canal',
+      'Considerar integración cross-channel'
+    ],
+    'Viabilidad Financiera': [
+      'Definir rango presupuestario realista',
+      'Desglosar inversión por categoría',
+      'Incluir costos de producción',
+      'Considerar costos de pauta/medios',
+      'Agregar buffer para imprevistos'
+    ],
+    'Medición de Impacto': [
+      'Definir métricas primarias',
+      'Incluir métricas secundarias',
+      'Especificar herramientas de medición',
+      'Definir frecuencia de reportes',
+      'Establecer benchmarks o metas'
+    ]
+  };
+
+  const items = baseItems[category] || [];
+  
+  // Agregar elementos específicos según el nivel
+  if (verbalScore === 'incompleto') {
+    return ['Completar información básica', ...items.slice(0, 2)];
+  } else if (verbalScore === 'necesita-trabajo') {
+    return items.slice(0, 3);
+  } else if (verbalScore === 'puede-mejorar') {
+    return items.slice(0, 4);
+  } else {
+    return items;
+  }
+}
+
+function getTaskResources(category: string): { type: 'template' | 'example' | 'guide' | 'tool'; title: string; description: string; }[] {
+  const resources: { [key: string]: { type: 'template' | 'example' | 'guide' | 'tool'; title: string; description: string; }[] } = {
+    'Claridad y Enfoque': [
+      { type: 'template', title: 'Plantilla de título', description: 'Formato: [Tipo de proyecto] para [Marca/Producto] - [Timeframe]' },
+      { type: 'example', title: 'Ejemplos de títulos efectivos', description: 'Biblioteca de títulos de proyectos exitosos' }
+    ],
+    'Comunicación Ejecutiva': [
+      { type: 'template', title: 'Estructura de resumen', description: 'Plantilla: Objetivos + Audiencia + Estrategia + Resultados esperados' },
+      { type: 'guide', title: 'Guía de escritura ejecutiva', description: 'Cómo escribir para ejecutivos y stakeholders senior' }
+    ],
+    'Conocimiento del Cliente': [
+      { type: 'template', title: 'Perfil de audiencia', description: 'Plantilla completa para definir buyer personas' },
+      { type: 'tool', title: 'Herramientas de research', description: 'Google Analytics, Facebook Insights, encuestas' }
+    ],
+    'Visión Estratégica': [
+      { type: 'guide', title: 'Metodología SMART', description: 'Específicos, Medibles, Alcanzables, Relevantes, Temporales' },
+      { type: 'template', title: 'Matriz de objetivos', description: 'Plantilla para organizar objetivos por prioridad' }
+    ],
+    'Dirección Creativa': [
+      { type: 'example', title: 'Ejemplos de grandes ideas', description: 'Casos de estudio de campañas icónicas' },
+      { type: 'guide', title: 'Desarrollo de conceptos', description: 'Metodología para crear ideas memorables' }
+    ],
+    'Distribución Inteligente': [
+      { type: 'tool', title: 'Media planning tools', description: 'Herramientas para planificación de medios' },
+      { type: 'guide', title: 'Guía de canales digitales', description: 'Fortalezas y audiencias de cada canal' }
+    ],
+    'Viabilidad Financiera': [
+      { type: 'template', title: 'Calculadora de presupuesto', description: 'Hoja de cálculo para desglose de inversión' },
+      { type: 'guide', title: 'Benchmarks de industria', description: 'Rangos típicos de inversión por canal' }
+    ],
+    'Medición de Impacto': [
+      { type: 'template', title: 'Dashboard de métricas', description: 'Plantilla para seguimiento de KPIs' },
+      { type: 'tool', title: 'Herramientas de analytics', description: 'Google Analytics, social media insights, CRM' }
+    ]
+  };
+
+  return resources[category] || [];
+}
+
+function getSuccessCriteria(category: string): string[] {
+  const criteria: { [key: string]: string[] } = {
+    'Claridad y Enfoque': [
+      'Cualquier persona puede entender de qué se trata en 5 segundos',
+      'Incluye tipo de proyecto, audiencia y timeframe',
+      'Es específico y no genérico'
+    ],
+    'Comunicación Ejecutiva': [
+      'Un ejecutivo puede entender el valor en 30 segundos',
+      'Incluye objetivos cuantificables',
+      'Explica claramente el ROI esperado'
+    ],
+    'Conocimiento del Cliente': [
+      'Puedes visualizar una persona real de tu audiencia',
+      'Incluye datos demográficos y psicográficos',
+      'Explica comportamientos de consumo específicos'
+    ],
+    'Visión Estratégica': [
+      'Todos los objetivos son medibles',
+      'Se alinean con objetivos de negocio',
+      'Tienen timeframes específicos'
+    ],
+    'Dirección Creativa': [
+      'La gran idea es memorable y repetible',
+      'El tono es claro y específico',
+      'Proporciona dirección clara al equipo creativo'
+    ],
+    'Distribución Inteligente': [
+      'Cada canal tiene una justificación específica',
+      'La inversión está distribuida estratégicamente',
+      'Los canales se complementan entre sí'
+    ],
+    'Viabilidad Financiera': [
+      'El presupuesto es realista y detallado',
+      'Incluye todos los costos principales',
+      'Permite flexibilidad para optimización'
+    ],
+    'Medición de Impacto': [
+      'Las métricas permiten medir el éxito de los objetivos',
+      'Incluye herramientas de medición específicas',
+      'Define frecuencia de seguimiento'
+    ]
+  };
+
+  return criteria[category] || ['La sección está completa y detallada'];
+}
+
+function generateComprehensivePriorityActions(healthChecks: BriefHealthCheck[], overallPercentage: number): {
+  id: string;
+  title: string;
+  why: string;
+  how: string;
+  impact: string;
+  timeToComplete: string;
+}[] {
+  const actions: {
+    id: string;
+    title: string;
+    why: string;
+    how: string;
+    impact: string;
+    timeToComplete: string;
+  }[] = [];
+
+  // Acciones generales para todos los briefs
+  const generalActions = [
+    {
+      id: 'general_review',
+      title: 'Revisar y optimizar el título del proyecto',
+      why: 'Un título claro ayuda a todos los involucrados a entender inmediatamente el alcance y objetivo',
+      how: 'Incluye: Tipo de proyecto + Audiencia + Timeframe. Ejemplo: "Campaña de Awareness para Millennials Urbanos - Q1 2024"',
+      impact: 'Alto impacto',
+      timeToComplete: '5-10 minutos'
+    },
+    {
+      id: 'general_executive',
+      title: 'Perfeccionar el resumen ejecutivo',
+      why: 'Es lo primero que leen los stakeholders senior - debe vender tu idea en 30 segundos',
+      how: 'Estructura: Qué haremos + Para quién + Qué lograremos + Timeframe. Máximo 3 oraciones.',
+      impact: 'Alto impacto',
+      timeToComplete: '10-15 minutos'
+    },
+    {
+      id: 'general_audience',
+      title: 'Definir audiencia con mayor precisión',
+      why: 'Una audiencia específica permite crear mensajes más relevantes y elegir canales apropiados',
+      how: 'Incluye: Demographics (edad, género, ingresos) + Psychographics (valores, intereses) + Comportamientos',
+      impact: 'Alto impacto',
+      timeToComplete: '15-20 minutos'
+    },
+    {
+      id: 'general_objectives',
+      title: 'Hacer objetivos más específicos y medibles',
+      why: 'Objetivos claros facilitan la ejecución y permiten medir el éxito real del proyecto',
+      how: 'Usa la metodología SMART: Específico, Medible, Alcanzable, Relevante, Temporal',
+      impact: 'Alto impacto',
+      timeToComplete: '15-25 minutos'
+    },
+    {
+      id: 'general_creative',
+      title: 'Desarrollar la dirección creativa',
+      why: 'Una dirección creativa clara da coherencia a todas las piezas y facilita la ejecución',
+      how: 'Define: Gran idea central + Tono de comunicación + Elementos visuales mandatorios + Ejemplos',
+      impact: 'Impacto medio',
+      timeToComplete: '20-30 minutos'
+    },
+    {
+      id: 'general_channels',
+      title: 'Justificar la selección de canales',
+      why: 'Cada canal debe tener una razón estratégica basada en tu audiencia y objetivos',
+      how: 'Para cada canal incluye: Por qué es relevante + Qué rol cumple + Cómo se integra con otros',
+      impact: 'Impacto medio',
+      timeToComplete: '10-20 minutos'
+    },
+    {
+      id: 'general_budget',
+      title: 'Detallar consideraciones de presupuesto',
+      why: 'Un presupuesto bien estructurado muestra viabilidad y permite optimizaciones',
+      how: 'Incluye: Rango presupuestario + Desglose por categorías + Costos principales + Buffer',
+      impact: 'Alto impacto',
+      timeToComplete: '15-25 minutos'
+    },
+    {
+      id: 'general_metrics',
+      title: 'Definir métricas de éxito específicas',
+      why: 'Métricas claras permiten evaluar el ROI y optimizar durante la ejecución',
+      how: 'Incluye: Métricas primarias + Métricas secundarias + Herramientas de medición + Benchmarks',
+      impact: 'Alto impacto',
+      timeToComplete: '10-15 minutos'
+    }
+  ];
+
+  // Agregar acciones generales
+  actions.push(...generalActions);
+
+  // Acciones específicas basadas en áreas problemáticas
+  const problemAreas = healthChecks.filter(hc => 
+    hc.verbalScore === 'puede-mejorar' || 
+    hc.verbalScore === 'necesita-trabajo' || 
+    hc.verbalScore === 'incompleto'
+  );
+
+  problemAreas.forEach((hc, index) => {
+    const specificActions = getSpecificActionsForCategory(hc.category, hc.verbalScore);
+    specificActions.forEach((action, actionIndex) => {
+      actions.push({
+        id: `specific_${index}_${actionIndex}`,
+        title: action.title,
+        why: action.why,
+        how: action.how,
+        impact: hc.verbalScore === 'incompleto' ? 'Alto impacto' : 'Impacto medio',
+        timeToComplete: action.timeToComplete
+      });
+    });
+  });
+
+  // Acciones de optimización avanzada si el brief está en buen estado
+  if (overallPercentage > 70) {
+    const advancedActions = [
+      {
+        id: 'advanced_integration',
+        title: 'Verificar integración cross-channel',
+        why: 'Los canales deben trabajar juntos para amplificar el mensaje y crear sinergias',
+        how: 'Revisa que el mensaje central se adapte consistentemente a cada canal manteniendo coherencia',
+        impact: 'Impacto medio',
+        timeToComplete: '10-15 minutos'
+      },
+      {
+        id: 'advanced_contingency',
+        title: 'Desarrollar planes de contingencia',
+        why: 'Anticipar escenarios alternativos permite responder rápidamente a cambios',
+        how: 'Define: Qué hacer si el presupuesto se reduce 20% + Si un canal no funciona + Si cambia el timeline',
+        impact: 'Impacto medio',
+        timeToComplete: '15-20 minutos'
+      },
+      {
+        id: 'advanced_stakeholder',
+        title: 'Preparar presentación para stakeholders',
+        why: 'Un brief bien presentado tiene más probabilidades de ser aprobado y ejecutado',
+        how: 'Crea: Agenda de presentación + Slides clave + Preguntas frecuentes + Próximos pasos',
+        impact: 'Alto impacto',
+        timeToComplete: '20-30 minutos'
+      }
+    ];
+
+    actions.push(...advancedActions);
+  }
+
+  // Acciones de fundamentos si el brief está muy básico
+  if (overallPercentage < 40) {
+    const fundamentalActions = [
+      {
+        id: 'fundamental_research',
+        title: 'Investigar el mercado y competencia',
+        why: 'Entender el contexto competitivo ayuda a posicionar mejor tu propuesta',
+        how: 'Investiga: Qué hace la competencia + Oportunidades no cubiertas + Tendencias del mercado',
+        impact: 'Alto impacto',
+        timeToComplete: '30-45 minutos'
+      },
+      {
+        id: 'fundamental_stakeholder',
+        title: 'Identificar stakeholders clave',
+        why: 'Conocer quién toma decisiones te permite adaptar tu mensaje y enfoque',
+        how: 'Lista: Quién aprueba + Quién ejecuta + Quién usa los resultados + Qué le importa a cada uno',
+        impact: 'Alto impacto',
+        timeToComplete: '10-15 minutos'
+      },
+      {
+        id: 'fundamental_timeline',
+        title: 'Crear cronograma detallado',
+        why: 'Un timeline realista muestra que has pensado en la ejecución práctica',
+        how: 'Incluye: Milestones principales + Dependencias + Tiempo de aprobaciones + Buffer',
+        impact: 'Impacto medio',
+        timeToComplete: '15-25 minutos'
+      }
+    ];
+
+    actions.push(...fundamentalActions);
+  }
+
+  return actions;
+}
+
+function getSpecificActionsForCategory(category: string, verbalScore: string): {
+  title: string;
+  why: string;
+  how: string;
+  timeToComplete: string;
+}[] {
+  const categoryActions: { [key: string]: { title: string; why: string; how: string; timeToComplete: string; }[] } = {
+    'Claridad y Enfoque': [
+      {
+        title: 'Reescribir el título para mayor claridad',
+        why: 'El título actual no comunica claramente el alcance del proyecto',
+        how: 'Usa la fórmula: [Tipo de actividad] + [Audiencia] + [Timeframe]. Ejemplo: "Campaña Digital para Millennials - Q1 2024"',
+        timeToComplete: '5-10 minutos'
+      },
+      {
+        title: 'Definir el alcance específico del proyecto',
+        why: 'Límites claros evitan confusión y scope creep durante la ejecución',
+        how: 'Especifica: Qué SÍ incluye el proyecto + Qué NO incluye + Límites geográficos/temporales',
+        timeToComplete: '10-15 minutos'
+      }
+    ],
+    'Comunicación Ejecutiva': [
+      {
+        title: 'Restructurar el resumen ejecutivo',
+        why: 'El resumen actual no captura la atención ni comunica el valor claramente',
+        how: 'Estructura en 3 partes: 1) Qué haremos exactamente 2) Para quién y por qué 3) Qué lograremos',
+        timeToComplete: '15-20 minutos'
+      },
+      {
+        title: 'Agregar el "why" del proyecto',
+        why: 'Los ejecutivos necesitan entender por qué es importante actuar ahora',
+        how: 'Incluye: Oportunidad de mercado + Riesgo de no actuar + Beneficio competitivo esperado',
+        timeToComplete: '10-15 minutos'
+      }
+    ],
+    'Conocimiento del Cliente': [
+      {
+        title: 'Crear buyer personas detalladas',
+        why: 'Una audiencia genérica lleva a mensajes genéricos y resultados mediocres',
+        how: 'Para cada persona: Nombre, edad, trabajo, ingresos, dolores, motivaciones, canales preferidos',
+        timeToComplete: '20-30 minutos'
+      },
+      {
+        title: 'Incluir insights de comportamiento',
+        why: 'Entender cómo, cuándo y por qué compran te permite crear mensajes más efectivos',
+        how: 'Documenta: Proceso de compra + Momentos de decisión + Influenciadores + Objeciones típicas',
+        timeToComplete: '15-25 minutos'
+      }
+    ],
+    'Visión Estratégica': [
+      {
+        title: 'Convertir objetivos en metas SMART',
+        why: 'Objetivos vagos no se pueden medir ni optimizar durante la ejecución',
+        how: 'Cada objetivo debe ser: Específico, Medible, Alcanzable, Relevante, Temporal',
+        timeToComplete: '15-20 minutos'
+      },
+      {
+        title: 'Priorizar objetivos por impacto',
+        why: 'Tener demasiados objetivos diluye el enfoque y los recursos',
+        how: 'Clasifica en: Objetivo primario (1) + Objetivos secundarios (2-3) + Métricas de soporte',
+        timeToComplete: '10-15 minutos'
+      }
+    ],
+    'Dirección Creativa': [
+      {
+        title: 'Definir la "gran idea" central',
+        why: 'Sin una idea central fuerte, las piezas creativas carecen de coherencia',
+        how: 'La gran idea debe ser: Memorable + Repetible + Diferenciadora + Relevante para la audiencia',
+        timeToComplete: '20-30 minutos'
+      },
+      {
+        title: 'Especificar tono y personalidad',
+        why: 'Un tono inconsistente confunde a la audiencia y diluye el mensaje',
+        how: 'Define: Cómo hablamos + Cómo NO hablamos + Ejemplos de frases + Palabras clave',
+        timeToComplete: '15-20 minutos'
+      }
+    ],
+    'Distribución Inteligente': [
+      {
+        title: 'Justificar cada canal seleccionado',
+        why: 'Los canales deben elegirse estratégicamente, no por default',
+        how: 'Para cada canal: Por qué es relevante + Qué rol cumple + Cómo se mide + Presupuesto asignado',
+        timeToComplete: '15-25 minutos'
+      },
+      {
+        title: 'Definir la experiencia cross-channel',
+        why: 'Los usuarios interactúan con múltiples touchpoints - deben sentirse coherentes',
+        how: 'Mapea: Customer journey + Puntos de contacto + Mensaje por canal + Handoffs',
+        timeToComplete: '20-30 minutos'
+      }
+    ],
+    'Viabilidad Financiera': [
+      {
+        title: 'Crear desglose detallado del presupuesto',
+        why: 'Un presupuesto sin desglose no permite optimizaciones ni control',
+        how: 'Categoriza: Medios (40-60%) + Producción (20-30%) + Herramientas (5-10%) + Contingencia (10%)',
+        timeToComplete: '15-25 minutos'
+      },
+      {
+        title: 'Incluir escenarios de presupuesto',
+        why: 'Los presupuestos cambian - necesitas opciones para diferentes niveles',
+        how: 'Define: Escenario mínimo + Escenario óptimo + Escenario aspiracional + Qué incluye cada uno',
+        timeToComplete: '20-30 minutos'
+      }
+    ],
+    'Medición de Impacto': [
+      {
+        title: 'Definir métricas primarias y secundarias',
+        why: 'Muchas métricas diluyen el foco - necesitas jerarquía clara',
+        how: 'Primarias: 1-2 métricas que definen éxito + Secundarias: 3-4 métricas de soporte',
+        timeToComplete: '10-15 minutos'
+      },
+      {
+        title: 'Especificar herramientas de medición',
+        why: 'Sin herramientas específicas, la medición queda como "buena intención"',
+        how: 'Lista: Qué herramienta + Qué mide + Quién la monitorea + Frecuencia de reporte',
+        timeToComplete: '15-20 minutos'
+      }
+    ]
+  };
+
+  return categoryActions[category] || [];
 }

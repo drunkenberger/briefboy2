@@ -13,6 +13,7 @@ export interface SavedBrief {
 }
 
 const STORAGE_KEY = '@briefboy_saved_briefs';
+const MAX_BRIEFS_LIMIT = 5; // Número máximo de briefs a mantener cuando hay problemas de almacenamiento
 
 /**
  * Hook para manejar el almacenamiento local de briefs
@@ -77,8 +78,22 @@ export function useBriefStorage() {
       };
 
       const updated = [newBrief, ...savedBriefs];
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      setSavedBriefs(updated);
+      
+      // Intentar guardar, si falla por espacio, limpiar briefs antiguos
+      try {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        setSavedBriefs(updated);
+      } catch (storageError: any) {
+        if (storageError.name === 'QuotaExceededError') {
+          console.warn('Almacenamiento lleno, limpiando briefs antiguos...');
+          // Mantener solo los últimos briefs según el límite definido
+          const limitedBriefs = updated.slice(0, MAX_BRIEFS_LIMIT);
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(limitedBriefs));
+          setSavedBriefs(limitedBriefs);
+        } else {
+          throw storageError;
+        }
+      }
       
       return newBrief.id;
     } catch (error) {
@@ -97,8 +112,22 @@ export function useBriefStorage() {
         };
         
         const updated = [fallbackBrief, ...savedBriefs];
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        setSavedBriefs(updated);
+        
+        // Intentar guardar, si falla por espacio, limpiar briefs antiguos
+        try {
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+          setSavedBriefs(updated);
+        } catch (storageError: any) {
+          if (storageError.name === 'QuotaExceededError') {
+            console.warn('Almacenamiento lleno en fallback, limpiando briefs antiguos...');
+            // Mantener solo los últimos briefs según el límite definido
+            const limitedBriefs = updated.slice(0, MAX_BRIEFS_LIMIT);
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(limitedBriefs));
+            setSavedBriefs(limitedBriefs);
+          } else {
+            throw storageError;
+          }
+        }
         
         console.warn('Brief guardado con datos básicos debido a error en normalización');
         return fallbackBrief.id;
@@ -185,6 +214,30 @@ export function useBriefStorage() {
     }
   };
 
+  const clearOldBriefs = async () => {
+    try {
+      // Mantener solo los últimos briefs según el límite definido
+      const limitedBriefs = savedBriefs.slice(0, MAX_BRIEFS_LIMIT);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(limitedBriefs));
+      setSavedBriefs(limitedBriefs);
+      console.log(`Almacenamiento limpiado. Briefs: ${savedBriefs.length} -> ${limitedBriefs.length} (límite: ${MAX_BRIEFS_LIMIT})`);
+    } catch (error) {
+      console.error('Error limpiando almacenamiento:', error);
+    }
+  };
+
+  const getStorageInfo = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      const size = stored ? stored.length : 0;
+      const count = savedBriefs.length;
+      return { size, count };
+    } catch (error) {
+      console.error('Error obteniendo info de almacenamiento:', error);
+      return { size: 0, count: 0 };
+    }
+  };
+
   return {
     savedBriefs,
     loading,
@@ -193,6 +246,8 @@ export function useBriefStorage() {
     deleteBrief,
     getBriefById,
     clearAllBriefs,
+    clearOldBriefs,
+    getStorageInfo,
     reload: loadSavedBriefs,
   };
 }

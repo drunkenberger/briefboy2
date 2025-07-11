@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, Animated, Dimensions } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BriefAnalysisResult } from '../hooks/useBriefAnalysis';
 
 interface InteractiveBriefAnalysisProps {
