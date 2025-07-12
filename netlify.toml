@@ -1,0 +1,16 @@
+[build]
+  # Comando de build para Expo web con --legacy-peer-deps para resolver conflictos de dependencias
+  command = "npm install --legacy-peer-deps && npx expo export -p web"
+  
+  # Directorio de publicación
+  publish = "dist"
+
+[build.environment]
+  # Variables de entorno para el build
+  NODE_VERSION = "18"
+
+[[redirects]]
+  # Redirección para SPA (Single Page Application)
+  from = "/*"
+  to = "/index.html"
+  status = 200
