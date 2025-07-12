@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, Image, Linki
 import { useRouter } from 'expo-router';
 import BrutalistFocusText from '../components/BrutalistFocusText';
 import BrutalistNavHeader from '../components/BrutalistNavHeader';
+import MatrixBriefTerms from '../components/MatrixBriefTerms';
 
 const { width } = Dimensions.get('window');
 
@@ -57,12 +58,11 @@ export default function LandingPage() {
                 </Pressable>
               </View>
               <View style={styles.heroRight}>
-                <View style={styles.heroImageContainer}>
-                  <Image 
-                    source={require('../assets/images/briefboy-hero.jpeg')}
-                    style={styles.heroImage}
-                    resizeMode="cover"
-                  />
+                <View style={styles.heroAnimationWrapper}>
+                  <View style={styles.heroAnimationContainer}>
+                    <MatrixBriefTerms containerHeight={400} />
+                  </View>
+                  <Text style={styles.animationSubtitle}>STOP THE BULLSHIT</Text>
                 </View>
               </View>
             </View>
@@ -378,16 +378,25 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1,
   },
-  heroImageContainer: {
-    width: Math.min(400, width > 768 ? (width - 60) / 2 : width - 40),
-    aspectRatio: 1,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
-    overflow: 'hidden',
+  heroAnimationWrapper: {
+    alignItems: 'center',
   },
-  heroImage: {
-    width: '100%',
-    height: '100%',
+  heroAnimationContainer: {
+    width: Math.min(500, width > 768 ? (width - 60) / 2 : width - 40),
+    height: 400,
+    borderWidth: 4,
+    borderColor: '#FFD700',
+    overflow: 'hidden',
+    backgroundColor: '#000000',
+    position: 'relative',
+  },
+  animationSubtitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 3,
+    marginTop: 16,
+    textTransform: 'uppercase',
   },
 
   // Problem Section
