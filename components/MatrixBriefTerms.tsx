@@ -1,7 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
+
+// Términos de briefs que caerán (movido fuera del componente para optimización)
+const BRIEF_TERMS = [
+  'ENGAGEMENT', 'DISRUPTIVO', 'AWARENESS', 'CONVERSIÓN', 'INSIGHT', 'TARGET', 'PUNCHY', 'MEMORABLE',
+  'STORYTELLING', 'VIRALIDAD', 'BRANDING', 'IMPACTO', 'ROI', 'CREATIVIDAD', 'SINERGIAS', 'HOLÍSTICO',
+  'MILLENNIALS', 'CUSTOMER JOURNEY', 'PAIN POINT', 'TOUCHPOINT', 'KPI', 'BENCHMARK', 'CENTENNIALS', 'GEN Z',
+  'CALL TO ACTION', 'BRAND EQUITY', 'TOP OF MIND', 'SHARE OF VOICE', 'ENGAGEMENT RATE', 'LOVEMARK', 'WOW FACTOR',
+  'OMNICHANNEL', 'PERFORMANCE', 'GROWTH HACKING', 'INFLUENCER', 'CONTENIDO', 'ALCANCE', 'VIRAL', 'TRENDING',
+  '360°', 'TRANSMEDIA', 'EXPERIENCIAL', 'MINDSHARE', 'EMPODERAR', 'NARRATIVA', 'ORGÁNICO', 'AUTÉNTICO',
+  'SYNERGY', 'LEVERAGE', 'PARADIGM', 'DISRUPT', 'INNOVATIVE', 'AGILE', 'PIVOT', 'ECOSYSTEM',
+  'SCALABLE', 'SUSTAINABLE', 'AUTHENTIC', 'PREMIUM', 'EXCLUSIVE', 'CURATED', 'BESPOKE', 'ARTISANAL',
+  'JIRIBILLA'
+];
 
 interface MatrixBriefTermsProps {
   containerHeight?: number;
@@ -16,27 +29,15 @@ interface FallingWord {
   speed: number;
   size: number;
   color: string;
+  animation?: Animated.CompositeAnimation;
 }
 
 const MatrixBriefTerms: React.FC<MatrixBriefTermsProps> = ({ containerHeight = 400 }) => {
   const [fallingWords, setFallingWords] = useState<FallingWord[]>([]);
-  const animationRef = useRef<any>();
-  
-  // Términos de briefs que caerán
-  const briefTerms = [
-    'ENGAGEMENT', 'DISRUPTIVO', 'AWARENESS', 'CONVERSIÓN', 'INSIGHT', 'TARGET', 'PUNCHY', 'MEMORABLE',
-    'STORYTELLING', 'VIRALIDAD', 'BRANDING', 'IMPACTO', 'ROI', 'CREATIVIDAD', 'SINERGIAS', 'HOLÍSTICO',
-    'MILLENNIALS', 'CUSTOMER JOURNEY', 'PAIN POINT', 'TOUCHPOINT', 'KPI', 'BENCHMARK', 'CENTENNIALS', 'GEN Z',
-    'CALL TO ACTION', 'BRAND EQUITY', 'TOP OF MIND', 'SHARE OF VOICE', 'ENGAGEMENT RATE', 'LOVEMARK', 'WOW FACTOR',
-    'OMNICHANNEL', 'PERFORMANCE', 'GROWTH HACKING', 'INFLUENCER', 'CONTENIDO', 'ALCANCE', 'VIRAL', 'TRENDING',
-    '360°', 'TRANSMEDIA', 'EXPERIENCIAL', 'MINDSHARE', 'EMPODERAR', 'NARRATIVA', 'ORGÁNICO', 'AUTÉNTICO',
-    'SYNERGY', 'LEVERAGE', 'PARADIGM', 'DISRUPT', 'INNOVATIVE', 'AGILE', 'PIVOT', 'ECOSYSTEM',
-    'SCALABLE', 'SUSTAINABLE', 'AUTHENTIC', 'PREMIUM', 'EXCLUSIVE', 'CURATED', 'BESPOKE', 'ARTISANAL',
-    'JIRIBILLA'
-  ];
-
-  const createFallingWord = () => {
-    const word = briefTerms[Math.floor(Math.random() * briefTerms.length)];
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const animationsRef = useRef<Set<Animated.CompositeAnimation>>(new Set());
+  const createFallingWord = useCallback(() => {
+    const word = BRIEF_TERMS[Math.floor(Math.random() * BRIEF_TERMS.length)];
     const size = Math.random() > 0.7 ? 18 : Math.random() > 0.4 ? 14 : 12; // Tamaños variados
     
     // Calcular ancho estimado de la palabra basado en su longitud y tamaño de fuente
@@ -52,8 +53,36 @@ const MatrixBriefTerms: React.FC<MatrixBriefTermsProps> = ({ containerHeight = 4
     const animatedY = new Animated.Value(-50);
     const animatedOpacity = new Animated.Value(0);
 
+    const wordId = `${Date.now()}-${Math.random()}`;
+
+    // Crear animación
+    const animation = Animated.parallel([
+      Animated.timing(animatedY, {
+        toValue: containerHeight + 50,
+        duration: speed,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      Animated.sequence([
+        Animated.timing(animatedOpacity, {
+          toValue: opacity,
+          duration: 500,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+        Animated.timing(animatedOpacity, {
+          toValue: opacity,
+          duration: speed - 1000,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+        Animated.timing(animatedOpacity, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+      ]),
+    ]);
+
     const newWord: FallingWord = {
-      id: `${Date.now()}-${Math.random()}`,
+      id: wordId,
       word,
       x,
       animatedY,
@@ -61,43 +90,33 @@ const MatrixBriefTerms: React.FC<MatrixBriefTermsProps> = ({ containerHeight = 4
       speed,
       size,
       color,
+      animation,
     };
 
-    // Animación de caída
-    Animated.parallel([
-      Animated.timing(animatedY, {
-        toValue: containerHeight + 50,
-        duration: speed,
-        useNativeDriver: true,
-      }),
-      Animated.sequence([
-        Animated.timing(animatedOpacity, {
-          toValue: opacity,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animatedOpacity, {
-          toValue: opacity,
-          duration: speed - 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animatedOpacity, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start(() => {
-      // Eliminar palabra cuando termine la animación
-      setFallingWords(prev => prev.filter(w => w.id !== newWord.id));
+    // Agregar animación al set para tracking
+    animationsRef.current.add(animation);
+
+    // Iniciar animación
+    animation.start((finished) => {
+      // Limpiar animación del set
+      animationsRef.current.delete(animation);
+      
+      // Eliminar palabra solo si la animación terminó completamente
+      if (finished) {
+        setFallingWords(prev => prev.filter(w => w.id !== wordId));
+      }
     });
 
     return newWord;
-  };
+  }, [containerHeight]);
 
+  // useEffect para inicialización
   useEffect(() => {
     // Crear palabras iniciales (más densidad)
-    const initialWords = Array(12).fill(0).map(() => createFallingWord());
+    const initialWords: FallingWord[] = [];
+    for (let i = 0; i < 12; i++) {
+      initialWords.push(createFallingWord());
+    }
     setFallingWords(initialWords);
 
     // Crear nuevas palabras periódicamente
@@ -110,12 +129,28 @@ const MatrixBriefTerms: React.FC<MatrixBriefTermsProps> = ({ containerHeight = 4
       });
     }, 300); // Nueva palabra cada 300ms (más frecuencia)
 
-    animationRef.current = interval;
+    intervalRef.current = interval;
 
     return () => {
-      if (animationRef.current) {
-        clearInterval(animationRef.current);
+      // Limpiar interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
+    };
+  }, [createFallingWord]); // Depend on createFallingWord
+
+  // useEffect para cleanup final del componente
+  useEffect(() => {
+    return () => {
+      // Parar todas las animaciones activas al desmontar
+      animationsRef.current.forEach(animation => {
+        animation.stop();
+      });
+      animationsRef.current.clear();
+
+      // Limpiar palabras
+      setFallingWords([]);
     };
   }, []);
 

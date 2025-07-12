@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import BrutalistFocusText from '../components/BrutalistFocusText';
 import BrutalistNavHeader from '../components/BrutalistNavHeader';
 import MatrixBriefTerms from '../components/MatrixBriefTerms';
+import ElevenLabsDirectWidget from '../components/ElevenLabsDirectWidget';
 
 const { width } = Dimensions.get('window');
 
@@ -192,6 +193,19 @@ export default function LandingPage() {
           </View>
         </View>
 
+        {/* Voice Assistant Section */}
+        <View style={styles.voiceAssistantSection}>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>HABLA CON NUESTRO ASISTENTE</Text>
+            <Text style={styles.sectionSubtitle}>
+              RESUELVE TUS DUDAS SOBRE MARKETING Y BRIEFS
+            </Text>
+            <View style={styles.widgetWrapper}>
+              <ElevenLabsDirectWidget agentId="agent_01jzzt3hd7ffqrttr04n9kwn6t" />
+            </View>
+          </View>
+        </View>
+
         {/* Social Proof */}
         <View style={styles.testimonialsSection}>
           <View style={styles.sectionContainer}>
@@ -224,6 +238,7 @@ export default function LandingPage() {
             </View>
           </View>
         </View>
+
 
         {/* Final CTA */}
         <View style={styles.finalCTA}>
@@ -589,6 +604,27 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
     textAlign: 'center',
+  },
+
+
+  // Voice Assistant Section
+  voiceAssistantSection: {
+    paddingVertical: 80,
+    backgroundColor: '#000000',
+    borderBottomWidth: 4,
+    borderBottomColor: '#FFFFFF',
+  },
+  widgetWrapper: {
+    width: '100%',
+    height: 500,
+    maxWidth: 600,
+    alignSelf: 'center',
+    marginTop: 40,
+    borderWidth: 4,
+    borderColor: '#FFD700',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#000000',
   },
 
   // Final CTA
