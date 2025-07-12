@@ -138,6 +138,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'transparent',
+    borderRadius: 50,
+    overflow: 'hidden',
+    boxShadow: '0 4px 20px rgba(255, 215, 0, 0.4)',
   },
 });
 
