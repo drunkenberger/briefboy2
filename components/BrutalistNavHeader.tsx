@@ -16,8 +16,19 @@ export default function BrutalistNavHeader({ currentPage = 'home' }: BrutalistNa
   };
 
   const handleNavigation = (page: string) => {
-    // TODO: Implement navigation to different pages
-    console.log(`Navigate to ${page}`);
+    switch (page) {
+      case 'about':
+        router.push('/about');
+        break;
+      case 'learn':
+        router.push('/learn');
+        break;
+      case 'contact':
+        router.push('/contact');
+        break;
+      default:
+        console.log(`Navigate to ${page}`);
+    }
   };
 
   return (
