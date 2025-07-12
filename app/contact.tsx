@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, Pressable, TextInput, Alert } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable, TextInput, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import BrutalistNavHeader from '../components/BrutalistNavHeader';
 
@@ -12,6 +12,23 @@ export default function ContactScreen() {
     message: '',
     briefType: ''
   });
+  const [hoveredSocial, setHoveredSocial] = useState<string | null>(null);
+
+  const openSocialMedia = (platform: string) => {
+    const urls: { [key: string]: string } = {
+      instagram: 'https://instagram.com/briefboy',
+      linkedin: 'https://linkedin.com/company/briefboy',
+      twitter: 'https://twitter.com/briefboy_ai',
+      youtube: 'https://youtube.com/@BriefBoyChannel'
+    };
+
+    const url = urls[platform];
+    if (url) {
+      Linking.openURL(url).catch(err => 
+        Alert.alert('Error', 'No se pudo abrir el enlace')
+      );
+    }
+  };
 
   const handleSubmit = () => {
     if (!formData.name || !formData.email || !formData.message) {
@@ -191,6 +208,91 @@ export default function ContactScreen() {
               <Text style={styles.infoDescription}>
                 Proyectos estratégicos y consultorías especializadas
               </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Social Media Section */}
+        <View style={styles.socialSection}>
+          <Text style={styles.socialTitle}>SÍGUENOS SI ODIAS LA MALA PUBLICIDAD</Text>
+          <Text style={styles.socialSubtitle}>
+            Compartimos casos de briefs mortales y cómo resucitarlos
+          </Text>
+          
+          <View style={styles.socialGrid}>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialCard,
+                pressed && styles.socialCardPressed
+              ]}
+              onPress={() => openSocialMedia('instagram')}
+            >
+              <Text style={styles.socialIcon}>📷</Text>
+              <Text style={styles.socialName}>INSTAGRAM</Text>
+              <Text style={styles.socialHandle}>@briefboy</Text>
+              <Text style={styles.socialDescription}>
+                Briefs del horror y casos de éxito
+              </Text>
+            </Pressable>
+
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialCard,
+                pressed && styles.socialCardPressed
+              ]}
+              onPress={() => openSocialMedia('linkedin')}
+            >
+              <Text style={styles.socialIcon}>💼</Text>
+              <Text style={styles.socialName}>LINKEDIN</Text>
+              <Text style={styles.socialHandle}>/company/briefboy</Text>
+              <Text style={styles.socialDescription}>
+                Contenido B2B y casos de estudio
+              </Text>
+            </Pressable>
+
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialCard,
+                pressed && styles.socialCardPressed
+              ]}
+              onPress={() => openSocialMedia('twitter')}
+            >
+              <Text style={styles.socialIcon}>🐦</Text>
+              <Text style={styles.socialName}>X (TWITTER)</Text>
+              <Text style={styles.socialHandle}>@briefboy_ai</Text>
+              <Text style={styles.socialDescription}>
+                Hot takes sobre la industria
+              </Text>
+            </Pressable>
+
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialCard,
+                pressed && styles.socialCardPressed
+              ]}
+              onPress={() => openSocialMedia('youtube')}
+            >
+              <Text style={styles.socialIcon}>📺</Text>
+              <Text style={styles.socialName}>YOUTUBE</Text>
+              <Text style={styles.socialHandle}>@BriefBoyChannel</Text>
+              <Text style={styles.socialDescription}>
+                Autopsias de campañas fallidas
+              </Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.socialStats}>
+            <View style={styles.socialStatItem}>
+              <Text style={styles.socialStatNumber}>47K</Text>
+              <Text style={styles.socialStatLabel}>SEGUIDORES TOTALES</Text>
+            </View>
+            <View style={styles.socialStatItem}>
+              <Text style={styles.socialStatNumber}>2.3M</Text>
+              <Text style={styles.socialStatLabel}>IMPRESIONES MENSUALES</Text>
+            </View>
+            <View style={styles.socialStatItem}>
+              <Text style={styles.socialStatNumber}>892</Text>
+              <Text style={styles.socialStatLabel}>BRIEFS SALVADOS</Text>
             </View>
           </View>
         </View>
@@ -438,6 +540,103 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     opacity: 0.8,
     fontWeight: '700',
+  },
+
+  // Social Media Section
+  socialSection: {
+    padding: 40,
+    paddingTop: 80,
+    backgroundColor: '#000000',
+  },
+  socialTitle: {
+    fontSize: 40,
+    fontWeight: '900',
+    color: '#FFD700',
+    marginBottom: 8,
+    letterSpacing: -2,
+    textAlign: 'center',
+  },
+  socialSubtitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 48,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    opacity: 0.9,
+  },
+  socialGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 20,
+    justifyContent: 'center',
+    marginBottom: 48,
+  },
+  socialCard: {
+    backgroundColor: '#000000',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    padding: 24,
+    alignItems: 'center',
+    minWidth: 160,
+    maxWidth: 200,
+    flex: 1,
+  },
+  socialCardPressed: {
+    backgroundColor: '#FFD700',
+    borderColor: '#FFD700',
+  },
+  socialIcon: {
+    fontSize: 40,
+    marginBottom: 16,
+  },
+  socialName: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#FFD700',
+    marginBottom: 4,
+    letterSpacing: 1,
+  },
+  socialHandle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 12,
+    opacity: 0.9,
+  },
+  socialDescription: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    opacity: 0.7,
+    fontWeight: '500',
+    lineHeight: 16,
+  },
+  socialStats: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 40,
+    borderTopWidth: 2,
+    borderTopColor: '#FFD700',
+    paddingTop: 32,
+  },
+  socialStatItem: {
+    alignItems: 'center',
+  },
+  socialStatNumber: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: '#FFD700',
+    marginBottom: 4,
+    letterSpacing: -1,
+  },
+  socialStatLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    letterSpacing: 1,
+    opacity: 0.8,
   },
 
   // FAQ Section

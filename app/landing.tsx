@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, Image, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import BrutalistFocusText from '../components/BrutalistFocusText';
 import BrutalistNavHeader from '../components/BrutalistNavHeader';
@@ -11,6 +11,22 @@ export default function LandingPage() {
 
   const navigateToApp = () => {
     router.push('/(tabs)');
+  };
+
+  const openSocialMedia = (platform: string) => {
+    const urls: { [key: string]: string } = {
+      instagram: 'https://instagram.com/briefboy',
+      linkedin: 'https://linkedin.com/company/briefboy',
+      twitter: 'https://twitter.com/briefboy_ai',
+      youtube: 'https://youtube.com/@BriefBoyChannel'
+    };
+
+    const url = urls[platform];
+    if (url) {
+      Linking.openURL(url).catch(err => 
+        console.error('Error opening URL:', err)
+      );
+    }
   };
 
   return (
@@ -229,8 +245,52 @@ export default function LandingPage() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2024 BRIEF BOY</Text>
-          <Text style={styles.footerTagline}>BRIEFS SIN BULLSHIT</Text>
+          <View style={styles.footerLeft}>
+            <Text style={styles.footerText}>© 2024 BRIEF BOY</Text>
+            <Text style={styles.footerTagline}>BRIEFS SIN BULLSHIT</Text>
+          </View>
+          
+          <View style={styles.footerSocials}>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialIcon,
+                pressed && styles.socialIconPressed
+              ]}
+              onPress={() => openSocialMedia('instagram')}
+            >
+              <Text style={styles.socialIconText}>📷</Text>
+            </Pressable>
+            
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialIcon,
+                pressed && styles.socialIconPressed
+              ]}
+              onPress={() => openSocialMedia('linkedin')}
+            >
+              <Text style={styles.socialIconText}>💼</Text>
+            </Pressable>
+            
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialIcon,
+                pressed && styles.socialIconPressed
+              ]}
+              onPress={() => openSocialMedia('twitter')}
+            >
+              <Text style={styles.socialIconText}>🐦</Text>
+            </Pressable>
+            
+            <Pressable 
+              style={({ pressed }) => [
+                styles.socialIcon,
+                pressed && styles.socialIconPressed
+              ]}
+              onPress={() => openSocialMedia('youtube')}
+            >
+              <Text style={styles.socialIconText}>📺</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -582,6 +642,13 @@ const styles = StyleSheet.create({
     maxWidth: 1200,
     alignSelf: 'center',
     width: '100%',
+    borderTopWidth: 2,
+    borderTopColor: '#FFD700',
+    marginTop: 60,
+  },
+  footerLeft: {
+    flexDirection: 'column',
+    gap: 4,
   },
   footerText: {
     color: '#FFFFFF',
@@ -594,5 +661,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 1,
+  },
+  footerSocials: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'center',
+  },
+  socialIcon: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#000000',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  socialIconPressed: {
+    backgroundColor: '#FFD700',
+    borderColor: '#FFD700',
+  },
+  socialIconText: {
+    fontSize: 20,
   },
 });
