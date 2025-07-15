@@ -320,18 +320,9 @@ const AudioToTextScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.appTitle}>📊 BriefBoy</Text>
-          <Text style={styles.appSubtitle}>Generador de Briefs Publicitarios con IA</Text>
-          
-          <Pressable
-            style={[styles.toggleButton, { marginTop: 12 }]}
-            onPress={() => {
-              console.log('🧪 TEST UI BUTTON PRESSED!');
-              Alert.alert('Test', 'El botón funciona correctamente');
-            }}
-          >
-            <Text style={styles.toggleButtonText}>🧪 Test UI</Text>
-          </Pressable>
+          <Text style={styles.appTitle}>BRIEFBOY</Text>
+          <View style={styles.yellowBar} />
+          <Text style={styles.appSubtitle}>GENERADOR DE BRIEFS PUBLICITARIOS CON IA</Text>
         </View>
 
         <AudioRecorder
@@ -340,7 +331,9 @@ const AudioToTextScreen: React.FC = () => {
         />
 
         <View style={styles.divider}>
-          <Text style={styles.dividerText}>○ O ○</Text>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>O</Text>
+          <View style={styles.dividerLine} />
         </View>
 
         <FileUploadButton
@@ -648,33 +641,48 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     paddingTop: 20,
     paddingBottom: 20,
+    borderBottomWidth: 4,
+    borderBottomColor: '#FFFFFF',
   },
   appTitle: {
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: '900',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    letterSpacing: -2,
+    color: '#FFD700',
+    marginBottom: 16,
+    letterSpacing: -3,
     textTransform: 'uppercase',
   },
+  yellowBar: {
+    width: 120,
+    height: 8,
+    backgroundColor: '#FFD700',
+    marginBottom: 16,
+  },
   appSubtitle: {
-    fontSize: 16,
-    color: '#FFD700',
+    fontSize: 18,
+    color: '#FFFFFF',
     textAlign: 'center',
     fontWeight: '700',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
   divider: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginVertical: 40,
+    gap: 20,
+  },
+  dividerLine: {
+    height: 2,
+    width: 60,
+    backgroundColor: '#FFD700',
   },
   dividerText: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#FFD700',
-    fontWeight: '700',
+    fontWeight: '900',
     letterSpacing: 2,
-    textTransform: 'uppercase',
   },
   actionsContainer: {
     flexDirection: 'row',
@@ -797,29 +805,33 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   finalBriefContainer: {
-    backgroundColor: '#000000',
-    borderRadius: 0,
-    padding: 24,
-    marginVertical: 20,
+    backgroundColor: '#111111',
+    borderWidth: 4,
+    borderColor: '#FFD700',
+    padding: 32,
+    marginVertical: 40,
   },
   finalBriefHeader: {
-    marginBottom: 16,
+    marginBottom: 24,
+    alignItems: 'center',
   },
   finalBriefTitle: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: '900',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    letterSpacing: -1,
+    color: '#FFD700',
+    marginBottom: 12,
+    letterSpacing: -2,
     textTransform: 'uppercase',
+    textAlign: 'center',
   },
   finalBriefSubtitle: {
-    fontSize: 14,
-    color: '#FFD700',
-    lineHeight: 20,
+    fontSize: 16,
+    color: '#FFFFFF',
+    lineHeight: 24,
     fontWeight: '700',
     letterSpacing: 1,
     textTransform: 'uppercase',
+    textAlign: 'center',
   },
   finalBriefActions: {
     flexDirection: 'row',
@@ -828,13 +840,12 @@ const styles = StyleSheet.create({
   },
   finalBriefButton: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 0,
+    backgroundColor: '#FFD700',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 4,
+    borderWidth: 3,
     borderColor: '#FFFFFF',
   },
   finalBriefButtonText: {

@@ -25,7 +25,7 @@ const TranscriptionResult: React.FC<TranscriptionResultProps> = ({ loading, erro
       <View style={styles.card}>
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#2563eb" />
+            <ActivityIndicator size="large" color="#FFD700" />
             <Text style={styles.loadingTitle}>
               {isFromFile ? 'Procesando archivo...' : 'Transcribiendo audio...'}
             </Text>
@@ -77,14 +77,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    backgroundColor: '#000000',
+    borderWidth: 4,
+    borderColor: '#FFD700',
+    padding: 32,
   },
   loadingContainer: {
     alignItems: 'center',
@@ -110,16 +106,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#dc2626',
-    marginBottom: 8,
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginBottom: 12,
+    letterSpacing: -1,
+    textTransform: 'uppercase',
   },
   errorText: {
-    fontSize: 15,
-    color: '#991b1b',
+    fontSize: 16,
+    color: '#FFD700',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 24,
+    fontWeight: '700',
   },
   transcriptionContainer: {
     width: '100%',
@@ -129,8 +128,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomWidth: 2,
+    borderBottomColor: '#FFD700',
   },
   transcriptionIcon: {
     fontSize: 24,

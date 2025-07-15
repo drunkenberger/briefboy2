@@ -5,6 +5,7 @@ import BrutalistFocusText from '../components/BrutalistFocusText';
 import BrutalistNavHeader from '../components/BrutalistNavHeader';
 import MatrixBriefTerms from '../components/MatrixBriefTerms';
 import ElevenLabsDirectWidget from '../components/ElevenLabsDirectWidget';
+import ZohoSalesIQWidget from '../components/ZohoSalesIQWidget';
 
 const { width } = Dimensions.get('window');
 
@@ -301,6 +302,9 @@ export default function LandingPage() {
       <View style={styles.floatingWidgetContainer}>
         <ElevenLabsDirectWidget agentId="agent_01jzzt3hd7ffqrttr04n9kwn6t" />
       </View>
+      
+      {/* Zoho SalesIQ Support Widget */}
+      <ZohoSalesIQWidget widgetCode="siqcac6ccaff06943ac0b9dc85c19f146c8382faef57bf5a58fb3189ff00dca96ab" />
     </View>
   );
 }
@@ -707,7 +711,7 @@ const styles = StyleSheet.create({
   floatingWidgetContainer: {
     position: 'fixed',
     bottom: 30,
-    right: 30,
+    left: 30,
     width: 100,
     height: 100,
     zIndex: 9999,
