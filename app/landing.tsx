@@ -6,6 +6,7 @@ import BrutalistNavHeader from '../components/BrutalistNavHeader';
 import MatrixBriefTerms from '../components/MatrixBriefTerms';
 import ElevenLabsDirectWidget from '../components/ElevenLabsDirectWidget';
 import ZohoSalesIQWidget from '../components/ZohoSalesIQWidget';
+import { InstagramIcon, LinkedInIcon, TwitterIcon, YouTubeIcon } from '../components/SocialIcons';
 
 const { width } = Dimensions.get('window');
 
@@ -262,7 +263,7 @@ export default function LandingPage() {
               ]}
               onPress={() => openSocialMedia('instagram')}
             >
-              <Text style={styles.socialIconText}>📷</Text>
+              <InstagramIcon size={20} color="#FFFFFF" />
             </Pressable>
             
             <Pressable 
@@ -272,7 +273,7 @@ export default function LandingPage() {
               ]}
               onPress={() => openSocialMedia('linkedin')}
             >
-              <Text style={styles.socialIconText}>💼</Text>
+              <LinkedInIcon size={20} color="#FFFFFF" />
             </Pressable>
             
             <Pressable 
@@ -282,7 +283,7 @@ export default function LandingPage() {
               ]}
               onPress={() => openSocialMedia('twitter')}
             >
-              <Text style={styles.socialIconText}>🐦</Text>
+              <TwitterIcon size={20} color="#FFFFFF" />
             </Pressable>
             
             <Pressable 
@@ -292,7 +293,7 @@ export default function LandingPage() {
               ]}
               onPress={() => openSocialMedia('youtube')}
             >
-              <Text style={styles.socialIconText}>📺</Text>
+              <YouTubeIcon size={20} color="#FFFFFF" />
             </Pressable>
           </View>
         </View>
