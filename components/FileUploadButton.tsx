@@ -295,6 +295,14 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({
         <Text style={styles.formatText}>• PDF: Extracción con IA</Text>
         <Text style={styles.formatNote}>Tamaño máximo: 25MB • Compatible con web y móvil</Text>
       </View>
+      
+      <View style={styles.tipsContainer}>
+        <Text style={styles.tipsTitle}>💡 Consejos para mejores resultados:</Text>
+        <Text style={styles.tipsText}>• Incluye contexto sobre la marca o producto</Text>
+        <Text style={styles.tipsText}>• Describe objetivos específicos y métricas</Text>
+        <Text style={styles.tipsText}>• Menciona audiencia target y insights</Text>
+        <Text style={styles.tipsText}>• Agrega información sobre presupuesto y timeline</Text>
+      </View>
     </View>
   );
 };
@@ -528,6 +536,28 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     marginBottom: 6,
     lineHeight: 20,
+    fontWeight: '700',
+  },
+  tipsContainer: {
+    backgroundColor: '#000000',
+    padding: 16,
+    borderRadius: 0,
+    marginTop: 16,
+    borderWidth: 2,
+    borderColor: '#FFD700',
+  },
+  tipsTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#FFD700',
+    marginBottom: 8,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  tipsText: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    marginBottom: 4,
     fontWeight: '700',
   },
 });

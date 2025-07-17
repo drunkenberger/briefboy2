@@ -214,7 +214,7 @@ export class FileExporter {
     if (brief.creativeStrategy?.bigIdea) {
       text += `💡 ESTRATEGIA CREATIVA\n`;
       text += `${'-'.repeat(22)}\n`;
-      text += `▶ GRAN IDEA:\n${brief.creativeStrategy.bigIdea}\n\n`;
+      text += `▶ PUNTO DE PARTIDA:\n${brief.creativeStrategy.bigIdea}\n\n`;
 
       if (brief.creativeStrategy.toneAndManner) {
         text += `▶ TONO Y MANERA:\n${brief.creativeStrategy.toneAndManner}\n\n`;
@@ -447,7 +447,7 @@ export class FileExporter {
     // Estrategia Creativa
     if (brief.creativeStrategy?.bigIdea) {
       md += `## 💡 Estrategia Creativa\n\n`;
-      md += `### ▶ Gran Idea\n\n${brief.creativeStrategy.bigIdea}\n\n`;
+      md += `### ▶ Punto de Partida\n\n${brief.creativeStrategy.bigIdea}\n\n`;
       
       if (brief.creativeStrategy.toneAndManner) {
         md += `### ▶ Tono y Manera\n\n${brief.creativeStrategy.toneAndManner}\n\n`;
@@ -731,7 +731,7 @@ export class FileExporter {
         <div class="section strategy">
           <h3>ESTRATEGIA CREATIVA</h3>
           <div class="subsection">
-            <h4>▶ Gran Idea:</h4>
+            <h4>▶ Punto de Partida:</h4>
             <p>${brief.creativeStrategy.bigIdea}</p>
           </div>
           ${brief.creativeStrategy.toneAndManner ? `

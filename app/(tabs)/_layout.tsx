@@ -5,6 +5,8 @@ import { Platform } from 'react-native';
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import BrutalistHeader from '@/components/BrutalistHeader';
+import BrutalistFooter from '@/components/BrutalistFooter';
+import ZohoSalesIQWidget from '@/components/ZohoSalesIQWidget';
 
 export default function TabLayout() {
   return (
@@ -53,6 +55,8 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+      <BrutalistFooter />
+      <ZohoSalesIQWidget widgetCode="siqcac6ccaff06943ac0b9dc85c19f146c8382faef57bf5a58fb3189ff00dca96ab" />
     </>
   );
 }

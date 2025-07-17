@@ -64,6 +64,13 @@ const TranscriptionResult: React.FC<TranscriptionResultProps> = ({ loading, erro
                 </Text>
               )}
             </View>
+            
+            <View style={styles.transcriptionTips}>
+              <Text style={styles.transcriptionTipsTitle}>💡 Siguiente paso:</Text>
+              <Text style={styles.transcriptionTipsText}>
+                La IA está generando tu brief con esta transcripción. Para mejores resultados, revisa que el texto contenga información sobre objetivos, audiencia y presupuesto.
+              </Text>
+            </View>
           </View>
         )}
       </View>
@@ -88,14 +95,17 @@ const styles = StyleSheet.create({
   },
   loadingTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1e293b',
+    fontWeight: '900',
+    color: '#FFFFFF',
     marginTop: 16,
     marginBottom: 4,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   loadingSubtitle: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#FFD700',
+    fontWeight: '700',
   },
   errorContainer: {
     alignItems: 'center',
@@ -137,33 +147,60 @@ const styles = StyleSheet.create({
   },
   transcriptionTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#1e293b',
+    fontWeight: '900',
+    color: '#FFFFFF',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   transcriptionContent: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
+    backgroundColor: '#000000',
+    borderRadius: 0,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   transcriptionText: {
     fontSize: 16,
-    color: '#334155',
+    color: '#FFFFFF',
     lineHeight: 24,
+    fontWeight: '700',
   },
   transcriptionFooter: {
     alignItems: 'center',
   },
   transcriptionMeta: {
     fontSize: 12,
-    color: '#64748b',
-    fontStyle: 'italic',
+    color: '#FFD700',
+    fontWeight: '700',
   },
   fileIndicator: {
     fontSize: 12,
-    color: '#7c3aed',
+    color: '#FFD700',
     marginTop: 8,
-    fontWeight: '500',
+    fontWeight: '700',
+  },
+  transcriptionTips: {
+    backgroundColor: '#000000',
+    borderRadius: 0,
+    padding: 16,
+    marginTop: 16,
+    borderWidth: 2,
+    borderColor: '#FFD700',
+  },
+  transcriptionTipsTitle: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#FFD700',
+    marginBottom: 8,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  transcriptionTipsText: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    lineHeight: 18,
+    fontWeight: '700',
   },
 });
 

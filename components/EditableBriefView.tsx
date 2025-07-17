@@ -44,7 +44,7 @@ const BRIEF_FIELDS: BriefField[] = [
   { key: 'brandPositioning', label: 'Posicionamiento de Marca', type: 'textarea', placeholder: 'Cómo se posiciona la marca...', required: true },
 
   // Estrategia Creativa
-  { key: 'creativeStrategy.bigIdea', label: 'Gran Idea Creativa', type: 'textarea', placeholder: 'La gran idea que guiará toda la campaña...', required: true },
+  { key: 'creativeStrategy.bigIdea', label: 'Punto de Partida Creativo', type: 'textarea', placeholder: 'El punto de partida creativo que guiará toda la campaña...', required: true },
   { key: 'creativeStrategy.messageHierarchy', label: 'Jerarquía de Mensajes', type: 'array', placeholder: 'Mensajes ordenados por importancia', required: true },
   { key: 'creativeStrategy.toneAndManner', label: 'Tono y Manera', type: 'textarea', placeholder: 'Cómo debe sonar y sentirse la comunicación...', required: true },
   { key: 'creativeStrategy.creativeMandatories', label: 'Elementos Obligatorios', type: 'array', placeholder: 'Elementos que deben incluirse obligatoriamente', required: false },

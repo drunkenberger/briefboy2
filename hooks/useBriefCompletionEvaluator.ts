@@ -65,7 +65,7 @@ function performLocalEvaluation(brief: any): BriefCompletion {
     { key: 'targetAudience.primary', label: 'Audiencia Primaria' },
     { key: 'targetAudience.insights', label: 'Insights de Audiencia' },
     { key: 'brandPositioning', label: 'Posicionamiento de Marca' },
-    { key: 'creativeStrategy.bigIdea', label: 'Gran Idea Creativa' },
+    { key: 'creativeStrategy.bigIdea', label: 'Punto de Partida Creativo' },
     { key: 'creativeStrategy.messageHierarchy', label: 'Jerarquía de Mensajes' },
     { key: 'creativeStrategy.toneAndManner', label: 'Tono y Manera' },
     { key: 'channelStrategy.integratedApproach', label: 'Enfoque Integrado' },

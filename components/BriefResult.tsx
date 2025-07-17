@@ -42,7 +42,7 @@ const BriefResult: React.FC<BriefResultProps> = ({ brief, loading, error, iaSugg
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#1976d2" />
+        <ActivityIndicator size="large" color="#FFD700" />
         <Text style={styles.status}>Generando brief publicitario...</Text>
       </View>
     );
@@ -82,7 +82,7 @@ const BriefResult: React.FC<BriefResultProps> = ({ brief, loading, error, iaSugg
       <Text style={styles.sectionLabel}>Mensajes Clave</Text>
       {renderValue(brief.keyMessages, 'keymsg-')}
       {brief.callToAction ? (
-        <Text style={[styles.listItem, { fontStyle: 'italic', color: '#1976d2' }]}>Llamado a la acción: {brief.callToAction}</Text>
+        <Text style={[styles.listItem, { fontStyle: 'italic', color: '#FFD700' }]}>Llamado a la acción: {brief.callToAction}</Text>
       ) : null}
       <Text style={styles.sectionLabel}>Canales</Text>
       {brief.channelsAndTactics?.channels ? renderValue(brief.channelsAndTactics.channels, 'channels-') : null}
@@ -94,7 +94,7 @@ const BriefResult: React.FC<BriefResultProps> = ({ brief, loading, error, iaSugg
           <Text style={styles.sectionLabel}>Otros datos</Text>
           {Object.entries(brief._extra).map(([key, value]) => (
             <View key={key} style={{ marginBottom: 8, marginLeft: 8 }}>
-              <Text style={{ fontWeight: 'bold', color: '#555' }}>{key}:</Text>
+              <Text style={{ fontWeight: 'bold', color: '#FFD700' }}>{key}:</Text>
               <ObjectInspector data={value} />
             </View>
           ))}
@@ -108,7 +108,7 @@ const BriefResult: React.FC<BriefResultProps> = ({ brief, loading, error, iaSugg
         </View>
       )}
       {/* Mostrar contenido bruto siempre para depuración */}
-      <Text style={{ fontSize: 11, color: '#888', marginTop: 24 }} selectable>
+      <Text style={{ fontSize: 11, color: '#FFFFFF', marginTop: 24 }} selectable>
         {'Respuesta OpenAI (raw):\n' + (brief._raw !== undefined ? String(brief._raw) : '[Sin contenido recibido]')}
       </Text>
     </ScrollView>
@@ -117,17 +117,17 @@ const BriefResult: React.FC<BriefResultProps> = ({ brief, loading, error, iaSugg
 
 // Inspector recursivo para mostrar cualquier objeto/array de forma legible
 const ObjectInspector: React.FC<{ data: any; level?: number }> = ({ data, level = 0 }) => {
-  if (data === null || data === undefined) return <Text style={{ color: '#888' }}>[vacío]</Text>;
+  if (data === null || data === undefined) return <Text style={{ color: '#FFFFFF' }}>[vacío]</Text>;
   if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') {
-    return <Text style={{ color: '#444', marginLeft: level * 12 }}>{String(data)}</Text>;
+    return <Text style={{ color: '#FFFFFF', marginLeft: level * 12 }}>{String(data)}</Text>;
   }
   if (Array.isArray(data)) {
-    if (data.length === 0) return <Text style={{ color: '#888', marginLeft: level * 12 }}>[array vacío]</Text>;
+    if (data.length === 0) return <Text style={{ color: '#FFFFFF', marginLeft: level * 12 }}>[array vacío]</Text>;
     return (
       <View style={{ marginLeft: level * 12 }}>
         {data.map((item, i) => (
           <View key={i} style={{ marginBottom: 2 }}>
-            <Text style={{ color: '#888' }}>•</Text>
+            <Text style={{ color: '#FFD700' }}>•</Text>
             <ObjectInspector data={item} level={level + 1} />
           </View>
         ))}
@@ -136,119 +136,152 @@ const ObjectInspector: React.FC<{ data: any; level?: number }> = ({ data, level 
   }
   if (typeof data === 'object') {
     const keys = Object.keys(data);
-    if (keys.length === 0) return <Text style={{ color: '#888', marginLeft: level * 12 }}>[objeto vacío]</Text>;
+    if (keys.length === 0) return <Text style={{ color: '#FFFFFF', marginLeft: level * 12 }}>[objeto vacío]</Text>;
     return (
       <View style={{ marginLeft: level * 12 }}>
         {keys.map((k) => (
           <View key={k} style={{ marginBottom: 2 }}>
-            <Text style={{ fontWeight: 'bold', color: '#1976d2' }}>{k}:</Text>
+            <Text style={{ fontWeight: 'bold', color: '#FFD700' }}>{k}:</Text>
             <ObjectInspector data={data[k]} level={level + 1} />
           </View>
         ))}
       </View>
     );
   }
-  return <Text style={{ color: '#888' }}>[tipo no soportado]</Text>;
+  return <Text style={{ color: '#FFFFFF' }}>[tipo no soportado]</Text>;
 };
 
 const styles = StyleSheet.create({
   scroll: {
     width: '100%',
     marginTop: 24,
+    backgroundColor: '#000000',
   },
   container: {
     paddingBottom: 48,
     paddingHorizontal: 16,
+    backgroundColor: '#000000',
   },
   centered: {
     alignItems: 'center',
     marginTop: 32,
+    backgroundColor: '#000000',
+    padding: 32,
+    borderWidth: 4,
+    borderColor: '#FFD700',
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#1976d2',
+    fontWeight: '900',
+    color: '#FFD700',
     marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: -1,
+    textTransform: 'uppercase',
   },
   sectionLabel: {
-    fontWeight: 'bold',
+    fontWeight: '900',
     fontSize: 15,
     marginTop: 16,
-    color: '#333',
+    color: '#FFD700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   section: {
     fontSize: 15,
-    color: '#222',
+    color: '#FFFFFF',
     marginTop: 4,
     marginBottom: 4,
+    fontWeight: '700',
   },
   listItem: {
     fontSize: 14,
-    color: '#444',
+    color: '#FFFFFF',
     marginLeft: 12,
     marginBottom: 2,
+    fontWeight: '700',
   },
   requirements: {
     marginLeft: 8,
     marginBottom: 8,
+    backgroundColor: '#000000',
+    padding: 16,
+    borderWidth: 2,
+    borderColor: '#FFD700',
   },
   reqLabel: {
-    fontWeight: 'bold',
-    color: '#555',
+    fontWeight: '900',
+    color: '#FFD700',
     marginTop: 8,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   reqItem: {
     fontSize: 13,
-    color: '#555',
+    color: '#FFFFFF',
     marginLeft: 16,
+    fontWeight: '700',
   },
   error: {
-    color: '#d32f2f',
+    color: '#FFD700',
     fontSize: 15,
     marginTop: 16,
     textAlign: 'center',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   status: {
     fontSize: 16,
-    color: '#333',
+    color: '#FFFFFF',
     marginTop: 12,
     textAlign: 'center',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   phase: {
     marginTop: 8,
     marginBottom: 8,
     padding: 8,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 6,
+    backgroundColor: '#000000',
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   phaseTitle: {
-    fontWeight: 'bold',
-    color: '#1976d2',
+    fontWeight: '900',
+    color: '#FFD700',
     fontSize: 15,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   phaseDuration: {
     fontSize: 13,
-    color: '#888',
+    color: '#FFFFFF',
     marginBottom: 4,
+    fontWeight: '700',
   },
   iaSuggestionsBox: {
     marginTop: 24,
     padding: 12,
-    backgroundColor: '#fffbe6',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ffe082',
+    backgroundColor: '#000000',
+    borderRadius: 0,
+    borderWidth: 4,
+    borderColor: '#FFD700',
   },
   iaSuggestionsTitle: {
-    fontWeight: 'bold',
-    color: '#b28704',
+    fontWeight: '900',
+    color: '#FFD700',
     marginBottom: 6,
     fontSize: 15,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   iaSuggestionsText: {
-    color: '#7c6f00',
+    color: '#FFFFFF',
     fontSize: 14,
+    fontWeight: '700',
   },
 });
 

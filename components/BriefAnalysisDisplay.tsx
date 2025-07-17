@@ -27,7 +27,7 @@ const BriefAnalysisDisplay: React.FC<BriefAnalysisDisplayProps> = ({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color="#FFD700" />
         <Text style={styles.loadingText}>Analizando brief...</Text>
         <Text style={styles.loadingSubtext}>Evaluando calidad y completitud</Text>
       </View>
@@ -147,14 +147,14 @@ const BriefAnalysisDisplay: React.FC<BriefAnalysisDisplayProps> = ({
       )}
 
       {/* Recomendaciones */}
-      <Section title="Recomendaciones" icon="💡" color="#3b82f6">
+      <Section title="Recomendaciones" icon="💡" color="#FFD700">
         {analysis.recommendations.map((recommendation, index) => (
-          <BulletPoint key={index} text={recommendation} color="#3b82f6" />
+          <BulletPoint key={index} text={recommendation} color="#FFD700" />
         ))}
       </Section>
 
       {/* Análisis por sección */}
-      <Section title="Análisis por Sección" icon="📊" color="#6366f1">
+      <Section title="Análisis por Sección" icon="📊" color="#FFD700">
         {Object.entries(analysis.sectionAnalysis).map(([sectionKey, sectionData]) => (
           <View key={sectionKey} style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
@@ -264,30 +264,41 @@ const getSectionDisplayName = (sectionKey: string): string => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#000000',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
+    backgroundColor: '#000000',
+    borderWidth: 4,
+    borderColor: '#FFD700',
+    margin: 16,
   },
   loadingText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1e293b',
+    fontWeight: '900',
+    color: '#FFFFFF',
     marginTop: 16,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   loadingSubtext: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#FFD700',
     marginTop: 8,
+    fontWeight: '700',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
+    backgroundColor: '#000000',
+    borderWidth: 4,
+    borderColor: '#FFD700',
+    margin: 16,
   },
   errorIcon: {
     fontSize: 48,
@@ -295,48 +306,59 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#ef4444',
+    fontWeight: '900',
+    color: '#FFD700',
     marginBottom: 8,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   errorDetail: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 24,
+    fontWeight: '700',
   },
   retryButton: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#FFD700',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   retryButtonText: {
-    color: '#ffffff',
+    color: '#000000',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 40,
+    backgroundColor: '#000000',
+    borderWidth: 4,
+    borderColor: '#FFD700',
+    margin: 16,
   },
   emptyText: {
     fontSize: 16,
-    color: '#64748b',
+    color: '#FFFFFF',
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   headerCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: '#000000',
+    borderRadius: 0,
     padding: 24,
     margin: 16,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 4,
+    borderColor: '#FFD700',
   },
   scoreContainer: {
     flexDirection: 'row',
@@ -349,29 +371,34 @@ const styles = StyleSheet.create({
   },
   overallScore: {
     fontSize: 48,
-    fontWeight: '800',
-    color: '#1e293b',
+    fontWeight: '900',
+    color: '#FFD700',
   },
   scoreLabel: {
     fontSize: 24,
-    color: '#64748b',
+    color: '#FFFFFF',
     marginLeft: 4,
+    fontWeight: '900',
   },
   scoreTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1e293b',
+    fontWeight: '900',
+    color: '#FFFFFF',
     marginBottom: 8,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   readinessText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '900',
     marginBottom: 4,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   timeEstimate: {
     fontSize: 14,
-    color: '#64748b',
-    fontStyle: 'italic',
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   scoresGrid: {
     flexDirection: 'row',
@@ -381,17 +408,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   scoreCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+    backgroundColor: '#000000',
+    borderRadius: 0,
     padding: 16,
     width: '48%',
     alignItems: 'center',
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
   },
   scoreCardIcon: {
     fontSize: 24,
@@ -399,31 +423,31 @@ const styles = StyleSheet.create({
   },
   scoreCardValue: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: '900',
     marginBottom: 4,
+    color: '#FFD700',
   },
   scoreCardTitle: {
     fontSize: 12,
-    color: '#64748b',
+    color: '#FFFFFF',
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   section: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
+    backgroundColor: '#000000',
+    borderRadius: 0,
     margin: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 4,
+    borderColor: '#FFD700',
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
+    borderBottomWidth: 2,
+    borderBottomColor: '#FFD700',
     borderLeftWidth: 4,
   },
   sectionIcon: {
@@ -432,8 +456,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1e293b',
+    fontWeight: '900',
+    color: '#FFD700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   sectionContent: {
     padding: 16,
@@ -446,68 +472,78 @@ const styles = StyleSheet.create({
   bullet: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 0,
     marginTop: 6,
     marginRight: 12,
+    backgroundColor: '#FFD700',
   },
   bulletText: {
     flex: 1,
     fontSize: 15,
-    color: '#475569',
+    color: '#FFFFFF',
     lineHeight: 22,
+    fontWeight: '700',
   },
   sectionCard: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 8,
+    backgroundColor: '#000000',
+    borderRadius: 0,
     padding: 12,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   sectionScoreContainer: {
     alignItems: 'flex-end',
   },
   sectionName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
+    fontWeight: '900',
+    color: '#FFFFFF',
     flex: 1,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   sectionScore: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '900',
   },
   sectionStatus: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '700',
   },
   sectionIssues: {
     marginTop: 8,
   },
   sectionIssuesTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#ef4444',
+    fontWeight: '900',
+    color: '#FFD700',
     marginBottom: 4,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   sectionIssueText: {
     fontSize: 13,
-    color: '#dc2626',
+    color: '#FFFFFF',
     marginBottom: 2,
+    fontWeight: '700',
   },
   sectionSuggestions: {
     marginTop: 8,
   },
   sectionSuggestionsTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#3b82f6',
+    fontWeight: '900',
+    color: '#FFD700',
     marginBottom: 4,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   sectionSuggestionText: {
     fontSize: 13,
-    color: '#2563eb',
+    color: '#FFFFFF',
     marginBottom: 2,
+    fontWeight: '700',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -518,33 +554,34 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: 0,
     paddingVertical: 16,
     paddingHorizontal: 20,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
   },
   primaryButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#FFD700',
   },
   primaryButtonText: {
-    color: '#ffffff',
+    color: '#000000',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   secondaryButton: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    backgroundColor: '#000000',
+    borderWidth: 3,
+    borderColor: '#FFD700',
   },
   secondaryButtonText: {
-    color: '#475569',
+    color: '#FFD700',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   errorActions: {
     flexDirection: 'row',
@@ -552,15 +589,19 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   debugButton: {
-    backgroundColor: '#fbbf24',
+    backgroundColor: '#FFD700',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 0,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   debugButtonText: {
-    color: '#92400e',
+    color: '#000000',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
 });
 

@@ -529,55 +529,65 @@ const AudioToTextScreen: React.FC = () => {
               </Text>
             </Pressable>
             
-            <Pressable
-              style={[styles.saveButton, { backgroundColor: '#2563eb', marginTop: 12 }]}
-              onPress={() => {
-                console.log('📤 TXT EXPORT BUTTON PRESSED!');
-                handleExportBrief(briefToShow, 'txt');
-              }}
-            >
-              <Text style={styles.saveButtonText}>📤 Exportar como TXT</Text>
-            </Pressable>
-            
-            <Pressable
-              style={[styles.saveButton, { backgroundColor: '#10b981', marginTop: 8 }]}
-              onPress={() => {
-                console.log('📝 MD EXPORT BUTTON PRESSED!');
-                handleExportBrief(briefToShow, 'md');
-              }}
-            >
-              <Text style={styles.saveButtonText}>📝 Exportar como Markdown</Text>
-            </Pressable>
-            
-            <Pressable
-              style={[styles.saveButton, { backgroundColor: '#f59e0b', marginTop: 8 }]}
-              onPress={() => {
-                console.log('🌐 HTML EXPORT BUTTON PRESSED!');
-                handleExportBrief(briefToShow, 'html');
-              }}
-            >
-              <Text style={styles.saveButtonText}>🌐 Exportar como HTML</Text>
-            </Pressable>
-            
-            <Pressable
-              style={[styles.saveButton, { backgroundColor: '#8b5cf6', marginTop: 8 }]}
-              onPress={() => {
-                console.log('📊 JSON EXPORT BUTTON PRESSED!');
-                handleExportBrief(briefToShow, 'json');
-              }}
-            >
-              <Text style={styles.saveButtonText}>📊 Exportar como JSON</Text>
-            </Pressable>
-            
-            <Pressable
-              style={[styles.saveButton, { backgroundColor: '#ef4444', marginTop: 8 }]}
-              onPress={() => {
-                console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
-                handleExportBrief(briefToShow, 'all');
-              }}
-            >
-              <Text style={styles.saveButtonText}>📦 Exportar TODOS los formatos</Text>
-            </Pressable>
+            <View style={styles.exportSection}>
+              <Text style={styles.exportSectionTitle}>📤 Exportar Brief</Text>
+              
+              <View style={styles.exportButtonsGrid}>
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    console.log('📤 TXT EXPORT BUTTON PRESSED!');
+                    handleExportBrief(briefToShow, 'txt');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>📄</Text>
+                  <Text style={styles.exportButtonText}>TXT</Text>
+                </Pressable>
+                
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    console.log('📝 MD EXPORT BUTTON PRESSED!');
+                    handleExportBrief(briefToShow, 'md');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>📝</Text>
+                  <Text style={styles.exportButtonText}>MD</Text>
+                </Pressable>
+                
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    console.log('🌐 HTML EXPORT BUTTON PRESSED!');
+                    handleExportBrief(briefToShow, 'html');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>🌐</Text>
+                  <Text style={styles.exportButtonText}>HTML</Text>
+                </Pressable>
+                
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    console.log('📊 JSON EXPORT BUTTON PRESSED!');
+                    handleExportBrief(briefToShow, 'json');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>📊</Text>
+                  <Text style={styles.exportButtonText}>JSON</Text>
+                </Pressable>
+              </View>
+              
+              <Pressable
+                style={styles.exportAllButton}
+                onPress={() => {
+                  console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
+                  handleExportBrief(briefToShow, 'all');
+                }}
+              >
+                <Text style={styles.exportAllButtonText}>📦 Exportar Todos los Formatos</Text>
+              </Pressable>
+            </View>
             
             {currentBriefId && (
               <Text style={styles.autoSaveText}>
@@ -747,6 +757,65 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     marginTop: 12,
     fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  exportSection: {
+    marginTop: 24,
+    width: '100%',
+    alignItems: 'center',
+  },
+  exportSectionTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginBottom: 16,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  exportButtonsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  exportButton: {
+    backgroundColor: '#000000',
+    borderWidth: 3,
+    borderColor: '#FFD700',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 80,
+    minHeight: 80,
+  },
+  exportButtonIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  exportButtonText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  exportAllButton: {
+    backgroundColor: '#FFD700',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 280,
+  },
+  exportAllButtonText: {
+    color: '#000000',
+    fontSize: 14,
+    fontWeight: '900',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },

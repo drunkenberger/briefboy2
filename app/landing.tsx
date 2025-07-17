@@ -251,8 +251,11 @@ export default function LandingPage() {
         {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.footerLeft}>
-            <Text style={styles.footerText}>© 2024 BRIEF BOY</Text>
+            <Text style={styles.footerText}>© 2025 BRIEF BOY</Text>
             <Text style={styles.footerTagline}>BRIEFS SIN BULLSHIT</Text>
+            <Text style={styles.footerWaza}>
+              Desarrollo by <Text style={styles.footerWazaHighlight}>WAZA</Text> - We are WAZA and we are coding an easier world <Text style={styles.footerHeart}>❤️</Text>
+            </Text>
           </View>
           
           <View style={styles.footerSocials}>
@@ -685,6 +688,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 1,
+  },
+  footerWaza: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginTop: 8,
+    lineHeight: 18,
+  },
+  footerWazaHighlight: {
+    color: '#FFD700',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
+  },
+  footerHeart: {
+    color: '#FFD700',
+    fontSize: 14,
   },
   footerSocials: {
     flexDirection: 'row',

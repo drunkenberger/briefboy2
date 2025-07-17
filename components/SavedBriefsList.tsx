@@ -67,6 +67,15 @@ const SavedBriefsList: React.FC<SavedBriefsListProps> = ({
         <Text style={styles.emptySubtitle}>
           Graba un audio y genera tu primer brief
         </Text>
+        
+        <View style={styles.emptyTips}>
+          <Text style={styles.emptyTipsTitle}>💡 Consejos para tu primer brief:</Text>
+          <Text style={styles.emptyTipsText}>• Describe claramente el producto o servicio</Text>
+          <Text style={styles.emptyTipsText}>• Menciona el público objetivo específico</Text>
+          <Text style={styles.emptyTipsText}>• Incluye objetivos medibles y KPIs</Text>
+          <Text style={styles.emptyTipsText}>• Especifica presupuesto y timeline</Text>
+          <Text style={styles.emptyTipsText}>• Detalla canales de comunicación preferidos</Text>
+        </View>
       </View>
     );
   }
@@ -207,6 +216,32 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  emptyTips: {
+    backgroundColor: '#000000',
+    borderRadius: 0,
+    padding: 24,
+    marginTop: 32,
+    borderWidth: 2,
+    borderColor: '#FFD700',
+    width: '100%',
+    maxWidth: 400,
+  },
+  emptyTipsTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#FFD700',
+    marginBottom: 16,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+  },
+  emptyTipsText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginBottom: 8,
+    fontWeight: '700',
+    lineHeight: 20,
   },
 });
 

@@ -28,7 +28,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = ({
         #zsiq_float {
           left: 30px !important;
           right: auto !important;
-          bottom: 30px !important;
+          bottom: 140px !important;
         }
         
         /* Cambiar colores del botón */
@@ -79,7 +79,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = ({
           background-color: #FFD700 !important;
           left: 30px !important;
           right: auto !important;
-          bottom: 30px !important;
+          bottom: 140px !important;
         }
       `;
       document.head.appendChild(style);
@@ -153,7 +153,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = ({
 const styles = StyleSheet.create({
   mobileIndicator: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 140,
     left: 30,
     backgroundColor: '#FFD700',
     borderWidth: 4,

@@ -199,6 +199,8 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
         <View style={styles.instructionsContainer}>
           <Text style={styles.instructionsTitle}>💡 Consejos:</Text>
+          <Text style={styles.instructionsText}>• Tiempo máximo de grabación: 8 minutos</Text>
+          <Text style={styles.instructionsText}>• Para análisis más largos, sube texto o archivo manualmente</Text>
           <Text style={styles.instructionsText}>• Habla claro y con volumen normal</Text>
           <Text style={styles.instructionsText}>• Menciona objetivos, audiencia y presupuesto</Text>
           <Text style={styles.instructionsText}>• Incluye detalles sobre canales y timelines</Text>

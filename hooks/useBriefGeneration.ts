@@ -40,7 +40,7 @@ Respond with ONLY a valid JSON object in the following comprehensive structure. 
   },
   "brandPositioning": "Clear statement of how the brand positions itself in the market and in the mind of consumers",
   "creativeStrategy": {
-    "bigIdea": "The central creative concept that will guide the entire campaign",
+    "bigIdea": "The creative starting point that will guide the entire campaign",
     "messageHierarchy": [
       "Primary message",
       "Secondary supporting message",

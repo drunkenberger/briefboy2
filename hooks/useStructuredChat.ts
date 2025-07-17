@@ -79,7 +79,7 @@ export function useStructuredChat(
     { key: 'brandPositioning', label: 'Posicionamiento de Marca', required: true },
     
     // Estrategia Creativa
-    { key: 'creativeStrategy.bigIdea', label: 'Gran Idea Creativa', required: true },
+    { key: 'creativeStrategy.bigIdea', label: 'Punto de Partida Creativo', required: true },
     { key: 'creativeStrategy.messageHierarchy', label: 'Jerarquía de Mensajes', required: true },
     { key: 'creativeStrategy.toneAndManner', label: 'Tono y Manera', required: true },
     { key: 'creativeStrategy.creativeMandatories', label: 'Elementos Obligatorios', required: false },
@@ -358,7 +358,7 @@ export function useStructuredChat(
         'targetAudience.primary': 'Falta definir la audiencia primaria. ¿Quién es exactamente tu audiencia objetivo principal? Incluye demografía, psicografía y comportamientos.',
         'targetAudience.insights': 'Necesitamos insights sobre la audiencia. ¿Qué motivaciones, necesidades o comportamientos clave has identificado en tu audiencia?',
         'brandPositioning': 'No hay posicionamiento de marca definido. ¿Cómo quieres que tu marca sea percibida en relación a la competencia?',
-        'creativeStrategy.bigIdea': 'Falta la gran idea creativa. ¿Cuál es el concepto central que guiará toda la campaña?',
+        'creativeStrategy.bigIdea': 'Falta el punto de partida creativo. ¿Cuál es el concepto central que guiará toda la campaña?',
         'creativeStrategy.messageHierarchy': 'Necesitamos la jerarquía de mensajes. ¿Cuáles son los mensajes clave ordenados por importancia?',
         'creativeStrategy.toneAndManner': 'No está definido el tono y manera. ¿Cómo debe sonar y sentirse la comunicación de la marca?',
         'channelStrategy.integratedApproach': 'Falta el enfoque integrado de canales. ¿Cómo se complementarán los diferentes canales de comunicación?',
@@ -383,7 +383,7 @@ export function useStructuredChat(
         'targetAudience.primary': `La descripción de la audiencia necesita más detalle. ¿Puedes añadir información sobre edad, ubicación, intereses, comportamientos de compra y canales preferidos?`,
         'targetAudience.insights': `Los insights actuales necesitan profundidad. ¿Qué insights específicos tienes sobre motivaciones, barreras o triggers de compra?`,
         'brandPositioning': `El posicionamiento necesita ser más diferenciado. ¿Cómo se distingue tu marca específicamente de la competencia?`,
-        'creativeStrategy.bigIdea': `La gran idea creativa necesita ser más impactante. ¿Hay un concepto más memorable que conecte emocionalmente con la audiencia?`,
+        'creativeStrategy.bigIdea': `El punto de partida creativo necesita ser más impactante. ¿Hay un concepto más memorable que conecte emocionalmente con la audiencia?`,
         'creativeStrategy.messageHierarchy': `Los mensajes necesitan mejor jerarquización. ¿Cuál es el mensaje principal y cómo se apoyan los secundarios?`,
         'creativeStrategy.toneAndManner': `El tono necesita ser más específico. ¿Puedes describir con más detalle la personalidad de marca y cómo debe sonar?`,
         'channelStrategy.integratedApproach': `El enfoque integrado necesita más detalle. ¿Cómo se complementarán específicamente los canales para maximizar el impacto?`,
