@@ -214,7 +214,7 @@ const StructuredChatInterface: React.FC<StructuredChatInterfaceProps> = ({
       />
 
       {/* Input para escribir */}
-      <View style={[styles.inputContainer, { paddingBottom: keyboardHeight > 0 ? 8 : 16 }]}>
+      <View style={[styles.inputContainer, { paddingBottom: keyboardHeight > 0 ? 8 : 16, marginBottom: keyboardHeight > 0 ? 0 : 10 }]}>
         <TextInput
           style={styles.textInput}
           value={inputText}
@@ -248,14 +248,16 @@ const StructuredChatInterface: React.FC<StructuredChatInterfaceProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#000000',
+    display: 'flex',
+    flexDirection: 'column',
   },
   progressContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#000000',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: 'rgba(255, 215, 0, 0.3)',
   },
   progressHeader: {
     flexDirection: 'row',
@@ -265,77 +267,78 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+    fontWeight: '500',
+    color: '#FFFFFF',
   },
   progressPercentage: {
     fontSize: 14,
-    fontWeight: '700',
-    color: '#2563eb',
+    fontWeight: '600',
+    color: '#FFD700',
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 3,
+    backgroundColor: '#333333',
+    borderRadius: 0,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#2563eb',
-    borderRadius: 3,
+    backgroundColor: '#FFD700',
+    borderRadius: 0,
   },
   currentQuestionContainer: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#111111',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#fbbf24',
+    borderBottomColor: 'rgba(255, 215, 0, 0.3)',
   },
   currentQuestionLabel: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#92400e',
-    marginBottom: 2,
+    fontWeight: '500',
+    color: '#FFD700',
+    marginBottom: 4,
   },
   currentQuestionField: {
     fontSize: 14,
-    color: '#b45309',
+    color: '#FFFFFF',
   },
   connectionStatus: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: '#111111',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#fecaca',
+    borderBottomColor: 'rgba(255, 215, 0, 0.3)',
   },
   connectionStatusText: {
-    color: '#dc2626',
+    color: '#FFD700',
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
   },
   errorBanner: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: '#111111',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#fbbf24',
+    borderBottomColor: 'rgba(255, 215, 0, 0.3)',
   },
   errorText: {
-    color: '#b45309',
+    color: '#FFD700',
     fontSize: 14,
     fontWeight: '500',
     textAlign: 'center',
   },
   messagesList: {
     flex: 1,
+    paddingBottom: 140,
   },
   messagesContainer: {
-    paddingVertical: 16,
+    paddingVertical: 20,
   },
   messageContainer: {
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   userMessageContainer: {
     alignItems: 'flex-end',
@@ -346,54 +349,58 @@ const styles = StyleSheet.create({
   messageBubble: {
     maxWidth: '85%',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 18,
+    paddingVertical: 14,
+    borderRadius: 0,
   },
   userBubble: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#FFD700',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   assistantBubble: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#111111',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: 'rgba(255, 215, 0, 0.3)',
   },
   typingBubble: {
-    paddingVertical: 16,
+    paddingVertical: 18,
   },
   questionIndicator: {
-    backgroundColor: '#dbeafe',
+    backgroundColor: '#FFD700',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 0,
     marginBottom: 8,
     alignSelf: 'flex-start',
   },
   questionIndicatorText: {
     fontSize: 12,
-    color: '#1e40af',
+    color: '#000000',
     fontWeight: '600',
   },
   messageText: {
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 22,
   },
   userText: {
-    color: '#ffffff',
+    color: '#000000',
   },
   assistantText: {
-    color: '#1e293b',
+    color: '#FFFFFF',
   },
   copyButton: {
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#000000',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 0,
     marginTop: 8,
     alignSelf: 'flex-end',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
   },
   copyButtonText: {
     fontSize: 12,
-    color: '#475569',
+    color: '#FFD700',
     fontWeight: '500',
   },
   messageTime: {
@@ -401,10 +408,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   userTime: {
-    color: '#e2e8f0',
+    color: '#000000',
+    opacity: 0.7,
   },
   assistantTime: {
-    color: '#9ca3af',
+    color: '#FFFFFF',
+    opacity: 0.7,
   },
   typingIndicator: {
     flexDirection: 'row',
@@ -415,8 +424,8 @@ const styles = StyleSheet.create({
   typingDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
-    backgroundColor: '#9ca3af',
+    borderRadius: 0,
+    backgroundColor: '#FFD700',
     marginHorizontal: 2,
   },
   typingDot1: {
@@ -430,49 +439,56 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontSize: 14,
-    color: '#9ca3af',
+    color: '#FFD700',
     fontStyle: 'italic',
+    opacity: 0.8,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: 16,
-    paddingTop: 12,
-    backgroundColor: '#ffffff',
+    paddingTop: 16,
+    paddingBottom: 16,
+    backgroundColor: '#000000',
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
+    borderTopColor: 'rgba(255, 215, 0, 0.3)',
+    position: 'relative',
+    zIndex: 1,
   },
   textInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 20,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
+    borderRadius: 0,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
     maxHeight: 100,
-    backgroundColor: '#ffffff',
-    color: '#1e293b',
+    backgroundColor: '#111111',
+    color: '#FFFFFF',
   },
   sendButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: '#2563eb',
+    borderRadius: 0,
+    backgroundColor: '#FFD700',
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   sendButtonDisabled: {
-    backgroundColor: '#cbd5e1',
+    backgroundColor: '#333333',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   sendButtonText: {
-    color: '#ffffff',
+    color: '#000000',
     fontSize: 16,
     fontWeight: '600',
   },
   sendButtonTextDisabled: {
-    color: '#9ca3af',
+    color: '#666666',
   },
 });
 

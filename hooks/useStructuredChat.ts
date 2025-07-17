@@ -110,336 +110,106 @@ export function useStructuredChat(
     { key: 'appendix.references', label: 'Referencias', required: false },
   ], []);
 
-  // Generar preguntas estructuradas basadas en el brief completo
+  // Generar preguntas estructuradas basadas en el análisis de la IA
   const generateStructuredQuestions = useCallback((briefData: any, analysisData: any): StructuredQuestion[] => {
+    if (!analysisData) {
+      console.warn("No hay datos de análisis para generar preguntas.");
+      return [];
+    }
+
+    console.log('Generando preguntas inteligentes basadas en análisis:', { score: analysisData.overallScore });
+
+    // Caso 1: El brief es excelente (score >= 95)
+    if (analysisData.overallScore >= 95) {
+      return [
+        {
+          id: 'enrichment-1',
+          field: 'strategicThinking',
+          question: "🚀 ¡Felicidades! Tu brief es excelente y está prácticamente listo. Para llevarlo a un nivel superior, pensemos de forma disruptiva: ¿Qué insight contraintuitivo o completamente nuevo sobre tu audiencia podría cambiar las reglas del juego para esta campaña?",
+          priority: 'low',
+          completed: false,
+        },
+        {
+          id: 'enrichment-2',
+          field: 'creativeHorizon',
+          question: "Tu brief es muy sólido. Como un ejercicio de expansión creativa, si no tuvieras ninguna limitación (presupuesto, canales, etc.), ¿cuál sería la idea más audaz que te atreverías a proponer?",
+          priority: 'low',
+          completed: false,
+        }
+      ];
+    }
+
+    // Caso 2: El brief necesita mejoras (score < 95)
     const questions: StructuredQuestion[] = [];
-    
-    console.log('Generando preguntas para todo el brief:', { briefData });
-    
-    // Usar la función centralizada para obtener todos los campos
     const allBriefFields = getAllBriefFields();
+
+    if (analysisData.sectionAnalysis) {
+      for (const sectionKey in analysisData.sectionAnalysis) {
+        const section = analysisData.sectionAnalysis[sectionKey];
+        
+        // Generar preguntas solo para secciones que no son excelentes o buenas
+        if (section.status === 'fair' || section.status === 'poor' || section.status === 'missing') {
+          const fieldConfig = allBriefFields.find(f => f.key === sectionKey);
+          const fieldLabel = fieldConfig ? fieldConfig.label : sectionKey;
+          const priority = fieldConfig?.required ? 'high' : 'medium';
+
+          // Combinar issues y suggestions en preguntas concretas
+          if (section.issues && section.issues.length > 0) {
+            section.issues.forEach((issue: string, index: number) => {
+              questions.push({
+                id: `issue-${sectionKey}-${index}`,
+                field: sectionKey,
+                question: `🚨 En la sección "${fieldLabel}", se identificó un problema: "${issue}". ¿Cómo podemos resolver esto o qué información adicional puedes proporcionar?`,
+                priority: priority,
+                completed: false,
+              });
+            });
+          }
+          
+          if (section.suggestions && section.suggestions.length > 0) {
+            section.suggestions.forEach((suggestion: string, index: number) => {
+              questions.push({
+                id: `suggestion-${sectionKey}-${index}`,
+                field: sectionKey,
+                question: `💡 Para mejorar la sección "${fieldLabel}", se sugiere: "${suggestion}". ¿Qué detalles puedes añadir al respecto?`,
+                priority: priority,
+                completed: false,
+              });
+            });
+          }
+        }
+      }
+    }
     
-    // Generar preguntas para cada campo usando la lógica inteligente
-    allBriefFields.forEach((field) => {
-      const fieldQuestions = generateQuestionsForBriefField(field, briefData);
-      questions.push(...fieldQuestions);
-    });
-    
-    // Ordenar por prioridad (requeridos primero)
+    // Si después de analizar las secciones no hay preguntas, pero el score es bajo, usar recomendaciones generales.
+    if (questions.length === 0 && analysisData.recommendations && analysisData.recommendations.length > 0) {
+        analysisData.recommendations.forEach((rec: string, index: number) => {
+            questions.push({
+                id: `rec-${index}`,
+                field: 'general',
+                question: `📈 Recomendación general para mejorar tu brief: ${rec} ¿Cómo podrías aplicar esto?`,
+                priority: 'medium',
+                completed: false,
+            });
+        });
+    }
+
+    // Ordenar por prioridad
     const sortedQuestions = questions.sort((a, b) => {
       const priorityOrder = { high: 3, medium: 2, low: 1 };
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
-    
-    console.log('Preguntas generadas después de filtros inteligentes:', sortedQuestions.length, sortedQuestions.map(q => `${q.field}: ${q.question.substring(0, 50)}...`));
+
+    console.log('Preguntas generadas por la nueva lógica inteligente:', sortedQuestions.length, sortedQuestions.map(q => `${q.field}: ${q.question.substring(0, 60)}...`));
     
     return sortedQuestions;
-  }, [getArrayFields]);
-  
-  // Función para generar preguntas adicionales basadas en campos faltantes o débiles
-  const generateAdditionalQuestions = useCallback((briefData: any, completedQuestionsSet?: Set<string>): StructuredQuestion[] => {
-    const questions: StructuredQuestion[] = [];
-    const questionsToCheck = completedQuestionsSet || completedQuestions;
-    
-    // Usar la función centralizada para obtener todos los campos
-    const allBriefFields = getAllBriefFields();
-    
-    // Revisar cada campo y generar preguntas si es necesario
-    allBriefFields.forEach((field) => {
-      const questionId = `field-${field.key}`;
-      
-      // Solo generar si no está ya completada
-      if (!questionsToCheck.has(questionId)) {
-        const fieldQuestions = generateQuestionsForBriefField(field, briefData);
-        
-        // Filtrar preguntas que no hayan sido completadas
-        const newQuestions = fieldQuestions.filter(q => !questionsToCheck.has(q.id));
-        questions.push(...newQuestions);
-      }
-    });
-    
-    console.log('🔄 Preguntas adicionales generadas:', {
-      totalGenerated: questions.length,
-      questionsFields: questions.map(q => q.field),
-      briefFieldsAnalyzed: allBriefFields.length,
-      completedQuestionsCount: questionsToCheck.size,
-      sampleBriefContent: {
-        projectTitle: briefData?.projectTitle,
-        strategicObjectives: briefData?.strategicObjectives,
-        targetAudience: briefData?.targetAudience
-      }
-    });
-    
-    return questions;
-  }, [completedQuestions, getAllBriefFields]);
-  
-  // Función para evaluar si un campo necesita mejora basado en su contenido y tipo
-  const needsImprovement = (fieldKey: string, currentValue: any): boolean => {
-    if (!currentValue) return false;
-    
-    // Diferentes criterios según el tipo de campo
-    switch (fieldKey) {
-      case 'projectTitle':
-        // Un título es bueno si tiene al menos 3 palabras significativas y no es genérico
-        const titleWords = currentValue.split(' ').filter((w: string) => w.length > 2);
-        const isGeneric = currentValue.toLowerCase().includes('proyecto') &&
-                         currentValue.toLowerCase().includes('campaña') &&
-                         currentValue.toLowerCase().includes('brief');
-        const isTooShort = titleWords.length < 2;
-        const isVeryGeneric = currentValue.toLowerCase() === 'proyecto' || 
-                             currentValue.toLowerCase() === 'campaña' ||
-                             currentValue.toLowerCase() === 'brief';
-        
-        // Solo necesita mejora si es realmente débil
-        return isTooShort || isVeryGeneric || (isGeneric && titleWords.length < 4);
-      
-      case 'briefSummary':
-        // Un resumen debe tener al menos 100 caracteres y ser descriptivo
-        return currentValue.length < 100 || 
-               !currentValue.includes('objetivo') ||
-               currentValue.split('.').length < 3;
-      
-      case 'businessChallenge':
-        // Un desafío debe explicar un problema específico
-        return currentValue.length < 80 ||
-               !currentValue.toLowerCase().includes('problema') ||
-               !currentValue.toLowerCase().includes('necesita');
-      
-      case 'strategicObjectives':
-        // Objetivos deben ser específicos y medibles
-        if (Array.isArray(currentValue)) {
-          return currentValue.length < 3 ||
-                 currentValue.some((obj: string) => obj.length < 30 || !obj.includes('%'));
-        }
-        return true;
-      
-      case 'targetAudience.primary':
-        // Audiencia debe incluir demografía y psicografía
-        return currentValue.length < 100 ||
-               !currentValue.toLowerCase().includes('edad') ||
-               !currentValue.toLowerCase().includes('inter');
-      
-      case 'targetAudience.insights':
-        // Insights deben ser profundos y específicos
-        if (Array.isArray(currentValue)) {
-          return currentValue.length < 2 ||
-                 currentValue.some((insight: string) => insight.length < 50);
-        }
-        return true;
-      
-      case 'brandPositioning':
-        // Posicionamiento debe ser claro y diferenciado
-        return currentValue.length < 80 ||
-               !currentValue.toLowerCase().includes('competencia') ||
-               !currentValue.toLowerCase().includes('único');
-      
-      case 'creativeStrategy.bigIdea':
-        // Gran idea debe ser impactante y memorable
-        return currentValue.length < 60 ||
-               currentValue.split(' ').length < 8;
-      
-      case 'creativeStrategy.messageHierarchy':
-        // Mensajes deben estar jerarquizados
-        if (Array.isArray(currentValue)) {
-          return currentValue.length < 3 ||
-                 currentValue.some((msg: string) => msg.length < 20);
-        }
-        return true;
-      
-      case 'creativeStrategy.toneAndManner':
-        // Tono debe ser específico y detallado
-        return currentValue.length < 60 ||
-               currentValue.split(',').length < 3;
-      
-      case 'channelStrategy.integratedApproach':
-        // Enfoque integrado debe explicar sinergia
-        return currentValue.length < 100 ||
-               !currentValue.toLowerCase().includes('canal') ||
-               !currentValue.toLowerCase().includes('integra');
-      
-      case 'successMetrics.primary':
-        // KPIs deben ser específicos y medibles
-        if (Array.isArray(currentValue)) {
-          return currentValue.length < 3 ||
-                 currentValue.some((kpi: string) => kpi.length < 20 || !kpi.includes('%'));
-        }
-        return true;
-      
-      case 'successMetrics.measurementFramework':
-        // Framework debe explicar metodología
-        return currentValue.length < 100 ||
-               !currentValue.toLowerCase().includes('medición') ||
-               !currentValue.toLowerCase().includes('método');
-      
-      case 'nextSteps':
-        // Próximos pasos deben ser actionables
-        if (Array.isArray(currentValue)) {
-          return currentValue.length < 3 ||
-                 currentValue.some((step: string) => step.length < 30 || !step.includes('semana'));
-        }
-        return true;
-      
-      // Campos que normalmente están vacíos en briefs iniciales
-      case 'riskAssessment.risks':
-      case 'implementationRoadmap.phases':
-      case 'budgetConsiderations.estimatedRange':
-      case 'budgetConsiderations.keyInvestments':
-      case 'budgetConsiderations.costOptimization':
-      case 'channelStrategy.recommendedMix':
-      case 'successMetrics.secondary':
-      case 'appendix.assumptions':
-      case 'appendix.references':
-        // Estos campos casi siempre necesitan trabajo
-        return true;
-      
-      default:
-        // Para campos no especificados, usar criterio general
-        if (Array.isArray(currentValue)) {
-          return currentValue.length < 2;
-        }
-        return currentValue.length < 50;
-    }
-  };
-  
-  // Función para generar preguntas para un campo específico del brief
-  const generateQuestionsForBriefField = (fieldConfig: any, briefData: any): StructuredQuestion[] => {
-    const questions: StructuredQuestion[] = [];
-    
-    // Obtener el valor actual del campo
-    let currentValue: any;
-    if (fieldConfig.key.includes('.')) {
-      const [parent, child] = fieldConfig.key.split('.');
-      currentValue = briefData[parent]?.[child];
-    } else {
-      currentValue = briefData[fieldConfig.key];
-    }
-    
-    // Determinar si el campo necesita mejora
-    const isEmpty = !currentValue || 
-      (Array.isArray(currentValue) && currentValue.length === 0) ||
-      (typeof currentValue === 'string' && currentValue.trim() === '') ||
-      (typeof currentValue === 'object' && Object.keys(currentValue).length === 0);
-    
-    // Lógica inteligente para determinar si un campo es débil basado en su tipo
-    const isWeak = !isEmpty && needsImprovement(fieldConfig.key, currentValue);
-    
-    // Generar pregunta solo si el campo está vacío o realmente necesita mejora
-    if (isEmpty || isWeak) {
-      const priority = fieldConfig.required ? 'high' : 'medium';
-      const question = generateQuestionForField(fieldConfig.key, fieldConfig.label, currentValue, isEmpty);
-      
-      console.log(`Campo ${fieldConfig.key}: isEmpty=${isEmpty}, isWeak=${isWeak}, valor="${currentValue}", pregunta generada=${!!question}`);
-      
-      if (question) {
-        questions.push({
-          id: `field-${fieldConfig.key}`,
-          field: fieldConfig.key,
-          question,
-          priority,
-          completed: false,
-        });
-      }
-    } else {
-      console.log(`Campo ${fieldConfig.key}: NO necesita mejora - valor="${currentValue}"`);
-    }
-    
-    return questions;
-  };
-  
-  // Función para generar la pregunta específica para cada campo
-  const generateQuestionForField = (fieldKey: string, fieldLabel: string, currentValue: any, isEmpty: boolean): string => {
-    if (isEmpty) {
-      // Preguntas para campos vacíos
-      const emptyQuestions: { [key: string]: string } = {
-        'projectTitle': 'Necesitamos un título específico para el proyecto. ¿Cuál es el nombre oficial de la campaña o proyecto?',
-        'briefSummary': 'Falta el resumen ejecutivo. ¿Puedes describir en 2-3 párrafos qué es este proyecto, por qué es importante y qué se espera lograr?',
-        'businessChallenge': 'No veo definido el desafío de negocio. ¿Cuál es el problema específico que esta campaña debe resolver?',
-        'strategicObjectives': 'Necesitamos objetivos estratégicos claros. ¿Cuáles son los 3-5 objetivos principales que quieres alcanzar con esta campaña?',
-        'targetAudience.primary': 'Falta definir la audiencia primaria. ¿Quién es exactamente tu audiencia objetivo principal? Incluye demografía, psicografía y comportamientos.',
-        'targetAudience.insights': 'Necesitamos insights sobre la audiencia. ¿Qué motivaciones, necesidades o comportamientos clave has identificado en tu audiencia?',
-        'brandPositioning': 'No hay posicionamiento de marca definido. ¿Cómo quieres que tu marca sea percibida en relación a la competencia?',
-        'creativeStrategy.bigIdea': 'Falta el punto de partida creativo. ¿Cuál es el concepto central que guiará toda la campaña?',
-        'creativeStrategy.messageHierarchy': 'Necesitamos la jerarquía de mensajes. ¿Cuáles son los mensajes clave ordenados por importancia?',
-        'creativeStrategy.toneAndManner': 'No está definido el tono y manera. ¿Cómo debe sonar y sentirse la comunicación de la marca?',
-        'channelStrategy.integratedApproach': 'Falta el enfoque integrado de canales. ¿Cómo se complementarán los diferentes canales de comunicación?',
-        'successMetrics.primary': 'No hay KPIs primarios definidos. ¿Cuáles son las métricas principales para medir el éxito de la campaña?',
-        'successMetrics.measurementFramework': 'Falta el framework de medición. ¿Cómo medirás el éxito de manera integral?',
-        'riskAssessment.risks': 'No hay análisis de riesgos. ¿Qué riesgos potenciales identificas para este proyecto y cómo los mitigarías?',
-        'implementationRoadmap.phases': 'Falta la hoja de ruta de implementación. ¿Cuáles serían las fases principales para ejecutar esta campaña?',
-        'nextSteps': 'No hay próximos pasos definidos. ¿Cuáles son las acciones inmediatas que se deben tomar?',
-        'budgetConsiderations.estimatedRange': 'No hay estimación presupuestaria. ¿Cuál es el rango de presupuesto disponible para esta campaña?',
-        'budgetConsiderations.keyInvestments': 'Faltan las inversiones clave. ¿En qué áreas principales se debe invertir el presupuesto?',
-        'appendix.assumptions': 'No hay supuestos documentados. ¿Qué supuestos clave estás considerando para este proyecto?',
-      };
-      
-      return emptyQuestions[fieldKey] || `Necesitamos información sobre ${fieldLabel}. ¿Puedes proporcionar detalles específicos?`;
-    } else {
-      // Preguntas para campos que necesitan mejora
-      const improvementQuestions: { [key: string]: string } = {
-        'projectTitle': `El título "${currentValue}" podría ser más específico. ¿Hay un nombre más descriptivo que capture mejor la esencia del proyecto?`,
-        'briefSummary': `El resumen actual necesita más contexto estratégico. ¿Puedes ampliar explicando el contexto de negocio, el problema que resuelve y el impacto esperado?`,
-        'businessChallenge': `El desafío descrito necesita más especificidad. ¿Puedes profundizar en las causas del problema y por qué es crítico resolverlo ahora?`,
-        'strategicObjectives': `Los objetivos actuales necesitan ser más específicos y medibles. ¿Puedes reformularlos con métricas concretas y plazos?`,
-        'targetAudience.primary': `La descripción de la audiencia necesita más detalle. ¿Puedes añadir información sobre edad, ubicación, intereses, comportamientos de compra y canales preferidos?`,
-        'targetAudience.insights': `Los insights actuales necesitan profundidad. ¿Qué insights específicos tienes sobre motivaciones, barreras o triggers de compra?`,
-        'brandPositioning': `El posicionamiento necesita ser más diferenciado. ¿Cómo se distingue tu marca específicamente de la competencia?`,
-        'creativeStrategy.bigIdea': `El punto de partida creativo necesita ser más impactante. ¿Hay un concepto más memorable que conecte emocionalmente con la audiencia?`,
-        'creativeStrategy.messageHierarchy': `Los mensajes necesitan mejor jerarquización. ¿Cuál es el mensaje principal y cómo se apoyan los secundarios?`,
-        'creativeStrategy.toneAndManner': `El tono necesita ser más específico. ¿Puedes describir con más detalle la personalidad de marca y cómo debe sonar?`,
-        'channelStrategy.integratedApproach': `El enfoque integrado necesita más detalle. ¿Cómo se complementarán específicamente los canales para maximizar el impacto?`,
-        'successMetrics.primary': `Los KPIs necesitan ser más específicos. ¿Puedes definir métricas concretas con targets numéricos?`,
-        'successMetrics.measurementFramework': `El framework de medición necesita más estructura. ¿Cómo medirás el éxito a corto, mediano y largo plazo?`,
-        'nextSteps': `Los próximos pasos necesitan ser más específicos. ¿Puedes definir acciones concretas con responsables y fechas?`,
-      };
-      
-      return improvementQuestions[fieldKey] || `La información sobre ${fieldLabel} necesita más detalle. ¿Puedes ampliar con información más específica?`;
-    }
-  };
+  }, [getAllBriefFields]);
   
   
   
   
 
-  // Inicializar chat y preguntas
-  useEffect(() => {
-    if (brief && analysis && messages.length === 0) {
-      console.log('🚀 Inicializando chat estructurado...');
-      const generatedQuestions = generateStructuredQuestions(brief, analysis);
-      setQuestions(generatedQuestions);
-      setWorkingBrief(normalizeBrief(brief));
-      
-      if (generatedQuestions.length > 0) {
-        const welcomeMessage: ChatMessage = {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: `¡Hola! Voy a hacerte preguntas específicas para completar y mejorar tu brief hasta alcanzar el 100% de completitud.
-
-📊 **Nuevo sistema inteligente:**
-- Analizo TODOS los campos del brief (no solo 5 preguntas)
-- Continúo hasta que el brief esté completamente optimizado
-- Muestro tu progreso en tiempo real
-- El brief se actualiza automáticamente, pero puedes editarlo manualmente
-
-**Empecemos con las primeras optimizaciones:**`,
-          timestamp: Date.now(),
-        };
-        
-        const firstQuestion: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: generatedQuestions[0].question,
-          timestamp: Date.now(),
-          questionId: generatedQuestions[0].id,
-          briefField: generatedQuestions[0].field,
-        };
-        
-        setMessages([welcomeMessage, firstQuestion]);
-        console.log('✅ Chat inicializado con', generatedQuestions.length, 'preguntas');
-      } else {
-        console.log('⚠️ No se generaron preguntas - brief podría estar completo');
-      }
-    }
-  }, [brief, analysis, generateStructuredQuestions]);
+  
 
   // Función para verificar integridad del brief
   const verifyBriefIntegrity = useCallback((brief: any, source: string) => {
@@ -861,6 +631,31 @@ FORMATO DE RESPUESTA OBLIGATORIO:
     return briefData[fieldKey];
   };
 
+  const processNextQuestion = useCallback(() => {
+    const nextIndex = currentQuestionIndex + 1;
+    if (nextIndex < questions.length) {
+      setCurrentQuestionIndex(nextIndex);
+      const nextQuestion = questions[nextIndex];
+      const nextQuestionMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        role: 'assistant',
+        content: nextQuestion.question,
+        timestamp: Date.now(),
+        questionId: nextQuestion.id,
+        briefField: nextQuestion.field,
+      };
+      setMessages(prev => [...prev, nextQuestionMessage]);
+    } else {
+      const finalMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        role: 'assistant',
+        content: "✅ ¡Excelente trabajo! Hemos cubierto todos los puntos de mejora identificados. El brief está ahora mucho más robusto. Puedes cerrar esta ventana o seguir editando manualmente.",
+        timestamp: Date.now(),
+      };
+      setMessages(prev => [...prev, finalMessage]);
+    }
+  }, [currentQuestionIndex, questions]);
+
   // Enviar mensaje y procesar respuesta
   const sendMessage = useCallback(async (messageContent: string) => {
     if (!messageContent.trim()) return;
@@ -888,10 +683,8 @@ FORMATO DE RESPUESTA OBLIGATORIO:
     setError(null);
     
     try {
-      // Obtener el workingBrief más actualizado directamente del estado
       const currentWorkingBrief = workingBrief;
       
-      // Procesar respuesta y actualizar brief
       const responseData = await processUserResponse(
         messageContent.trim(),
         currentQuestion.id,
@@ -899,7 +692,6 @@ FORMATO DE RESPUESTA OBLIGATORIO:
         currentWorkingBrief
       );
       
-      // Marcar pregunta como completada
       setQuestions(prev => prev.map(q => 
         q.id === currentQuestion.id ? { ...q, completed: true } : q
       ));
@@ -913,190 +705,13 @@ FORMATO DE RESPUESTA OBLIGATORIO:
       
       setMessages(prev => [...prev, assistantMessage]);
       
-      // Usar el brief actualizado directamente de la respuesta
       const briefToEvaluate = responseData.updatedBrief;
       
-      // ACTUALIZACIÓN ATÓMICA: Estado local + Modal
-      console.log('🔁 SINCRONIZANDO ESTADO:', {
-        campo: currentQuestion.field,
-        timestamp: new Date().toLocaleTimeString()
-      });
-      
-      // 1. Actualizar estado local del hook
       setWorkingBrief(briefToEvaluate);
-      
-      // 2. Notificar al modal inmediatamente
       onBriefChange(briefToEvaluate);
       
-      // 3. Verificación exhaustiva
-      const verificationValue = getFieldValue(briefToEvaluate, currentQuestion.field);
-      const updateSuccess = verificationValue !== undefined && verificationValue !== null && 
-                           (Array.isArray(verificationValue) ? verificationValue.length > 0 : true);
-      
-      console.log('🎯 VERIFICACIÓN POST-ACTUALIZACIÓN:', {
-        campo: currentQuestion.field,
-        actualizacionExitosa: updateSuccess,
-        valor: verificationValue,
-        tipo: Array.isArray(verificationValue) ? 'array' : typeof verificationValue,
-        longitud: Array.isArray(verificationValue) ? verificationValue.length : 
-                 typeof verificationValue === 'string' ? verificationValue.length : 'N/A',
-        briefCompleto: Object.keys(briefToEvaluate).length + ' campos',
-        timestamp: new Date().toLocaleTimeString()
-      });
-      
-      // 4. Alerta si hay problemas (excepto campos opcionales)
-      const camposOpcionales = ['targetAudience.secondary', 'creativeStrategy.creativeMandatories', 
-                               'budgetConsiderations.estimatedRange', 'appendix.assumptions'];
-      
-      if (!updateSuccess && !camposOpcionales.includes(currentQuestion.field)) {
-        console.error('🚨 FALLO CRÍTICO EN ACTUALIZACIÓN:', {
-          campo: currentQuestion.field,
-          mensajeUsuario: messageContent,
-          valorEsperado: 'algún valor',
-          valorObtenido: verificationValue,
-          briefAntes: Object.keys(workingBrief || {}).length + ' campos',
-          briefDespues: Object.keys(briefToEvaluate).length + ' campos'
-        });
-      }
-      
-      console.log('🔄 SendMessage: Brief actualizado y sincronizado:', {
-        field: currentQuestion.field,
-        updatedValue: getFieldValue(briefToEvaluate, currentQuestion.field),
-        briefFieldCount: Object.keys(briefToEvaluate).length,
-        briefUpdated: true
-      });
-      
-      // Procesar siguiente pregunta
-      setTimeout(async () => {
-        try {
-          console.log('Procesando siguiente pregunta. Brief actualizado:', briefToEvaluate);
-          
-          // Marcar la pregunta actual como completada
-          const currentQuestion = questions[currentQuestionIndex];
-          if (currentQuestion) {
-            setCompletedQuestions(prev => new Set([...prev, currentQuestion.id]));
-            
-            // También marcar en el array de preguntas
-            setQuestions(prev => prev.map(q => 
-              q.id === currentQuestion.id 
-                ? { ...q, completed: true }
-                : q
-            ));
-          }
-          
-          // Buscar la siguiente pregunta no completada
-          const nextIndex = currentQuestionIndex + 1;
-          const updatedCompletedQuestions = new Set([...completedQuestions, currentQuestion?.id]);
-          const nextUncompletedQuestion = questions.slice(nextIndex).find(q => !updatedCompletedQuestions.has(q.id));
-          
-          if (nextUncompletedQuestion) {
-            // Continuar con la siguiente pregunta existente
-            const nextQuestionIndex = questions.findIndex(q => q.id === nextUncompletedQuestion.id);
-            setCurrentQuestionIndex(nextQuestionIndex);
-            
-            const nextQuestionMessage: ChatMessage = {
-              id: (Date.now() + 2).toString(),
-              role: 'assistant',
-              content: nextUncompletedQuestion.question,
-              timestamp: Date.now(),
-              questionId: nextUncompletedQuestion.id,
-              briefField: nextUncompletedQuestion.field,
-            };
-            
-            setMessages(prev => [...prev, nextQuestionMessage]);
-            
-          } else {
-            // No hay más preguntas, generar nuevas si es necesario
-            console.log('🔍 Generando preguntas adicionales con brief actualizado:', {
-              briefFieldCount: Object.keys(briefToEvaluate).length,
-              completedQuestions: updatedCompletedQuestions.size
-            });
-            
-            const newQuestions = generateAdditionalQuestions(briefToEvaluate, updatedCompletedQuestions);
-            
-            if (newQuestions.length > 0) {
-              const nextQuestion = newQuestions[0];
-              
-              console.log('🎯 Nueva pregunta generada:', {
-                field: nextQuestion.field,
-                question: nextQuestion.question.substring(0, 100) + '...'
-              });
-              
-              const nextQuestionMessage: ChatMessage = {
-                id: (Date.now() + 2).toString(),
-                role: 'assistant',
-                content: `Continuemos optimizando: ${nextQuestion.question}`,
-                timestamp: Date.now(),
-                questionId: nextQuestion.id,
-                briefField: nextQuestion.field,
-              };
-              
-              setMessages(prev => [...prev, nextQuestionMessage]);
-              setQuestions(prev => [...prev, ...newQuestions]);
-              setCurrentQuestionIndex(questions.length);
-              
-            } else {
-              // Evaluar completitud final
-              const evaluation = await evaluateBrief(briefToEvaluate);
-              
-              if (evaluation.isComplete) {
-                const finalMessage: ChatMessage = {
-                  id: (Date.now() + 2).toString(),
-                  role: 'assistant',
-                  content: `¡Excelente! Tu brief está completo con un puntaje de ${evaluation.completionScore}%. 
-
-He analizado toda la información y el brief está listo para producción. ¿Hay algún aspecto específico que te gustaría revisar o ajustar?`,
-                  timestamp: Date.now(),
-                };
-                
-                setMessages(prev => [...prev, finalMessage]);
-              } else {
-                // Generar preguntas basadas en la evaluación de IA
-                if (evaluation.nextQuestions.length > 0) {
-                  const nextQuestion = evaluation.nextQuestions[0];
-                  const newQuestion: StructuredQuestion = {
-                    id: `ai-generated-${Date.now()}`,
-                    field: 'general',
-                    question: nextQuestion,
-                    priority: 'medium',
-                    completed: false,
-                  };
-                  
-                  const nextQuestionMessage: ChatMessage = {
-                    id: (Date.now() + 2).toString(),
-                    role: 'assistant',
-                    content: `Puntaje actual: ${evaluation.completionScore}%. ${nextQuestion}`,
-                    timestamp: Date.now(),
-                    questionId: newQuestion.id,
-                    briefField: newQuestion.field,
-                  };
-                  
-                  setMessages(prev => [...prev, nextQuestionMessage]);
-                  setQuestions(prev => [...prev, newQuestion]);
-                  setCurrentQuestionIndex(questions.length);
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Error processing next question:', error);
-          // Fallback simple: continuar con la siguiente pregunta
-          const nextIndex = currentQuestionIndex + 1;
-          if (nextIndex < questions.length) {
-            setCurrentQuestionIndex(nextIndex);
-            
-            const nextQuestion: ChatMessage = {
-              id: (Date.now() + 2).toString(),
-              role: 'assistant',
-              content: questions[nextIndex].question,
-              timestamp: Date.now(),
-              questionId: questions[nextIndex].id,
-              briefField: questions[nextIndex].field,
-            };
-            
-            setMessages(prev => [...prev, nextQuestion]);
-          }
-        }
+      setTimeout(() => {
+        processNextQuestion();
       }, 1000);
       
       setIsConnected(true);
@@ -1116,7 +731,7 @@ He analizado toda la información y el brief está listo para producción. ¿Hay
     } finally {
       setIsTyping(false);
     }
-  }, [questions, currentQuestionIndex, processUserResponse, workingBrief]);
+  }, [questions, currentQuestionIndex, processUserResponse, workingBrief, processNextQuestion]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
@@ -1135,9 +750,8 @@ He analizado toda la información y el brief está listo para producción. ¿Hay
   }, [onBriefChange]);
 
   const initializeChat = useCallback(() => {
-    console.log('🔄 Reinicializando chat estructurado...');
+    console.log('🔄 Reinicializando chat estructurado con lógica inteligente...');
     
-    // Limpiar estado actual
     setMessages([]);
     setQuestions([]);
     setCurrentQuestionIndex(0);
@@ -1146,25 +760,27 @@ He analizado toda la información y el brief está listo para producción. ¿Hay
     setIsConnected(true);
     setIsTyping(false);
     
-    // Inicializar con el brief actual
     if (brief && analysis) {
       const generatedQuestions = generateStructuredQuestions(brief, analysis);
       setQuestions(generatedQuestions);
       setWorkingBrief(normalizeBrief(brief));
       
+      let welcomeMessageContent: string;
+      if (analysis.overallScore >= 95) {
+        welcomeMessageContent = `🌟 **¡Excelente trabajo!** Tu brief tiene una puntuación de ${analysis.overallScore}/100. Es muy sólido.
+
+Te haré un par de preguntas de alto nivel para explorar ideas aún más audaces y llevarlo de 'excelente' a 'excepcional'.`;
+      } else {
+        welcomeMessageContent = `Hola! Tu brief tiene una puntuación de ${analysis.overallScore}/100. He identificado algunas áreas de mejora.
+
+Te haré preguntas específicas basadas en el análisis para fortalecer tu brief. ¡Empecemos!`;
+      }
+
       if (generatedQuestions.length > 0) {
         const welcomeMessage: ChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `¡Hola! Voy a hacerte preguntas específicas para completar y mejorar tu brief hasta alcanzar el 100% de completitud.
-
-📊 **Nuevo sistema inteligente:**
-- Analizo TODOS los campos del brief (no solo 5 preguntas)
-- Continúo hasta que el brief esté completamente optimizado
-- Muestro tu progreso en tiempo real
-- El brief se actualiza automáticamente, pero puedes editarlo manualmente
-
-**Empecemos con las primeras optimizaciones:**`,
+          content: welcomeMessageContent,
           timestamp: Date.now(),
         };
         
@@ -1178,24 +794,26 @@ He analizado toda la información y el brief está listo para producción. ¿Hay
         };
         
         setMessages([welcomeMessage, firstQuestion]);
-        console.log('✅ Chat reinicializado con', generatedQuestions.length, 'preguntas');
+        console.log('✅ Chat inteligente inicializado con', generatedQuestions.length, 'preguntas.');
       } else {
-        console.log('⚠️ No se generaron preguntas - brief podría estar completo');
-        
-        // Mostrar mensaje de brief completo
         const completeBriefMessage: ChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `¡Excelente! Tu brief parece estar muy completo. 
-
-¿Hay algún aspecto específico que te gustaría revisar o mejorar?`,
+          content: `🎉 **¡Felicidades!** Tu brief ha alcanzado una puntuación de ${analysis.overallScore}/100 y no se han identificado áreas críticas para mejorar. Está listo para producción.`,
           timestamp: Date.now(),
         };
         
         setMessages([completeBriefMessage]);
+        console.log('✅ Brief completo. No se generaron preguntas de mejora.');
       }
     }
   }, [brief, analysis, generateStructuredQuestions]);
+
+  useEffect(() => {
+    if (brief && analysis) {
+      initializeChat();
+    }
+  }, [brief, analysis, initializeChat]);
 
   return {
     messages,

@@ -273,8 +273,11 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
             <View style={styles.sideBySideContainer}>
               {/* Panel izquierdo: Chat estructurado */}
               <View style={styles.chatPanel}>
-                <View style={styles.panelHeader}>
-                  <Text style={styles.panelTitle}>💬 Chat Estructurado</Text>
+                <View style={[styles.panelHeader, styles.chatPanelHeader]}>
+                  <View style={styles.panelTitleContainer}>
+                    <View style={styles.panelIndicator} />
+                    <Text style={styles.panelTitle}>💬 Chat Estructurado</Text>
+                  </View>
                   <Text style={styles.panelSubtitle}>
                     Responde las preguntas una por una
                   </Text>
@@ -292,8 +295,11 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
 
               {/* Panel derecho: Brief editable */}
               <View style={styles.briefPanel}>
-                <View style={styles.panelHeader}>
-                  <Text style={styles.panelTitle}>📝 Brief en Tiempo Real</Text>
+                <View style={[styles.panelHeader, styles.briefPanelHeader]}>
+                  <View style={styles.panelTitleContainer}>
+                    <View style={[styles.panelIndicator, styles.briefPanelIndicator]} />
+                    <Text style={styles.panelTitle}>📝 Brief en Tiempo Real</Text>
+                  </View>
                   <Text style={styles.panelSubtitle}>
                     Se actualiza automáticamente
                   </Text>
@@ -387,47 +393,45 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#000000',
     paddingTop: Platform.OS === 'ios' ? 44 : 20,
-    paddingBottom: 16,
-    borderBottomWidth: 4,
-    borderBottomColor: '#FFD700',
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 215, 0, 0.3)',
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   backButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
     backgroundColor: '#FFD700',
     marginRight: 12,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   backButtonText: {
     color: '#000000',
     fontSize: 16,
-    fontWeight: '900',
+    fontWeight: '600',
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
   },
   headerTitle: {
     flex: 1,
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '600',
     color: '#FFFFFF',
     textAlign: 'center',
-    letterSpacing: -1,
-    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 0,
     backgroundColor: '#000000',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 12,
@@ -435,7 +439,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 20,
     color: '#FFFFFF',
-    fontWeight: '900',
+    fontWeight: '600',
   },
   stepIndicator: {
     flexDirection: 'row',
@@ -466,80 +470,122 @@ const styles = StyleSheet.create({
   sideBySideContainer: {
     flex: 1,
     flexDirection: 'row',
+    minHeight: 0,
   },
   chatPanel: {
-    flex: 1,
+    flex: 0.55,
     backgroundColor: '#111111',
-    borderRightWidth: 4,
+    borderRightWidth: 3,
     borderRightColor: '#FFD700',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   briefPanel: {
-    flex: 1,
+    flex: 0.45,
     backgroundColor: '#000000',
-    minHeight: 0, // Allows flex child to shrink
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+    shadowColor: '#000000',
+    shadowOffset: { width: -2, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   panelHeader: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 20,
     backgroundColor: '#000000',
-    borderBottomWidth: 3,
+    borderBottomWidth: 2,
     borderBottomColor: '#FFD700',
+    position: 'relative',
   },
   panelTitle: {
     fontSize: 20,
-    fontWeight: '900',
+    fontWeight: '600',
     color: '#FFD700',
-    marginBottom: 4,
+    marginBottom: 6,
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
   },
   panelSubtitle: {
     fontSize: 14,
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '400',
     letterSpacing: 0.5,
+    opacity: 0.8,
+  },
+  panelTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  panelIndicator: {
+    width: 4,
+    height: 24,
+    backgroundColor: '#FFD700',
+    marginRight: 12,
+    borderRadius: 0,
+  },
+  chatPanelHeader: {
+    backgroundColor: '#111111',
+  },
+  briefPanelHeader: {
+    backgroundColor: '#1a1a1a',
+  },
+  briefPanelIndicator: {
+    backgroundColor: '#FFD700',
+    opacity: 0.8,
   },
   structuredFooter: {
     backgroundColor: '#000000',
-    borderTopWidth: 4,
-    borderTopColor: '#FFD700',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 215, 0, 0.3)',
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   footerInfo: {
     flex: 1,
-    marginRight: 16,
+    marginRight: 20,
   },
   footerText: {
     fontSize: 14,
     color: '#FFFFFF',
-    fontWeight: '700',
-    marginBottom: 4,
+    fontWeight: '400',
+    marginBottom: 6,
     letterSpacing: 0.5,
+    lineHeight: 20,
   },
   footerSubtext: {
     fontSize: 12,
     color: '#FFD700',
-    fontWeight: '700',
+    fontWeight: '400',
     letterSpacing: 0.5,
+    lineHeight: 18,
+    opacity: 0.8,
   },
   applyButton: {
     backgroundColor: '#FFD700',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingHorizontal: 28,
+    paddingVertical: 18,
     borderRadius: 0,
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   applyButtonText: {
     color: '#000000',
     fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   applyButtonSuccess: {
     backgroundColor: '#FFD700',
@@ -547,8 +593,8 @@ const styles = StyleSheet.create({
   },
   applyButtonHasChanges: {
     backgroundColor: '#FFD700',
-    borderColor: '#FFFFFF',
-    borderWidth: 4,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderWidth: 2,
   },
   applyButtonTextSuccess: {
     color: '#000000',
@@ -566,17 +612,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#FFD700',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
     marginTop: 8,
     alignSelf: 'flex-start',
   },
   debugButtonText: {
     color: '#FFD700',
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '500',
     letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    opacity: 0.8,
   },
 });
 
