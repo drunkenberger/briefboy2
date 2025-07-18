@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 
 interface ZohoSalesIQWidgetProps {
-  widgetCode?: string;
+  // No se aceptan props para forzar la configuración a través de variables de entorno.
 }
 
 /**
@@ -10,10 +10,21 @@ interface ZohoSalesIQWidgetProps {
  * En web: carga el script de Zoho directamente
  * En mobile: muestra indicador de disponibilidad
  */
-const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = ({ 
-  widgetCode = "siqcac6ccaff06943ac0b9dc85c19f146c8382faef57bf5a58fb3189ff00dca96ab" 
-}) => {
+const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
+  const widgetCode = process.env.EXPO_PUBLIC_ZOHO_WIDGET_CODE;
+
   useEffect(() => {
+    // Validar que el widget code exista antes de hacer nada
+    if (!widgetCode) {
+      if (Platform.OS === 'web') {
+        console.warn(
+          'Zoho SalesIQ: El widget code no está configurado. ' +
+          'Añade EXPO_PUBLIC_ZOHO_WIDGET_CODE a tu archivo .env para habilitar el chat.'
+        );
+      }
+      return; // No renderizar nada si no hay código
+    }
+
     // Solo ejecutar en web
     if (Platform.OS === 'web') {
       // Verificar si el script ya existe
@@ -23,6 +34,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = ({
 
       // Agregar estilos CSS personalizados para el widget de Zoho
       const style = document.createElement('style');
+      style.id = 'zsiqstyle'; // Asignar ID para poder eliminarlo después
       style.textContent = `
         /* Personalizar el botón flotante de Zoho */
         #zsiq_float {
@@ -129,6 +141,10 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = ({
         const existingScript = document.getElementById('zsiqscript');
         if (existingScript) {
           existingScript.remove();
+        }
+        const existingStyle = document.getElementById('zsiqstyle');
+        if (existingStyle) {
+          existingStyle.remove();
         }
       };
     }

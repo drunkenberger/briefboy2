@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
+import { knowledgeBaseService } from '../services/knowledgeBaseService';
 
-const SYSTEM_PROMPT = `You are Elena Rodriguez, a seasoned Marketing Director with 15+ years of experience. Your task is to CREATE a comprehensive Marketing Brief (not analyze one) from a meeting transcription.
+const SYSTEM_PROMPT = `You are Elena Rodriguez, a seasoned Marketing Director with 15+ years of experience at top agencies like Ogilvy, BBDO, and TBWA. Your task is to CREATE a comprehensive Marketing Brief (not analyze one) from a meeting transcription.
+
+KNOWLEDGE BASE - MEJORES PRÁCTICAS DE BRIEFS:
+${knowledgeBaseService.getAllKnowledge()}
+
+Based on this knowledge base, ensure your brief follows industry best practices and avoids common mistakes.
 
 **IMPORTANT:** You are NOT analyzing an existing brief. You are CREATING a new marketing brief from scratch based on the transcription.
 
@@ -390,13 +396,26 @@ export function useBriefGeneration(transcript: string | null, enabled: boolean =
             throw new Error("La IA devolvió un análisis del brief en lugar de crear un brief. Reintentando...");
           }
 
-          // Validar que tiene campos mínimos del brief (soportando nuevo y viejo formato)
-          const hasOldFormat = parsed.title || parsed.summary || parsed.objectives;
-          const hasNewFormat = parsed.projectTitle || parsed.briefSummary || parsed.strategicObjectives;
+          // Validar que tiene campos mínimos del brief y que no mezcla formatos
+          const oldFormatKeys = ['title', 'summary', 'objectives', 'problemStatement', 'targetAudience', 'successMetrics', 'requirements', 'keyMessages', 'timeline', 'channelsAndTactics', 'riskAnalysis', 'dependencies', 'assumptions', 'outOfScope', 'campaignPhases'];
+          const newFormatKeys = ['projectTitle', 'briefSummary', 'businessChallenge', 'strategicObjectives', 'brandPositioning', 'creativeStrategy', 'channelStrategy', 'successMetrics', 'budgetConsiderations', 'riskAssessment', 'implementationRoadmap', 'nextSteps', 'appendix'];
 
-          if (!hasOldFormat && !hasNewFormat) {
-            throw new Error("El JSON parseado no contiene campos esenciales del brief");
+          const hasOldFormat = oldFormatKeys.some(key => parsed.hasOwnProperty(key));
+          const hasNewFormat = newFormatKeys.some(key => parsed.hasOwnProperty(key));
+
+          // Escenario 1: Formato mixto (inválido)
+          if (hasOldFormat && hasNewFormat) {
+            console.error('❌ Error de validación: El brief contiene una mezcla de campos de formato antiguo y nuevo.');
+            throw new Error("Error de formato: El brief no puede contener una mezcla de campos antiguos y nuevos. Se debe usar un formato de manera consistente.");
           }
+
+          // Escenario 2: Ningún formato detectado (inválido)
+          if (!hasOldFormat && !hasNewFormat) {
+            console.error('❌ Error de validación: El JSON no parece ser un brief válido.');
+            throw new Error("El JSON parseado no contiene campos esenciales del brief. La estructura es irreconocible.");
+          }
+
+          console.log(`✅ Formato detectado: ${hasOldFormat ? 'Antiguo' : 'Nuevo'}`);
 
           // Validar que los campos tienen contenido real (no están vacíos)
           const hasEmptyFields = [];

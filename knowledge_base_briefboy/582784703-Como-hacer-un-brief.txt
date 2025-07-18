@@ -1,0 +1,2296 @@
+A user’s guide
+to the DO Brief
+                  TM
+
+
+
+
+Ogilvy & Mather
+A user’s guide
+to the DO Brief
+                  TM
+
+
+
+
+Tim Broadbent
+Contents
+
+
+
+
+     Foreword                                                                 5
+
+     Introduction                                                             7
+
+1.   How to fill in the DO Brief, section by section                         13
+
+2.   Examples of good DO Briefs, and reasons why they’re good                23
+
+3.   Inspiration, 24-hour Briefs, a RedWorks Brief and the actual briefing   35
+
+     Appendix: Examples of good DO Briefs from
+     Ogilvy Public Relations Worldwide, OgilvyAction and OgilvyOne           45
+    	
+
+    Brand                                 Product                               Job No.                               Date
+
+
+
+
+    Task                                                                        Success Criteria
+
+     E.g., new product launch, reposition the brand, generate inquiries          How will this activity be measured and are these measurements in place?
+
+
+
+    Why is this brief here?
+    What’s keeping the client awake at night? What’s happening in the client’s business that has prompted the need for
+    communication? What is the big brilliant problem we can help to solve?
+
+    Who are we trying to influence?
+    Who is it we need to influence and how (if at all) do they currently think, feel and behave towards the brand/category/
+    product area? Ask yourself what they are currently doing that we need to change. Think about any barriers that exist.
+    Please bring these people to life in a way that will help the creative team get inside their heads, not just as general
+    consumers but within the context of the specific challenge the brand faces. NB: The relevant points will set the scene;
+    more in-depth info can be attached in the Inspiration section or saved for the briefing.
+
+
+    What do we want them to DO as a result of this communication?
+    When it says “do” it means DO. This is the actual change in behavior that will ultimately affect the client’s business—
+    and help them sleep well at night. A simplistic answer like “buy more X” is not enough—everyone in the business is
+    doing that. Be specific rather than general. You’ll need to have explored who you need to influence, what they are
+    currently doing, and how we need to change it before you can express this fully.
+
+    How do we expect communications to work towards achieving this?
+    How are the communications actually going to DO that? Will they shock, engage, make things more relevant, entice
+    people to trial, create a unified voice for the brand, change the way people feel about when and where they should
+    consume the product and so get them to consume it more often? How will our communications reward people for
+    the time they spend with them?
+
+    What are we trying to convey?
+    What is the core thought that will drive the creative solution? Think about whether this should be a big ideaL™,
+    a killer fact, a promise, a straight message, or just a plain and simple big idea—it depends on the task at hand.
+
+
+    What will help people to KNOW this?                                         What will help people to FEEL this?
+    What makes this competitive, relevant to the target and                     What are the core values or personality of the brand we need
+    true? NB: Additional product detail can be attached as                      to stay true to? Are we questioning or directing? Are we
+    an addendum to the core brief.                                              being inclusive or exclusive? Are we talking conspiratorially
+                                                                                with people or are we distant and authoritative? What do
+                                                                                we imagine the tone of the communication to be?
+
+
+    Mandatories                                           Channels                                            Supporting Materials
+    What are the immutable “must haves”                   Where and when will we reach people                 List any additional technical specs,
+    or “must nots” for this task? E.g., avoid             in the most receptive state of mind?                copy briefs, or product details
+    attacking competition or using slapstick              (Please expand as needed.)                          supporting this brief.
+    humor, ensure culturally sensitive
+    references, feature the product, etc.
+
+
+    Account Director                                  Planning Director                                Creative Director
+
+
+
+
+    Creative Development Time    Final Review Date              Client Presentation Date     Final Deadline                  Production Budget
+
+
+
+
+4
+Foreword
+By Tham Khai Meng, Worldwide Creative Director
+    Pervasive Creativity. It’s what Ogilvy aims for. We want to be the network that
+    does the best, the freshest and the hottest creative work in the world.
+
+    That’s why I’m delighted by this renewed focus on the very start of the creative
+    process—the creative brief.
+
+    Everyone who writes a creative brief has the opportunity to make a difference.
+    You remember the old computer acronym GIGO? “Garbage In, Garbage Out.”
+    It’s like that with briefs.
+
+    Every creative team has horror stories of receiving lousy briefs. Dull, vague,
+    confusing, thoughtless briefs. What chance do they have of producing sparkling,
+    fresh creative work if the account team doesn’t brief them properly?
+
+    But every creative team also remembers those briefs that made a difference. Briefs that
+    ignited their imaginations. Briefs that opened up new possibilities. Briefs that inspired
+    and enthused.
+
+    That’s what Pervasive Creativity means here. Writing a brief has to be a creative act
+    in itself. That will give creative teams their best chance of producing great work.
+    The better the brief, the better the work.
+
+    Our Twin Peaks strategy—the strategy of producing the most creative work in
+    the world as well as the most effective—starts here. With great briefs.
+
+    The DO Brief TM form is here to help you. It asks the tough questions you need
+    to answer in order to write great briefs. Please study and apply the lessons in
+    this short book.
+
+    Thank you, and good luck.
+
+
+
+
+6
+Introduction
+By Tim Broadbent, Global Effectiveness Director
+    WHY IS THIS GUIDE HERE?
+
+    President John F. Kennedy wanted to sell the idea of landing a man on the Moon.
+    He said, “We choose to go to the Moon in this decade and do the other things,
+    not because they are easy, but because they are hard.”
+
+    The DO Brief is hard. Most creative briefs ask familiar questions. The DO Brief
+    asks tough new questions. This guide explains why. It will help you answer those
+    questions better.
+
+
+    WHAT’S NEW ABOUT THE DO BRIEF?
+
+    1. It begins with a question about the client’s business issue.
+       Not an awareness issue, or an image issue, or a positioning issue, but a business issue.
+       Unless our creative work helps drive the client’s business, it will pass like a ship
+       in the night. All clients want profitable growth. How can we help?
+
+       To help solve the client’s business issue, we need a commercial idea—an idea
+       that uses Ogilvy’s creativity to address their business issue.
+
+    2. It asks what communications must get consumers to do.
+       How must consumer behavior change—not just awareness or perceptions, but
+       behavior? For instance, a charity ad might raise your awareness. It might even
+       move you to tears. But unless you put your hand in your pocket to donate money,
+       it failed.
+
+    3. It asks how communications will change behavior.
+       All campaigns exist to get somebody to do something, but they work in different
+       ways. Some persuade, giving rational information about a product benefit.
+       Others make the brand famous. Still others strengthen emotional engagement.
+       There are many other possibilities. We need to be clear about which communications
+       model applies in this situation.
+
+    4. It asks what we need to convey.
+       Unlike most creative briefing forms, it does not assume the solution is always
+       to drive a logical, factual proposition into consumers’ minds. Often the most
+       effective campaigns create an emotional impression of the brand. Conveying
+       information can be effective, but conveying feelings can be more effective.
+
+    5. It is channel-neutral and global.
+       Previously, Ogilvy & Mather Advertising, OgilvyOne, Ogilvy Public Relations
+       Worldwide and OgilvyAction each had different briefing forms. The DO Brief
+       encourages integration among strategists of all disciplines because it is the shared
+       platform for all activity. It is also used in all regions. All of us must use the same
+       tools in this globalized world.
+
+
+
+
+8
+WHY DOES IT ASK THESE QUESTIONS?
+
+1. To improve briefing quality.
+   Filling in the DO Brief ought to make your brain hurt. It demands clarity, focus
+   and consistency as well as creative stimulation. The harder you work at the briefing
+   form, the better the briefing will be.
+
+2. To help clients buy original work.
+   It is easier for our marketing clients to sell seen-it-before creative work within
+   their own companies. Helping them buy fresh, truly original work is part of the
+   planner’s job, perhaps the most important part. Stanley Pollitt, one of the fathers
+   of account planning, said something crucial about the planner’s role that seems
+   to have been forgotten: “The rationale of creative work after it has been developed
+   will become much more important than the initial creative brief.”
+
+   What is a “rationale of creative work”? It is a narrative that explains how the work
+   will sell more. It involves four steps:
+     i) Review the brand’s sales and position in the market to identify
+        a business opportunity.
+    ii) Identify the key consumer segment for that opportunity.
+   iii) Analyze consumer behavior and attitudes in terms of the defined
+        business opportunity.
+   iv) Articulate the role of communications in bringing about the desired
+        behavioral change.
+   These reflect the first four questions on the DO Brief. Answer them properly
+   and you are well on the way to selling the work as strategically right.
+
+3. To judge creative work.
+   Creative work should be judged against strategy. Unless you happen to be
+   in the target market, it doesn’t matter whether you personally like, say, the look
+   of the lead actor or the music track. The question is whether the work will get
+   the sales job done.
+
+   If you and the client agree on the communications strategy—by going through
+   the Ogilvy FusionTM process and the DO Brief together—it will be easier to
+   judge whether the work will be effective with its target audience.
+
+
+
+
+                                                                                          9
+     WHERE DOES IT FIT INTO OGILVY FUSION?
+
+     Ogilvy Fusion is Ogilvy’s new operating system. Its purpose is to provide a way
+     for our disciplines to work more closely together and produce deeply integrated
+     360 Degree campaigns.
+
+     There are two versions: Ogilvy Fusion (designed to be completed in 48 hours
+     or a similarly short time) and Ogilvy FusionProTM (designed for longer and more
+     complex marketing programs). They share the same five-stage process:
+
+
+
+
+     There are three Ogilvy Fusion stages before the DO Brief.
+
+     Business Ambition is first. This asks the essential questions to help articulate the
+     client’s business issue or opportunity. It then helps define the marketing and
+     communications goals.
+
+     Customer Experience identifies barriers and drivers to purchase at each step of
+     the consumer journey. It also covers the desired consumer response to our
+     communications at each step.
+
+     Architecture identifies the roles for communications and basic channel choices
+     at each step.
+
+
+
+
+10
+The Solution inspired by the DO Brief is the fourth stage. It follows as
+a natural progression from the previous Ogilvy Fusion stages. In essence,
+Ogilvy Fusion is a statement of our strategy, and the DO Brief is the one-page
+summary and creative inspiration—it is where the rubber meets the road.
+
+You may need sub-briefs for particular communications tasks or channels in
+very elaborate, complex campaigns. Use the DO Brief format for these too.
+
+The fifth stage is Effectiveness, which identifies key success metrics based on
+the Business Ambition we started with.
+
+
+ACKNOWLEDGEMENTS
+
+Colin Mitchell and John Shaw wrote key sections. Paul Matheson,
+Gavin Macdonald, and Catherine Moustou of Ogilvy Asia Pacific made
+many helpful comments and supplied examples; they were also key members
+of the team that devised, tested and trained the DO Brief in the first place.
+The Inspiration section came from Sarah Newman’s tenure as Head of Planning
+in Ogilvy London. Many thanks to them.
+
+
+
+
+                                                                                  11
+1. How to fill in
+   the DO Brief,
+   section by section
+     Don’t begin with the brief. Always begin with a strategy. The DO Brief should be the
+     one-page summary of the strategy and indicate how it should be implemented, a step
+     towards a creative solution.
+
+
+          	
+
+          Brand                                      Product                                    Job No.                                     Date
+     The title says it all. Use this briefing form to generate a new creative idea.
+
+     Sometimes
+       Task         you don’t need a new creative idea—for instance,           Successfor   an adaptation through
+                                                                                        Criteria
+
+     RedWorks.      Therelaunch,
+         E.g., new product is anreposition
+                                  example      of a RedWorks
+                                           the brand,                  briefing form
+                                                      generate inquiries        How willin
+                                                                                         thisChapter       3.
+                                                                                              activity be measured and are these measurements in place?
+
+
+
+          Why is this brief here?
+         What’s
+        Brand    keeping the client awake at night? What’sJobhappening
+                                 Product                      No.      in the client’s business that has prompted the need for
+                                                                                    Date
+
+          communication? What is the big brilliant problem we can help to solve?
+        Task                                                                 Success Criteria
+        Who
+        E.g., neware  welaunch,
+                  product  trying   to infl
+                                reposition     uence?
+                                           the brand, generate inquiries        How will this activity be measured and are these measurements in place?
+        Who is it we need to influence and how (if at all) do they currently think, feel and behave towards the brand/category/
+        product area? Ask yourself what they are currently doing that we need to change. Think about any barriers that exist.
+        Please bring these people to life in a way that will help the creative team get inside their heads, not just as general
+     Most    of the next
+        consumers              boxes
+                          but within     theare   self-explanatory,
+                                              context                          but please
+                                                          of the specific challenge             thenotebrandthe     relationship
+                                                                                                                faces.                   between
+                                                                                                                          NB: The relevant          points will set the scene;
+     the Task and the Success Criteria. If the task is to reposition the brand, would you
+        more     in-depth    info  can     be   attached      in  the    Inspiration section          or  saved    for  the   briefi ng.
+     measure success by the number of inquiries the campaign generated? Probably not.
+         What
+     If the   dois
+            task  wetowant  them to
+                       generate      DO as a result
+                                  inquiries,   wouldofyouthis measure
+                                                              communication?
+                                                                       success by changes in brand
+         When it says “do” it means DO. This is the actual change in behavior that will ultimately affect the client’s business—
+     image   or personality?   Again,   probably    not.  Make    sure your thinking is joined up.
+         and help them sleep well at night. A simplistic answer like “buy more X” is not enough—everyone in the business is
+          doing that. Be specific rather than general. You’ll need to have explored who you need to influence, what they are
+     It really helps
+         currently    creatives
+                   doing,       when
+                          and how      you to
+                                   we need arechange
+                                                clear about
+                                                      it beforehow  success
+                                                                you can     willthis
+                                                                        express  befully.
+                                                                                     judged. One kind
+     of campaign will generate inquiries, while another kind will reposition the brand.
+     LetHow
+          themdoknow
+                   we expect
+                        from communications    to work
+                              the beginning what         towards achieving
+                                                    is required.  Don’t sendthis?
+                                                                               them down blind alleys.
+          How are the communications actually going to DO that? Will they shock, engage, make things more relevant, entice
+          people to trial, create a unified voice for the brand, change the way people feel about when and where they should
+          consume the product and so get them to consume it more often? How will our communications reward people for
+          the time they spend with them?
+           Why is this brief here?
+          What’s keeping the client awake at night? What’s happening in the client’s business that has prompted the need for
+          communication? What is the big brilliant problem we can help to solve?
+          What are we trying to convey?
+          What is the core thought that will drive the creative solution? Think about whether this should be a big ideaL™,
+          a killer fact, a promise, a straight message, or just a plain and simple big idea—it depends on the task at hand.
+     Ogilvy’s effectiveness initiative starts right here, with an articulation of the client’s
+     business issue
+        What will    orpeople
+                  help  opportunity
+                              to KNOW inthis?
+                                         the creative brief. The client’s objective
+                                                                  What will           is always
+                                                                             help people   to FEEL this?
+     profitable growth,
+        What makes        but how isrelevant
+                    this competitive, that totobe achieved?
+                                                the target and    What are the core values or personality of the brand we need
+          true? NB: Additional product detail can be attached asto stay true to? Are we questioning or directing? Are we
+          an addendum to the core brief.                        being inclusive or exclusive? Are we talking conspiratorially
+     Sometimes there is misunderstanding about what counts            as a business
+                                                                with people  or are we issue.
+                                                                                       distant and authoritative? What do
+     Are sales or market share flat or declining? That’s a business issue. Is a tone
+                                                                we  imagine  the competitor
+                                                                                      of the communication to be?
+      outpacing us in the market? That’s a business issue. We need words like “sales,”
+         Mandatories
+     “market   share,” “revenue” or “profitability” Channels
+                                                          in this section, not “brand image”Supporting Materials
+         What  are the   immutable     “must haves” Where(Business Ambition) will help here.List any additional technical specs,
+                                                           and when  will we reach  people
+      or “awareness.”
+          Who are we tryingThe    Ogilvy Fusion process
+                            to influence?
+         or “must nots” for this task? E.g., avoid  in the most receptive state of mind?    copy briefs, or product details
+          Who is it we need to influence and how (if at all) do they currently think, feel and behave towards the brand/category/
+          attacking   competition
+           product area?  Ask yourself or
+                                       whatusing     slapstick
+                                               they are               (Please
+                                                         currently doing that weexpand     as needed.)
+                                                                                 need to change.                             supporting
+                                                                                                   Think about any barriers that exist. this brief.
+           Please bring
+          humor,        theseculturally
+                   ensure      people to life in a way that will help the creative team get inside their heads, not just as general
+                                            sensitive
+           consumers but within the context of the specific challenge the brand faces. NB: The relevant points will set the scene;
+          references,
+           more in-depth feature    the
+                          info can be    product,
+                                      attached    in theetc.
+                                                         Inspiration section or saved for the briefing.
+
+
+          Account Director                                        Planning Director                                        Creative Director
+
+
+
+
+          Creative Development Time         Final Review Date                 Client Presentation Date          Final Deadline                     Production Budget
+
+
+14
+If you are lucky, Ogilvy RED Consulting or Business Acceleration will have done
+some upstream analysis that will answer this question for you. But most often it’ll
+be up to you and your team to find an answer.
+
+Some account teams will say at this point, “We don’t know about sales; the client
+doesn’t share that information with us.” But have you asked? Perhaps if you ask
+politely and explain how important it is, the marketing director would spend a half
+hour briefing the team on the business challenges facing the brand.
+
+You can find out a lot by yourself. For instance, what do financial journalists and
+industry bloggers say about the client’s business? What’s in that industry’s trade
+magazines? What do the company’s own financial reports and press statements
+say? Does your managing director or finance director know? Do you know someone
+who works in that industry? It’s always better to make an educated guess about
+the client’s business issue than to say nothing, because then clients can correct any
+misapprehensions
+   Why is this brief here?when they review the brief.
+       What’s keeping the client awake at night? What’s happening in the client’s business that has prompted the need for
+       communication? What is the big brilliant problem we can help to solve?
+It is essential that you try to find out what the business issue is. Campaigns that are
+based on business or behavioral objectives are more than four times as likely to be sales
+                                                                      1
+effective as campaigns based on attitude or awareness objectives. Ogilvy Fusion’s
+Business Ambition section suggests the key questions for you to answer.
+
+Others might say, “Creatives don’t need to know this.” But they do, and they’ve asked
+for it before. Ogilvy’s most senior creatives asked us not to shield them from business
+realities in briefings.
+
+
+       Who are we trying to influence?
+       Who is it we need to influence and how (if at all) do they currently think, feel and behave towards the brand/category/
+       product area? Ask yourself what they are currently doing that we need to change. Think about any barriers that exist.
+       Please bring these people to life in a way that will help the creative team get inside their heads, not just as general
+       consumers but within the context of the specific challenge the brand faces. NB: The relevant points will set the scene;
+       more in-depth info can be attached in the Inspiration section or saved for the briefing.
+
+
+
+
+The perfect answer to this question would include:
+   i) a quantitative description of the target audience, including their buying behavior
+      in relation to the business issue identified in the preceding section, and
+    )
+  ii a qualitative description that brings them alive as people to creatives.
+      Here’s a great example from an Axe brief:
+          He thinks about women a lot. A lot lot. But he’s not dreaming of romance, he’s a dirty boy who
+          can’t stop thinking about sex with extraordinarily welcoming women. Yet in the real world, women
+          arewe
+    What do     a completely
+                  want them todifferent   country—it’s
+                                 DO as a result             somewhere he’s never been, it may be a while before he gets
+                                                  of this communication?
+    When to   go there
+          it says “do” itand  you’re
+                          means       guaranteed
+                                 DO. This            he change
+                                          is the actual  won’t be   able to speak
+                                                                 in behavior that willthe  language
+                                                                                       ultimately      when
+                                                                                                  affect      he does.
+                                                                                                         the client’s    Deep down
+                                                                                                                      business—
+    and help them sleep well at night. A simplistic answer like “buy more X” is not enough—everyone in the business is
+          he wishes
+    doing that.        he could
+                Be specific ratherjust
+                                   thanbe himself
+                                        general.     around
+                                                 You’ll need togirls,
+                                                                have that  it wasn’t
+                                                                      explored  who you  soneed
+                                                                                             complicated,    that
+                                                                                                 to influence,  whathethey
+                                                                                                                       didn’t
+                                                                                                                           are have
+    currently doing, and how we need to change it before you can express this fully.
+          to try so hard.
+
+
+
+
+1
+    Binet, Les; and Field, Peter: “Marketing in the Era of Accountability,” WARC, 2007
+
+
+
+
+                                                                                                                                      15
+
+       How do we expect communications to work towards achieving this?
+       How are the communications actually going to DO that? Will they shock, engage, make things more relevant, entice
+       people to trial, create a unified voice for the brand, change the way people feel about when and where they should
+          more in-depth info can be attached in the Inspiration section or saved for the briefing.
+          Why is this brief here?
+          What’s keeping the client awake at night? What’s happening in the client’s business that has prompted the need for
+          communication? What is the big brilliant problem we can help to solve?
+
+
+
+
+     This is where we include the target’s perceptions of the brand—its image, positioning
+     or personality, etc. Don’t put that in the business issue section.
+
+
+          What do we want them to DO as a result of this communication?
+          When it says “do” it means DO. This is the actual change in behavior that will ultimately affect the client’s business—
+          and help them sleep well at night. A simplistic answer like “buy more X” is not enough—everyone in the business is
+          doing that. Be specific rather than general. You’ll need to have explored who you need to influence, what they are
+          Who  are doing,
+          currently we trying
+                           andto influence?
+                               how   we need to change it before you can express this fully.
+          Who is it we need to influence and how (if at all) do they currently think, feel and behave towards the brand/category/
+          product area? Ask yourself what they are currently doing that we need to change. Think about any barriers that exist.
+          Please bring these people to life in a way that will help the creative team get inside their heads, not just as general
+          consumers but within the context of the specific challenge the brand faces. NB: The relevant points will set the scene;
+     As  the
+          morebrief
+               in-depthsays,   “do”
+                         info can      means
+                                  be attached       “DO.”
+                                                in the        What
+                                                       Inspiration      change
+                                                                   section or saved in  consumer
+                                                                                    for the briefing.   behavior will grow
+     the client’s sales?
+
+     NEVER write “Buy more X.” That’s unhelpful and spineless.
+
+     Think through how an individual might respond to the campaign. What does that
+     person do now and what behavior do we want instead? Specific, concrete actions
+     (“Fit
+        Howwindow       locks”
+             do we expect
+                                ) are much
+                           communications         more
+                                             to work       helpful
+                                                      towards          tothis?
+                                                               achieving   the creatives than platitudes
+     (“Be
+        How  are the   )
+           vigilant” . Provide a narrative of the individualengage,
+                     communications actually going to DO that? Will they shock, behavior   change
+                                                                                    make things       you want.
+                                                                                                more relevant, entice
+        people to trial, create a unified voice for the brand, change the way people feel about when and where they should
+        consume the product and so get them to consume it more often? How will our communications reward people for
+        the time they spend with them?
+     Some
+        What good
+               do we DOs
+                      want themthat   brought
+                                   to DO            the
+                                          as a result     tasks
+                                                       of this    alive to creatives include:
+                                                               communication?
+        When it says “do” it means DO. This is the actual change in behavior that will ultimately affect the client’s business—
+      Ƣɡ     ƐƎƓ
+        and help them sleep well at night. A simplistic answer like “buy more X” is not enough—everyone in the business is
+          invite
+        doing  that. him   in for
+                     Be specific     a chat.
+                                 rather than general. You’ll need to have explored who you need to influence, what they are
+        currently doing, and how we need to change it before you can express this fully.
+        ƢƑ
+        Ƣbefore you look for your new house.
+        Ƣ
+
+            last five years, stop and go inside.
+        ƢƑ
+
+     The DO must always flow seamlessly from the business issue and consumer target
+     identified
+        What are earlier
+                 we trying in the brief.
+                           to convey?
+          What is the core thought that will drive the creative solution? Think about whether this should be a big ideaL™, a killer
+          fact, a promise, a straight message, or just a plain and simple big idea—it depends on the task at hand.
+
+          How do we expect communications to work towards achieving this?
+          How are the communications actually going to DO that? Will they shock, engage, make things more relevant, entice
+          people to trial, create a unified voice for the brand, change the way people feel about when and where they should
+          consume the product and so get them to consume it more often? How will our communications reward people for
+          the time they spend with them?
+
+
+
+     Unless we specify in advance how the communications are expected to work, we don’t
+     know the issue in full, we haven’t examined the problem hard enough, we don’t know
+     the audience well enough and we haven’t established the strategy soundly enough.
+
+
+         What will help people to KNOW this?                              What will help people to FEEL this?
+         What makes this competitive, relevant to the target and          What are the core values or personality of the brand we need
+         true? NB: Additional product detail can be attached as           to stay true to? Are we questioning or directing? Are we
+         an addendum to the core brief.                                   being inclusive or exclusive? Are we talking conspiratorially
+                                                                          with people or are we distant and authoritative? What do we
+          What are we trying to convey?                                   imagine the tone of the communication to be?
+          What is the core thought that will drive the creative solution? Think about whether this should be a big ideaL™, a killer
+          fact, a promise, a straight message, or just a plain and simple big idea—it depends on the task at hand.
+
+
+
+
+16
+The brief asks for a communications model for the ad. What is a “communications
+model”? There are three kinds:
+
+1. Models of communications in general
+
+    It used to be thought that all communications work the same way. Some clients
+    and researchers still think that. Typical “universal” models include:
+
+         AIDA: Attention, interest, desire, action.
+         STARCH: See, read, remember, act upon.
+         DAGMAR: Awareness, comprehension, conviction, action.
+         AIETA: Awareness, interest, evaluation, trial, adoption.
+
+    These communications models are old—for instance, AIDA dates from the 1880s.
+    They assume a) consumers are passive and empty-headed, and b) communications
+    move consumers through a linear sequence of conscious, discrete mental events
+    before they buy anything. Neither of these assumptions is credible today.
+
+    Communications models like these fundamentally misunderstand the way our
+    minds, and campaigns, actually work. They don’t reflect learnings in neuroscience,
+    psychology or in-market effectiveness. So why do they still survive? Because they’re
+    plausible, not because they’re right. They’re convenient checklists for pretest
+    research and tracking studies.
+
+    But this can create a big problem for us. Creative ideas may appear to fail in research.
+    In reality, the problem may not be the creative idea but the communications model
+    that underlies the research methodology. However, rebriefing the creatives because
+    of an imaginary problem wastes money and diminishes creative morale. You may
+    need a conversation with the client and research agency about how this particular
+    campaign should be pretested and tracked.
+
+2. Models of some campaigns
+
+    A more sophisticated approach allows that different campaigns may work in
+    different ways. Three of the most widely used sets of communications models are:
+
+       Hall & Partners:
+         Sales Response—People register a buying opportunity that fits their plans.
+         Persuasion—People take out a piece of information.
+         Involvement—People get involved in the advertising.
+         Salience—People register the ad as standing out in its sector.2
+
+
+
+
+2
+Hall, Mike (of Hall & Partners): “Using Advertising Frameworks, Different Research Models for Different
+Campaigns,” Admap, March 1992
+
+
+
+                                                                                                          17
+            Millward Brown:
+              Immediate Challenge—People take away “new news” about the product
+              that creates an immediate desire to buy it.
+              Interest/Status—People’s memories of advertisements make them more
+              likely to buy brand X.
+              Enhancement—Memories of advertising claims and images are converted
+              during experience of the product into beliefs about the brand.3
+
+            IPA:
+              Emotional Involvement—People feel greater empathy for the brand because
+              of the emotions created by the ad, or its likability.
+              Fame—People talk more about the brand and its advertising, see it as making
+              waves in its category.
+              Information—People take away a piece of information about the brand,
+              its users or their world.
+              Persuasion—People are convinced by rational argument that brand X
+              is superior.
+              Reinforcement—People are reminded to keep on doing what they already
+              do (loyalty campaigns).4
+
+         There are effectiveness results only for this last set. Emotive strategies (Fame and
+         Emotional Involvement) are more likely to be sales effective than rational strategies
+         (Persuasion and Information). Reinforcement campaigns are the least effective:
+
+                                                                Effectiveness success rate
+                                                                           %
+                     Fame                                                  72
+                     Emotional Involvement                                 68
+                     Persuasion                                            61
+                     Information                                           61
+                     Reinforcement                                         33
+
+
+         You need to work out in advance which of these communications models is most
+         likely to bring about the behavioral change described in the previous section of
+         the brief. This will be based on your understanding of the consumer and the kind
+         of behavioral change you are looking for. Even though emotive campaigns have
+         a higher success rate in general, persuasive or informative campaigns might be
+         better in a particular case.
+
+     3. Model of this particular campaign
+
+         Rather than using a standard, off-the-shelf influence model, think through the links
+         between the campaign and the purchase. Ogilvy Fusion will help you here, with the
+         Ogilvy Communications BlueprintTM exercises.
+
+
+     3
+      Millward Brown, as summarized by Prue, Terry: “An All-Embracing Theory of How Advertising Works,” Admap,
+      February 1998
+     4
+      Binet, Les; and Field, Peter: “Marketing in the Era of Accountability,” WARC, 2007
+
+
+18
+    To give an example of thinking through the purchase process, a brand of fruit juice
+    was bought by mothers and drunk by kids.5 Research showed kids were unlikely to
+    ask for any particular brand in this sector. An important role for the campaign was
+    to get mothers to believe their kids would love it even though they didn’t actively ask for it.
+    This communications model is clear in this diagram:
+
+    Example of bespoke communications model
+
+
+
+
+    The DO Brief version of this might say something like, “We need moms to believe
+    this is not only high-quality juice, but also will be a treat for their kids. The trouble
+    is that kids don’t ever ask for it by name. How can we get moms to believe it is
+    popular with their kids if they never ask for it? By making a campaign their kids
+    love. The campaign’s popularity with kids will lead mothers to believe that the
+    brand is popular with them too.”
+
+    With a communications model clearly in mind, it is much easier to design pretest
+    and tracking research appropriate to this particular campaign.
+
+
+
+
+5
+Source: Kia-Ora case history, Antony Buck, IPA Effectiveness Awards, 1988
+
+
+
+
+                                                                                                      19
+        How do we expect communications to work towards achieving this?
+        How are the communications actually going to DO that? Will they shock, engage, make things more relevant, entice
+        people to trial, create a unified voice for the brand, change the way people feel about when and where they should
+        consume the product and so get them to consume it more often? How will our communications reward people for
+        the time they spend with them?
+
+
+
+
+          What are we trying to convey?
+          What is the core thought that will drive the creative solution? Think about whether this should be a big ideaL™, a killer
+          fact, a promise, a straight message, or just a plain and simple big idea—it depends on the task at hand.
+
+
+
+
+     This is the most pressurized section of the brief. It is what creatives look at first.
+     It is how the brief as a whole will mainly be judged.
+
+     It is never easy to write, but it is easier if you have worked hard on the earlier sections
+     of What
+         the brief.
+             are we trying to convey?
+        What is the core thought that will drive the creative solution? Think about whether this should be a big ideaL™, a killer
+        fact, a promise, a straight message, or just a plain and simple big idea—it depends on the task at hand.
+     The desired behavioral change and communications model will guide your choice of
+     the kind of thing the communications must convey. If you need to generate inquiries,
+     youWhat
+          willwill
+               probably        use a persuasion influenceWhat
+                   help people to KNOW this?
+                                                                       model,       and for that you would want to
+                                                                            will help people to FEEL this?
+     convey   factual
+        What makes         information.
+                     this competitive,  relevantIf you
+                                                to the    need
+                                                       target and to reposition       the
+                                                                      What are the core    brand,
+                                                                                        values         youofwill
+                                                                                               or personality       probably
+                                                                                                               the brand we need
+        true? NB: Additional product detail can be attached as        to stay true to? Are we questioning or directing? Are we
+     usean
+         anaddendum
+             emotive       influence
+                       to the core brief. model, and for that you     being would      want
+                                                                            inclusive or       to convey
+                                                                                         exclusive?            feelings
+                                                                                                     Are we talking        about
+                                                                                                                    conspiratorially
+     the brand.                                                       with people or are we distant and authoritative? What do we
+                                                                      imagine the tone of the communication to be?
+
+
+     There are some great “Conveys” in the following chapter.
+
+
+        What will help people to KNOW this?                             What will help people to FEEL this?
+        What makes this competitive, relevant to the target and         What are the core values or personality of the brand we need
+        true? NB: Additional product detail can be attached as          to stay true to? Are we questioning or directing? Are we
+        an addendum to the core brief.                                  being inclusive or exclusive? Are we talking conspiratorially
+                                                                        with people or are we distant and authoritative? What do we
+                                                                        imagine the tone of the communication to be?
+
+
+
+     In most briefs this section would be called “Support for the Proposition,” which tends
+     to lead towards rational, fact-based claims. But we now know information is only one
+     flavor of effective campaigns, and usually not the most effective. So the DO Brief gives
+     knowledge and feelings equal status.
+
+     If you want to convey factual information, you would give more emphasis to the
+     Knowledge box. If you want to convey a feeling, you would write more in the Feelings
+     box. You don’t have to fill both boxes each time.
+
+     Be very selective about what you write in either box. Avoid clichés and platitudes.
+     Does what you have written really support the “Convey,” and is it meaningful,
+     appropriate and imaginative? Or is it there for other reasons—for instance, to appease
+     the client or account team? Then the brief will confuse the creatives.
+
+
+
+
+20
+    Mandatories                                          Channels                                          Supporting Materials
+    What are the immutable “must haves”                  Where and when will we reach people               List any additional technical specs,
+    or “must nots” for this task? E.g., avoid            in the most receptive state of mind?              copy briefs, or product details
+    attacking competition or using slapstick             (Please expand as needed.)                        supporting this brief.
+    humor, ensure culturally sensitive
+    references, feature the product, etc.
+
+    Account Director                                Planning Director                               Creative Director
+
+
+
+
+    Creative Development Time   Final Review Date            Client Presentation Date     Final Deadline                Production Budget
+
+
+
+
+Finally, we come to the practical stuff that creatives need to know before they actually
+begin working on something.
+
+ Mandatories restrict creative freedom, so, as the brief says, only include the
+“immutables.” That includes the things that will get the ad rejected out of hand
+ as unbuyable. Creatives must be informed of these “must nots” immediately,
+ before they start work, or you may waste their time on routes that will never see
+ the light of day.
+
+The Channels box will summarize the Ogilvy Communications Blueprint from
+Ogilvy Fusion.
+
+For briefs with many detailed requirements—often direct, digital or retail activation
+briefs—attach a separate page to the DO Brief.
+
+The brief MUST be signed by the account, planning and creative directors before
+it enters the creative department. Creatives are absolutely right to refuse to work
+on DO Briefs without all three signatures.
+
+The remaining boxes are self-explanatory.
+
+
+A FINAL NOTE
+
+A DO
+  Brand
+        Brief must be logical,
+                        Product
+                                connected, joined   up. Good briefs tell
+                                              Job No.               Date
+                                                                         a story,
+with a beginning, a middle and an end.
+    Task                                                                      Success Criteria
+The E.g.,
+    success       criteria must fit the task. The target
+          new product launch, reposition the brand, generate inquiries
+                                                                          audience must fit the business issue.
+                                                                       How will this activity be measured and are these measurements in place?
+The desired change in behavior must fit the influence model. And so on with the
+other sections.
+
+Always remember David Ogilvy’s advice: “What most clients want from us is great
+campaigns, with the spark to ignite sales and the staying power to build enduring
+brands.” Read through your brief one last time critically before you pass it to the
+creatives. Has it got that spark? Has it got staying power?
+
+
+
+
+                                                                                                                                                  21
+2. Examples of
+   good DO Briefs,
+   and reasons why
+   they’re good
+1. Shangri-La Hotels pitch creative DO Brief:
+
+
+
+
+      IKNX["CVJGTQTGTGCVKXGTKGH6GY
+FGCGPGTCVKQPKTGEVKQP
+
+      Brand                                   0RODUCT                                  *OB .O                                   Date
+
+       Shangri-La                               Hotels & Resorts                                                                  1/14/2009
+
+      Task                                    3UCCESS #RITERIA
+
+       360 Degree Global Campaign Idea          s 3TEALING SHARE IN THESE THE MOST DIFl CULT AND COMPETITIVE TIMES FOR HOTELS
+                                                s !SSESSED BY INCREASED INQUIRIES TO EXISTING HOTELS AND INTEREST FOR NEW LAUNCHES
+                                                s 4ALKABILITY AND 02 GENERATION
+
+      Why is this brief here?
+      7E ARE IN THE EYE OF THE WORST GLOBAL RECESSION SINCE THE )CE !GE 4HE HOTEL INDUSTRY IS ALREADY BADLY AFFECTED PARTICULARLY AS ITS KEY TARGET BUSINESS 
+      TRAVELERS ARE FACED WITH REDUCED BUDGETS THE WORLD OVER 4HERE ARE DROPPING OCCUPANCY RATES AND INCREASED PROMOTIONS AND A PRICE WAR LOOMING WHILE 
+      MORE AND MORE HOTELS ARE BUILT )N THE MIDST OF ALL THIS THE 3HANGRI,A IS ALSO LAUNCHING A NUMBER OF NEW HOTELS IN MAJOR 53 AND %UROPEAN DESTINATIONS 
+      AND IS SEEKING TO ATTRACT MORE BUSINESS )T HAS TO )N FACT WE HAVE ESTIMATED THAT ITS HOTELS AROUND THE WORLD WILL NEED  MORE STAYS PER NIGHT TO REMAIN 
+      LEVEL IN TERMS OF  VS  REVENUE 4O ACHIEVE ITS EXPANSION OBJECTIVES AND RIDE THE STORM OF THE RECESSION 3HANGRI,A NEEDS TO TAKE A NUMBER 
+      OF ACTIONS TACTICAL AND STRATEGIC &IRST OF ALL IT NEEDS AN IDEA TO WRAP ALL THESE ACTIONS IN AN IDEA THAT DEl NES IT IN A UNIQUE MOTIVATING AND OWNABLE 
+      WAY 7E BELIEVE THIS IDEA IS THE EXTRAORDINARY 3HANGRI,A QUALITY OF HOSPITALITY HOSPITALITY THAT GOES WELL BEYOND SIMPLY IMPECCABLE SERVICE IN LUXURIOUS 
+      SURROUNDINGSHOSPITALITY THAT COMES FROM THE HEART 
+      7HAT DOES THIS MEAN
+      7HILE OTHER l VESTAR HOTELS BOTH INTERNATIONAL AND !SIAN	 TREAT HOSPITALITY LIKE HARDWARESOMETHING TO BE ACQUIRED AND POLISHED TO STERILE PERFECTION
+      THE 3HANGRI,A SEES IT AS LIVING m UID INTERACTION BETWEEN HUMAN BEINGS CONDUCTED WITH HEARTFELT SINCERITY 4HUS OTHER l VESTAR HOTELS TEACH THEIR STAFF 
+      CONSISTENTLY IMPECCABLE SERVICE BUT THE 3HANGRI,A ADVOCATES SPONTANEITY AND AN INDIVIDUAL APPROACH 4HEY BELIEVE THAT COOKIECUTTER FAKENESS 
+      HAS NOTHING TO DO WITH RESPECTING THE GUEST /THER l VESTAR HOTELS MIGHT TREAT THEIR GUESTS LIKE KINGS TO BE INDULGED BUT THE 3HANGRI,A BELIEVES IN 
+      TREATING THEM LIKE HUMAN BEINGS TO BE VALUED /THER l VESTAR HOTELS BELIEVE THAT A GOOD HOTELIER IS MADE BUT THE 3HANGRI,A BELIEVES THAT A GOOD 
+      HOTELIER IS BORNBORN WITH THE ABILITY TO EMPATHIZE AND APPRECIATE THE NEEDS OF OTHERS AND TO REALLY CARE AND RESPOND FROM THE HEART h%VERYTHING MUST 
+      COME FROM THE HEARTv THEY TEACH YOUNG RECRUITS
+      4HE BRIEF HERE IS TO HELP 3HANGRI,A ACHIEVE ITS OBJECTIVES BY MAKING 3HANGRI,AS DISTINCT BRAND OF HOSPITALITY FAMOUS THE WORLD OVER HENCE MAKING 
+      3HANGRI,A EVERY PREMIUM TRAVELERS MUSTSTAY HOTEL
+
+      Who are we trying to influence?
+      0REMIUM BUSINESS TRAVELERS WHO EXPECT THE HIGHEST LEVELS OF SERVICE AND COMFORT FROM THE HOTELS THEY STAY INxWHO HAVE LIMITLESS AND 
+      INCREASING CHOICE OF EXCELLENT HOTEL CHAINSxWHO ARE OFTEN (YATT AND 3TARWOOD DIEHARDS BECAUSE THEY HOLD LOYALTY PROGRAMS WITH BENEl TS THAT 
+      ARE hUNSHAKABLEv 4HEY SPEND A GOOD DEAL OF THEIR LIFE ON THE ROAD LIVING OUT OF SUITCASES AND ON STALE AIRLINE FOOD 4HEY ARRIVE AND LEAVE ALONE 
+      4HEY ARE MET EVERYWHERE BY PAINTEDON SMILES AND GENERIC GREETINGS BECAUSE ALL IN THE HOSPITALITY INDUSTRY KNOW THEIR MONETARY VALUE AND 
+      TREAT THEM LIKE KINGS 9ET IN THEIR GOLDEN CAGES THEY FEEL DISSATISFACTION AND THEY MAY EVEN SUSPECT THAT WHAT IS MISSING IN ALL THESE TEMPLES 
+      OF LUXURY IS GENUINE HUMANITY AND INTERACTIONS FROM THE HEART NOT THE HOWTO BOOK
+
+      !ND HERE LIES THE DIFFERENCE 3HANGRI,A WITH ITS BELIEF IN AND PRACTICE OF TRUE !SIAN HOSPITALITYTHE HUMAN WAY OF TREATING CUSTOMERSWARMS 
+      YOUR HEART FEEDS YOUR SOUL AND NEVER LETS YOU FEEL LIKE A STRANGER IN THE STRANGEST OF PLACES $OESNT THIS MAKE A DIFFERENCE WHEN YOU ARE BACK 
+      IN THE FOUR WALLS OF A HOTEL ROOM FOR THE TENTH TIME IN A MONTH
+
+      What do we want them to DO as a result of this communication?
+      2ECOGNIZE THERES VITAL HUMANITY MISSING FROM THEIR HOTEL EXPERIENCES TO DATE AND RESOLVE TO STAY IN 3HANGRI,A NEXT TIME
+      3PECIl CALLY THIS MEANS INSTEAD OF BOOKING ON AUTOPILOT THEY INSTRUCT THEIR BOOKER TO BOOK THE 3HANGRI,A NEXT TIME
+
+      How do we expect communications to work towards achieving this?
+      7E ARE HERE TO CHANGE THE DEBATE FROM LUXURY ONEUPMANSHIP AND MINDLESS POINT COLLECTION TO ONE THAT RECOGNIZES WHATS REALLY IMPORTANT
+      THE QUALITY OF THE EXPERIENCE IN A HOTEL 
+
+      What are we trying to convey?
+      (OSPITALITY FROM THE HEART
+
+      What will help people to KNOW this?                                                                                 What will help people to FEEL this?
+      3TAFF RECRUITMENTTHEY WILL GO OUT OF THEIR WAY EG RURAL #HINA	 TO l ND STAFF WITH THE RIGHT ATTITUDE          )DEAS ABOUT HUMANITY NOT EFl CIENCY
+      3TAFF TRAININGTHE l RST THING THEY DO IS TO ASK TRAINEES TO DESCRIBE LOOKING AFTER FAMILY OR BEING LOOKED          )DEAS THAT ARE NOT WALLPAPER FOLLOWING 
+      AFTER BY FAMILY 4HEN THEY RELATE FEELINGS AND PRACTICES TO LOOKING AFTER GUESTS “Everything must come             INDUSTRY CODES )DEAS THAT MAKE 
+      from the heart.” 4RAINING ON THE 3HANGRI,A WAYSINCERITY RESPECT COURTESY HELPFULNESS HUMILITY                THEM LAUGH OR MAKE THEM CRY
+      3INCERITY IS KEY 4HIS MEANS BEHAVIOR NEEDS TO BE SPONTANEOUS AND INSTINCTIVE NOT PRESCRIBED 3TAFF                THAT DONT LEAVE THEM INDIFFERENT
+      ARE TRUSTED AND EMPOWERED TO MAKE A DIFFERENCE ON THEIR OWN READING AND ACCORDING TO THEIR CULTURE 
+      4HIS IS OBSERVED AND CULTIVATED DAILY BY '-S “It is the care that brings a person back.”
+
+      Mandatories                                                                                    Channels                           Supporting Materials
+      -AKE IT EASY TO BOOK OFF THE PAGESCREEN !DAPTATIONS FOR %UROPEAN AND !SIAN                    $EGREE "UT l RST             'UEST STORIES 3HANGRI,A 
+      LANGUAGES 2Em ECT LOCATIONS CURRENT AND NEW	 AND HOTELS AND RESORTS 2Em ECT                 0RINT PRESS  POSTERS	           #ORE 6ALUES VIDEO TRAINING 
+      !SIAN HERITAGE 4EMPLATE FOR #() SPA AND &"                                                  #2- $IGITAL                       VIDEO ANDOR TRANSCRIPTS
+
+
+      !CCOUNT $IRECTOR                                     0LANNING $IRECTOR                                    #REATIVE $IRECTOR
+
+
+
+      #REATIVE $EVELOPMENT 4IME      &INAL 2EVIEW $ATE               #LIENT 0RESENTATION $ATE        Final Deadline                     0RODUCTION "UDGET
+
+
+
+
+24
+ EG>CI
+
+
+
+
+L:7H>I:
+
+
+
+
+9><>I6A
+
+
+
+
+          25
+2. Hibiki creative DO Brief:
+
+
+
+
+      	
+
+
+      Brand                              Product                               Job No.                                Date
+
+       Suntory                             Hibiki                                SUTNAX8Z000001N                        9/16/2008
+
+      Task                               Success Criteria
+
+       Hibiki Rebranding                   Business Target: Annual Sales 6.5 billion JYP   7 billion JYP (+8% in 5 years)
+
+
+      Why is this brief here?
+      The whisky category and Hibiki are suffering. Young people aren’t drinking it. Its formal and hierarchical drinking occasions
+      are disappearing. And for all but the very loyal, there’s little emotional engagement and certainly very little pleasure
+      associated with it. And even though it’s the world’s best blended whisky, very few people understand the superiority
+      of the blend over one-note pungent malts. More broadly speaking, this applies to the world of premium alcohol overall.
+      As the leading brand in the Suntory whisky portfolio, Hibiki needs to change this.
+      We need to bring Hibiki back to life; it needs to live in the modern world. We need to position it as contemporary,
+      with something unique and compelling to say and engage with.
+      Who are we trying to influence?
+      Male, 35 – 40, premium whisky drinkers (including Hibiki), plus drinkers of other premium alcohols.
+      He’s a man who’s hungry for experiences and looks to get the most from life and what it has to offer. He lives life dynamically
+      and appreciates drama, complexity, rarity, and newness. He searches for inspiration in today’s age, he’s focused on
+      what’s of the highest quality, and he always wants something authentic. He loves to go to the best places, not for show
+      and status but because interesting things happen in them. Mixing with other people is at the top of his agenda because
+      it’s about meeting exciting new people and encountering new worlds.
+      He drinks what he considers to be the best and most interesting alcohol. He needs to understand that Hibiki is by far
+      the best and most interesting choice he could make.
+
+      What do we want them to DO as a result of this communication?
+      To actively choose Hibiki and to understand why they’ve done so. To do so versus other premium whisky choices,
+      and to do so at times when other premium alcohols may also be considered.
+
+      How do we expect communications to work towards achieving this?
+      We will talk about blended whisky (and our superior blend) in a new way, a way that is rich, evocative and emotionally
+      compelling in the story it tells about Hibiki (and by association the Hibiki drinker).
+      For current Hibiki drinkers, this will reinforce why they already choose Hibiki. For those drinking other premium alcohols,
+      it will make it very difficult not to try Hibiki.
+
+      What are we trying to convey?
+      Hibiki: Make Life More Complex.
+
+      What will help people to KNOW this?                                      What will help people to FEEL this?
+      A master blend of carefully selected malt and grain                      “Make Life More Complex” is not just about whisky—
+      whiskies, matured for a minimum of 17 years.                             it represents a bigger ideal. When we look at life,
+                                                                               we realize that people who lead lives with varied
+      Bringing many different characters together to make one
+                                                                               experiences achieve so much more than anyone else.
+      very deep ONE is what makes us special.
+                                                                               “Make Life More Complex” should remind our target of this.
+      This process is where the drama happens: bring different
+                                                                               Intimate, beautiful, charismatic, inspiring, premium.
+      characters together and something new will be born.
+
+      Mandatories                                                              Channels                               Supporting Materials
+      Only Hibiki understands that when we bring different
+      people, things and experiences together, something
+      dramatic happens, as our name Hibiki (resonating) implies.
+
+      Account Director                                Planning Director                                Creative Director
+
+
+
+      Creative Development Time   Final Review Date            Client Presentation Date     Final Deadline                   Production Budget
+
+
+
+
+26
+EG>CI
+
+
+          L:7H>I:
+
+
+
+
+        HE:8>6A:K:CI
+
+
+
+
+        DJID;=DB:
+
+
+
+
+                        27
+3. Dove creative DO Brief:
+
+
+
+
+     	
+
+
+     Brand                              Product                                              Job No.                        Date
+
+       Dove                              Damage Therapy shampoos and conditioners                                             
+
+     Task                               Success Criteria
+
+       Get women to give Dove’s          s  )S OUR ADVERTISING A 7/7 (How much free PR does it generate? Are consumers and the industry talking about it?)
+       new shampoos and                  s  $OES IT BUILD THE $OVE BRAND (Does it strengthen the core idea that Dove helps women feel great about themselves?)
+       conditioners a go.                s  $OES IT PROMPT WOMEN TO GIVE $OVES NEW SHAMPOOS AND CONDITIONERS A GO (Does it retain current Dove users and
+                                           encourage other women to switch brands?)
+
+
+     Why is this brief here?
+     Dove’s hair scientists have spent years developing a world-class, patented, superior hair repair technology. It is being launched as
+     a new range of shampoos and conditioners called Dove Damage Therapy. It’s a brilliant solution to a problem the vast majority
+     of women don’t think they have. Creating the need is difficult because no woman wants someone pointing a finger at her and
+     calling her “damaged.” It’s insulting. Why would she listen?
+     The point of this brief is to turn the issue of damage on its head, making damaged hair something women actively choose to confront,
+     rather than something they deny or shy away from.
+
+     Who are we trying to influence?
+     Women who don’t think of their hair as damaged. They would probably describe their hair as pretty normal: sometimes it behaves
+     itself and other times it’s dry, or has split ends, or is a mass of frizz that’s a nightmare to style. But that’s normal; it doesn’t mean their
+     hair is damaged and it doesn’t mean they need a special, therapeutic repair system. When they hear “damaged hair,” they think of
+     extremely frazzled hair that has been colored, cooked, crimped and coiffed to a crisp—certainly not their own. That’s why they shun
+     existing damage/repair variants.
+
+     What do we want them to DO as a result of this communication?
+     We want them to positively embrace the notion of damaged hair. When people ask them their hair type, they should reply “damaged”
+     —confidently and with a twinkle in their eye. They should place their Dove Damage Therapy bottles in plain view in their bathrooms as
+     badges of honor and hope that guests notice them. They should use Damage Therapy every time they feel like their hair could use a
+     little TLC (e.g., the morning after a big night out; at the end of a hard week; after the beach; after working out; any time their hair feels
+     dull and lifeless). They should join online communities and forums with handles like Stressed Tresses and leave supportive messages
+     for other women with damaged hair. They should put bumper stickers on their bashed-up cars that say things like “It’s not just my hair
+     that needs repairing.”
+
+     How do we expect communications to work towards achieving this?
+     Communications will democratize damaged hair by revelling in the fact that it’s a simple fact of life for 80% of women. They will not
+     work by lecturing or hectoring, which is the category norm. Nor will they attempt to induce anxiety. Instead, communications will be
+     upbeat and celebratory: hair damage is part of being a woman, part of the Dove sisterhood.
+
+     What are we trying to convey?
+     DAMAGED HAIR: BRING IT ON! Because damaging your hair is a sign that you are living life to the fullest.
+
+     What will help people to KNOW this?                                            What will help people to FEEL this?
+     Damaging your hair is normal. There’s nothing to be fearful                    Pantene’s solution would be to prey on women’s insecurities
+     or concerned about. Everyone does it. Blow-drying, brushing,                   with fear-based communications that go deep inside the hair shaft
+     coloring and straightening all damage hair. Just living life                   to reveal the damage that blow-drying and straightening cause.
+     damages hair.                                                                  But Dove isn’t Pantene. Dove is positive and supportive of women,
+                                                                                    not undermining.
+     Dove Damage Therapy makes light work of the repair.
+     It’s a patented technology that beats Pantene and salon                        Dove is about ordinary women getting on with it, embracing their
+     brands in laboratory tests. It delivers tangible benefits:                     imperfections with grace and humor.
+       s 8 MORE MOISTURE
+                                                                                    Dove has a sense of humor. It’s a twinkle in the eye,
+       s 8 LESS FRIZZ
+                                                                                    a conspiratorial wink between girlfriends. Women don’t need
+       s 8 FEWER SPLIT ENDS
+                                                                                    to take the communications seriously or literally in order
+       s 8 MORE RESILIENCE AGAINST FUTURE DAMAGE
+                                                                                    to engage with the product.
+
+     Mandatories                                           Channels                                             Supporting Materials
+     Should feel like a breath of fresh air in the          $EGREE PLAN TO FOLLOW BUT ANTHEMIC              For tone of voice:
+     quasi-scientific, pretend world of hair care          TV/web spot will be vital.                           Boots’ “Here Come the Girls” TVC
+     advertising. Fun, upbeat and anthemic.                                                                     The Indigo Girls, “Closer to Fine”
+
+     Account Director                                   Planning Director                                    Creative Director
+
+
+
+     Creative Development Time      Final Review Date             Client Presentation Date        Final Deadline                   Production Budget
+
+
+
+
+28
+IK8   EG>CI
+
+
+
+              NO COLOURING
+                  IS TOO
+               MUCH WHEN
+                   DOVE
+               TAKES CARE
+              OF THE DAMAGE.
+                   Introducing
+               Dove Daily Treatment
+                  Conditioners
+
+
+
+
+                 The very first conditioner
+                  with a treatment inside.
+                Get the deep nourishment
+                     of a treatment in
+               the time it takes to condition
+              your hair for extra smoothness.
+                 Use everyday instead of
+                     your conditioner
+
+
+
+
+      IK8
+
+
+
+
+                                                29
+4. Acqua Panna creative DO Brief:
+
+
+
+
+     IKNX["CVJGTQTGTGCVKXGTKGH6GY
+FGCGPGTCVKQPKTGEVKQP
+
+     Brand                              0RODUCT                               *OB .O                               $ATE
+
+      !CQUA 0ANNA                         'LASS BOTTLE                                                               
+
+     Task                                                                     3UCCESS #RITERIA
+
+      Brand Story                                                              s 2ESTAURANT DISTRIBUTION AND PUSH
+                                                                               s "EING ASKED FOR IN RESTAURANTS
+
+
+
+     Why is this brief here?
+     4RADITIONALLY PUSHED BY RESTAURANTS !CQUA 0ANNA IS LARGELY SEEN BY THE TRADE AS THE STILLWATER SISTER TO SPARKLING 
+     3AN 0ELLEGRINO )T HAS NO DISTINCT IDENTITY THAT WOULD ENSURE CONSUMER PULLTHROUGH 'ROWTH OF FILTRATION SYSTEMS 
+     AND ECONOMIC FRUGALITY HAVE LED TO A DRAMATIC  SALES DECLINE 
+
+     Who are we trying to influence?
+     &ORTYSOMETHING ACHIEVER 7ELL EDUCATED (E OWNS HIS OWN BUSINESS AND ENJOYS THE SOPHISTICATED CULTURED HIGH LIFE 
+     'OOD RESTAURANTS NICE HOTELS CLUBS AND A BROAD ARRAY OF THE ARTS CONSTANTLY PROVIDE STIMULATION (ELL ORDER 3AN 0ELLEGRINO 
+     OR A STILL WATER TO ACCOMPANY HIS FOOD AND WINE WHEN ASKED !S WITH HIS ONTHEGO CHOICES HE HAS NO COMPELLING 
+     PREFERENCE FOR ANY BRAND OF PREMIUM STILL WATER 4HEY ALL QUENCH HIS THIRST BUT NONE OF THEM REALLY PROJECT AN IMAGE 
+     THAT HE STRIVES FOR INDEED &RENCH WATER FOR THE GIRLS AT THE GYM IS DECIDEDLY TOO PINK	
+     )N CHARGE AT WORK AND IN CONTROL IN LIFE HE SITS ON TOP OF SOCIETYS BOX $RESSED IN /ZWALD "OATENG HE DOES INDEED RULE HIS WORLD 
+
+     What do we want them to DO as a result of this communication?
+     0ASS ON THE !CQUA 0ANNA LEGEND "ECOME KNOWLEDGEABLE PROPONENTS OF BOTH ITS UNIQUE HISTORY AND ITS ROLE WITH FOOD 
+     7E NEED TO SQUIRE THE COGNOSCENTI ON BOTH THE GIVING AND RECEIVING SIDES OF l NE DINING RESTAURANT TABLES AND ENCOURAGE 
+     THEM TO REVEAL !CQUA 0ANNAS SECRET MYSTICAL KNOWLEDGE
+
+     How do we expect communications to work towards achieving this?
+     #REATE A DRAMATIC LEGEND IN A MANNER THAT LURES AND INTRIGUES
+     'ET THEM TO THINK OF IT WITH THE SAME KIND OF REVERENCE THEY HAVE FOR THEIR SPECIAL SPIRITS OR WINES #HALLENGE MANY 
+     OF THE ESTABLISHED CATEGORY RULESINCLUDING SPECIl CALLY THE ROLE OF THE WATERTHROUGH THE USE OF HISTORY A MASCULINE 
+     PERSONA AND A SENSE OF SERENITY
+
+     What are we trying to convey?
+     !CQUA 0ANNA BESTOWS ASTONISHING POWER
+
+     What will help people to KNOW this?                                                                What will help people to FEEL this?
+     !STONISHING POWER OF THE WATER TO MAKE FOOD TASTE BETTER                                          #REATION OF AN INTRIGUING LEGEND
+     $ELICATE MINERAL BALANCE  ASTONISHING NATURALLY l LTERED PURITY FROM                              "RAND 0ERSONALITY 0OWERFUL #ULTURED 
+     A YEAR JOURNEY THROUGH THE LIMESTONE OF THE 4USCAN HILLS                                       -YSTERIOUS $ANGEROUS
+     !STONISHING POWER OF ITS HERITAGE SOURCED FROM 6ILLA 0ANNA THE -EDICI 
+     4USCAN ESTATE 2UTHLESS -EDICI POWER AND INm UENCE ACROSS %UROPE 
+     BETWEEN THE TH and 17TH CENTURIES POPES RULERS MONARCHS POLITICS 
+     *EALOUSLY GUARDED SECRET FOR OVER  YEARS
+
+
+     Mandatories                                                              Channels                              Supporting Materials
+     5NLESS THERE IS GOOD REASON CREATIVELY TO THE CONTRARY 
+     WE SHOULD LEVERAGE THE BRANDS PACKAGING ICONS
+
+
+
+     !CCOUNT $IRECTOR                                0LANNING $IRECTOR                               #REATIVE $IRECTOR
+
+
+
+     #REATIVE $EVELOPMENT 4IME   &INAL 2EVIEW $ATE            #LIENT 0RESENTATION $ATE     &INAL $EADLINE                  0RODUCTION "UDGET
+
+
+
+
+30
+                                                   EG>CI                  HIG::I:K:CI
+
+
+   It wasn’t drunk at The Last Supper.
+   Just by the man who painted it.
+   As legend has it, Leonardo da Vinci drank it.
+   As did Michelangelo and countless other
+   Renaissance figures. The source of
+   Acqua Panna® Natural Spring Water is one
+   of the few unspoiled treasures from an era
+   rich in romance and controversy. No wonder,
+   then, that the water has long been cherished
+   as the perfect complement to food and wine.
+   Discover more at HistoryIsServed.com
+
+
+
+
+© 2010 Nestlé Waters North America Inc.
+
+
+
+
+                                                             9><>I6A
+
+
+
+
+                                                           HD8>6AB:9>6
+
+
+
+
+                                                                                         31
+     WHAT MAKES THEM GOOD BRIEFS
+
+     1. They’re creatively stimulating. They’re also clear and internally consistent (no false
+        trails), and they make sense.
+
+     2. They’re rooted in real client business issues:
+      ƢɠƑƃĎč
+          per night per hotel just to keep revenues the same as last year.
+             –What’s lovely about “10 more stays” is that it makes advertising’s task vivid
+              and real for the creatives. A similar calculation was made famous in a recent
+              Sainsbury’s IPA Effectiveness paper.6 Sainsbury’s commercial objective was to
+              increase sales by £2.5 billion over three years. This amount was too vast to be
+              a useful input into the creative process. A simple sum showed it actually meant
+              customers spending £1.14 more per visit (£1.14 x 14 million customers x 52
+              weeks x 3 years = £2.5 billion).
+             –This calculation “transformed the role for communications: to getting shoppers
+              to spend a little extra,” which “unlocked the £2.5 billion problem so that
+              creativity could be used to solve it. An unimaginably daunting objective was
+              transformed into something as tangible and approachable as it’s possible to
+              imagine.” Can you translate big corporate objectives into tangible consumer
+              behavioral changes like this on your briefs? Can you solve huge problems with
+              solutions based on the behavior of individuals? Creatives will love you for it.
+      ƢɠƐ	Ƒ
+          in particular are drinking less. Based on current trends, Hibiki will not have
+          a future as an advertised brand. The importance of the task helps inspire creatives.
+          They know that what they do really matters.
+      ƢƎ
+          think they have. How then can we launch it successfully?
+      ƢĒčŝƑ
+
+     3. They bring the audience to life in a way that allows creatives to relate to
+        them as people:
+      ƢɠƃƆƍ´
+           who “arrives and leaves alone.”
+      Ƣɠ 	Ɔƍ´
+          someone who wants to mingle, to meet new people, to have new experiences.
+      ƢƎƑ
+      ƢɠƆƍ
+          are the same.
+
+
+
+
+     Roach, Tom; Mawdsley, Craig; Dorsett, Jane: “Sainsbury’s—How an Idea Helped Make Sainsbury’s Great Again,”
+     6
+
+     IPA Effectiveness Awards, 2008
+
+
+
+32
+4. It is clear what we need the audience to do as a result of seeing the campaign:
+ ƢƆƑƍ
+     That’s intriguing for the creatives: “So most hotel bookings are made on
+     autopilot? I didn’t know that.”
+ ƢƆƍ	Ƒɠ
+     crowd, not ordering the same drink as other people. It means standing out and
+     asserting your individuality.
+ ƢƆƗƍƐ
+     the bottle in plain view in the bathroom as a “badge of honor.”
+ ƢƎƑ
+
+5.   The Convey contains a step towards the creative solution:
+    ƢƆ	ƍƑ
+    ƢƆƍƑ
+    ƢƆƍ
+        about life and fun.
+    ƢƆƍ
+        powerful patrons.
+
+6. The Knows and Feels support the Convey and lead towards the creative solution:
+ ƢɠƃƆƐ
+    feeling indifferent.”
+ Ƣɠ	
+     a varied, interesting life.
+ ƢɠƐƑ
+ Ƣɠ
+    legendary figures.
+
+
+
+
+                                                                                           33
+3. Inspiration,
+   24-hour Briefs,
+   a RedWorks Brief
+   and the actual
+   briefing
+     INSPIRATION
+
+
+         Ogilvy & Mather Core Creative Brief: New Idea Generation—Inspiration
+         Use this page for anything that you think could give creative people inspiration in
+         solving the brief, visual as well as verbal.
+
+         For example: links to relevant material on the web, books, articles, movie references,
+         music, art, TV, celebrities, a “rant” you have written, thought starters, pieces of
+         advertising, any material which f leshes out the target audience, or anything else
+         that could help.
+
+
+     The first page of the DO Brief ensures relevance to the client’s business. The second
+     page is optional. Its role is to stimulate fresh executions.
+
+     Creative people usually ask for two things from a brief: direction and inspiration.
+     They are likely to want direction as they start work on a project, but as they try to
+     solve it they may be looking for inspiration.
+
+     The requirements for direction and inspiration are different. Direction needs to
+     be clear and logical. It must be followed. On the other hand, inspiration can be
+     intuitive, touchy-feely and visual. It does not all need to be followed; it can be
+     used or discarded according to whether it is helpful.
+
+     What you put in the Inspiration section is very much up to you. It is your chance
+     to think of the most exciting and interesting examples and stimuli that bring the
+     central thoughts of the brief to life. It’s also an opportunity to make your brief
+     stand out in relation to the other briefs that are floating around the creative
+     ƐƆƗƍ
+
+     The Inspiration section should look like an enticing chocolate box of stimulation.
+     Choosing a few good pieces of stimuli you believe in is more valuable than a huge
+     quantity of stuff. You might use songs, paintings, video, movies, websites, and
+     other pieces of communication, or your own thoughts. You could even make the
+     Inspiration section a couple of visual slides where the links open automatically.
+     (Yes, PowerPoint can be used creatively.)
+
+
+
+
+36
+Some examples of things that could help:
+ ƢƙƚƟ
+     challenges, and of success and failure.
+ ƢƐ
+     ƟƑ
+ ƢɠƁ
+      visually and verbally, including smell, taste, and atmosphere. Bring their
+      hopes and fears to life.
+ ƢƐ
+     such as the web, novels, art, etc.
+ ƢƟƑɡ
+     say about them online, how they feature in popular culture.
+ Ƣɡƕ
+     or a short rant? (It may not be as humiliating as you think.)
+
+Here are examples of good Inspiration sections:
+
+
+
+
+                                                                                   37
+     1. Ford Fiesta
+
+       Part of the Inspiration section compared the relaunch of the Ford Fiesta with
+       Tarantino’s rescue of John Travolta’s career and the launch of the iconic iMac.
+       The eventual work—part of what was described by the senior Ford of Europe
+       client as “our most successful launch ever”—had something of the confident mood
+       of the iMac launch. It was not encumbered with product messages about the
+       Fiesta, but gave the brand a sense of being a desirable, fashionable icon:
+
+
+
+           Inspiration
+
+              John Travolta
+
+
+
+
+            John Travolta
+            The success of Saturday Night Fever in the 1970s typecast John Travolta as a Disco Stud. The sequel, Staying Alive
+            was a commercial disaster and he went on a string of other weak rom-com flops for which the critics severely beat
+            him up. Disenchanted, he more or less disappeared until his career was resurrected playing the part of Vincent Vega
+            in Quentin Tarantino’s Pulp Fiction in 1994. Pulp Fiction, like predecessor Reservoir Dogs, is regarded as one of
+            the most influential Hollywood films of its era—a new category-defining phenomenon littered with pop-cultural
+            references. Many scenes and lines from the film have achieved iconic status. Whilst Travolta thanked Tarantino for
+            relaunching his career, Tarantino commented that “the public hadn’t stopped loving you John, they just needed a
+            reason to fall back in love with you.”
+
+
+              iMac
+            On arrival at Apple, Steve Jobs rejuvenated Apple’s image with the immensely successful Think Different campaign.
+            He cancelled the majority of the R&D projects: one of the few which survived the cull was the iMac which
+            relaunched and rejuvenated the company (one of the other projects was the iPod).
+            Its unusual shape, colours and materials gave it an iconic status both in the design and technology worlds...
+            In 1998, the iMac launched, where Apple famously declared that “the back of our computers look better than the
+            front of anyone else’s.” http://www/youtube.com/results?search_query=apple+mac+colors
+
+
+
+
+38
+2. Fanta
+
+   The team that developed Fanta’s “Stealth Sound System” was able to create
+   a stimulus that brought the spirit of Fanta to life, and referred specifically to
+   the technology that formed the basis of the highly awarded campaign:
+
+
+
+
+Fanta inspires everyone to open their
+imaginations; to see that play exists everywhere                                                         Play is not just an activity. Play is a
+and at any time, and that it’s easy to create,                                                         feeling, an attitude, a spirit that lives
+spread and make contagious. Fanta is creating a                                                                                      inside us.
+pandemic of play.                       Cup Stacking
+                                                     http://www.youtube.com/watch?v=q395-F6hAcg&NR=1
+
+
+
+
+                                                Nike: Shade Running
+http://www.youtube.com/watch?
+v=ONMe0Z1QQWs&mode=related&search=   http://www.youtube.com/watch?v=hWbB8C6NL9g&mode=related&search=
+                                                                                                       X Box: Jump In
+                                                                                                       http://www.youtube.com/watch?v=r9yNFhq4gaU
+
+
+
+                                                 Fanta believes the world
+                                                 would be a better place
+                                                  if we grew up less and
+                                                       played more.                                                          Parkour/Free Jumping
+                                                                                                                       http://www.youtube.com/watch?v=kdahQf0S7yc
+                                                                                                                        http://www.youtube.com/watch?v=6qhgIdP3l3I
+
+
+
+
+                 Shame on the
+                  Grown-ups:
+                 Mosquito Teen                                                                                                                                       Cadbury’s
+                                                                                                                                         http://www.youtube.com/watch?v=4wsGndlpQRs
+
+                   Repellent
+
+
+
+
+                                                                                                                                                                                 39
+     3. Ford Ka
+
+       This Inspiration section illuminated some of the most resonant themes for its
+       target audience (a more leading-edge group than Fiesta’s): discovery, eclecticism
+       and playful subversion. The successful multichannel campaign clearly reflected
+       these themes:
+
+                                                                  ‘The medium is the message’
+                    Space Invader
+                                                                       Marshall McLuhan
+                    Is a street artist who pastes up characters from and is inspired by the
+                    Space Invaders game. He does this in carefully selected locations, in
+                    cities across the world, then documents it as an invasion, with maps of
+                    where to find each invader.
+                    His philosophy is that of ‘leaving a gift to the city’. His art is rarely
+                    removed, because it’s visible to the right people yet under the radar of
+                    the wrong people.
+
+
+                    http://swindlemagazine.com/issue03/space-invader-2/
+                    http://www.space-invaders.com/
+
+
+
+
+                   Playful Defiance
+
+                   Howies wanted to make the point that skateboarders weren’t thieves
+                   and weren’t the ones stealing stuff from the shops.
+                   They created the ‘Shoplifter’ T-shirt range which had a special bar code
+                   in the sleeve that would set off security alarm systems when entering
+                   and leaving stores. http://www.howies.co.uk/
+
+
+
+
+                  Ford Secret                                                                        3
+
+
+
+                                            QR Codes
+
+                                            Viewers are able to simply point their camera
+                                            phones at any form of media to capture the codes
+                                            and get directed to Internet sites which can
+                                            deliver content as video, photos, music, text or
+                                            a link to a website that automatically opens.
+
+
+
+
+                  Northwest Airlines
+                  campaign
+                  by Ogilvy Tokyo
+
+
+
+
+                                                Damon Albarn is a great pop personality. Blur's
+                                                seventh album, the career best Think Tank, was
+                                                made despite the loss of Graham Coxon. He sold
+                                                truckloads for virtual band Gorillaz, avoided
+                                                becoming Sting with Mali Music and co-started the
+                                                Honest Jons label, releasing anything from fifties
+                                                calypso to digital dancehall dub. Whilst his
+                                                former contemporaries and rivals bite the dust
+                                                around him, he is frankly unstoppable.
+
+
+                                                ‘Has eclectic tastes and a tendency to explore
+                                                styles and sounds whilst other acts in the music
+                                                industry have been churning out the same oeuvre
+                                                for over ten years.’ Matt Kennard
+                  Ford Secret                                                                        5
+
+
+
+
+40
+24-HOUR BRIEFS
+
+Sometimes first thoughts are right. We might spend weeks working on a pitch
+strategy only to lose sight of the obvious. There’s a small window of opportunity
+during which we still think like consumers. We might say it lasts for the first 24 hours
+after receiving a new brief. Use that time of clarity to write a creative brief. Use the
+DO Brief format—it’s only six questions.
+
+The 24-hour Brief is provisional. It gives a working hypothesis of the strategy before
+we do the work necessary to complete a full DO Brief. Management consultants,
+who use this practice widely, call it “solving the case before solving the case.”
+
+It is particularly useful when creative work has to be produced quickly, but it also
+has other advantages. The discipline of writing one forces you to form a hypothesis,
+which makes subsequent primary and secondary research more purposeful. It aligns
+the team before they all go off in different directions. It allows the whole team,
+particularly creatives, to start mulling over the problem immediately. Otherwise
+creatives have to wait until the rest of the team has completed its work before they
+can even begin thinking about solving the problem.
+
+The best way to write a 24-hour Brief is to assemble a “swarm” meeting immediately
+after the client briefing and brainstorm the problem. You can also invite experts
+in the agency who might help. The swarm arrives at a best-guess consensus and
+someone writes it up and distributes it within 24 hours. The priority is to get a clear
+articulation of the client’s business problem. That’s what the creatives need most
+before starting work.
+
+Sometimes your first impressions will be very near the mark. However, often
+the strategy will evolve considerably as the pitch develops. The 24-hour Brief is
+no substitute for a fully thought-out DO Brief. No matter how perceptive first
+impressions are, they can always be improved upon. Always reserve the right to
+go back to the creatives later with a revised brief if you learn more from research,
+thinking or analysis.
+
+
+
+
+                                                                                           41
+     REDWORKS BRIEF
+
+     RedWorks does not use a consistent briefing form. Briefing forms vary by task,
+     channel, client and geography. Here’s a fairly typical example:
+
+
+
+
+                                               TASK
+                                                TASK
+                                              TASK   BRIEF
+                                                     BRIEF
+                                                   BRIEF   ––PRINT
+                                                             PRINT
+                                                         – PRINT
+                                                               TASK BRIEF – PRINT
+           Client
+      Client Client          :      ::                                 Client            Date: Date
+                                                                                                Date                                          :      : : Date                                                  :
+
+      BriefBrief
+            BriefOwner
+           Owner  Owner
+                      :             ::                             Job Job
+                                                                        Job
+                                                                     Brief
+                                                                       No.  No.
+                                                                             No.:
+                                                                           Owner            : ::                               Budget
+                                                                                                                                Budget
+                                                                                                                            Budget
+                                                                                                                                Job No.:             ::                                      Budget            :
+
+
+                                       Newspaper
+                                        Newspaper
+                                   Newspaper Ad AdAd                    Leaflet
+                                                                   LeafletLeaflet                  POS POS
+                                                                                                        POSWobbler
+                                                                                                            Wobbler
+                                                                                                    Newspaper
+                                                                                                       WobblerAd                   DM
+                                                                                                                                    DMLetter
+                                                                                                                               DMLeaflet
+                                                                                                                                 Letter  Letter                    POS Wobbler                  DM Letter
+                                                                                                        POS
+                                                                                                         POSCounter
+                                                                                                   POS CounterCounter                                              POS Counter
+      TaskTask
+           Task                        Magazine
+                                        Magazine
+                                   Magazine Ad AdAd                Flyer Flyer
+                                                                      TaskFlyer                     Magazine Ad                    DM
+                                                                                                                                    DMEnvelope
+                                                                                                                               DMFlyer Envelope
+                                                                                                                                 Envelope                                                       DM Envelope
+                             :      ::                                                        :    Card Card
+                                                                                                         Card                                                      Card
+           (Check
+      (Check (Check
+             box) box)
+                    box)                                               (Check box)
+                                       Bus
+                                        BusAd
+                                   Bus Ad   Ad                          Catalog
+                                                                         Catalog
+                                                                   Catalog                          BusOther
+                                                                                                   Other OtherPOS
+                                                                                                         Ad
+                                                                                                         POS   POS                 Other
+                                                                                                                               Other OtherDM
+                                                                                                                                  Catalog
+                                                                                                                                     DM    DM                      Other POS                    Other DM
+
+                                       Brochure
+                                        Brochure                       POS
+                                                                        POSPoster
+                                                                             Poster                OtherOther
+                                                                                                         Other                                                     Other
+                                   Brochure                        POS Poster                       Brochure                        POS Poster
+                                                                                                         (Please
+                                                                                                   (Please (Pleasespecify)
+                                                                                                                   specify)
+                                                                                                            specify)                                               (Please specify)
+
+
+                                 MediaMedia
+                                        Media  / /Publication(s)
+                                                   Publication(s)
+                                         / Publication(s)         :    ::                           Media / Publication(s)               :
+                                 Size Size
+                                      / Size/ Number
+                                        Number/ Number   ofofPages
+                                                    of Pages  Pages
+                                                                  :    ::                           Size / Number of Pages               :
+      Media  Media
+               Media
+                /      //             Position
+                                        Position
+                                 Position                       Media
+                                                                  :    :/ :                         Position                             :
+             Publication(s)
+               Publication(s)
+      Publication(s)          :  : :                            Publication(s)                :
+             (List
+      (List or (List
+                   ororattach
+                attach  attach   ColorColor
+                                        Color                     : or :attach
+                                                                (List     :                         Color                                :
+      MediaMedia
+               MediaSchedule)
+              Schedule)Schedule)
+                                                       Date(s) Media
+                                      Publication
+                                        Publication
+                                 Publication          Date(s)
+                                                Date(s)           : Schedule)
+                                                                       ::                           Publication Date(s)                  :
+                                       Material
+                                        Material
+                                   Material     Deadline
+                                                 Deadline
+                                            Deadline                     :      ::                  Material Deadline                    :
+
+
+      PrintPrint
+            PrintQuantity
+                  Quantity
+            Quantity  :    ::                                           Delivery
+                                                                         Delivery
+                                                                   Delivery
+                                                                     Print       Destination
+                                                                                  Destination
+                                                                           Quantity
+                                                                            Destination
+                                                                                      :     :                ::                     Delivery Destination               :
+
+
+
+          Message
+           Message :
+      Message                       ::                                 Message                :
+
+
+
+                                        Not
+                                         Notrequired
+                                             required
+                                   Not required                                                     Not required
+
+          Images
+           Images
+      Images                           Existing
+                                         Existing
+                                   Existing      ––Specify
+                                                    Specify
+                                            – Specify       location:
+                                                             location:
+                                                       location:
+                                                              Images                                Existing – Specify location:
+                             :     ::                                                         :
+           (Check
+      (Check (Check
+             box) box)
+                    box)               Supplied
+                                         Supplied
+                                   Supplied       ––Attach
+                                             – AttachAttach   (Check
+                                                           toto
+                                                      to brief  briefbox)
+                                                               brief                                Supplied – Attach to brief
+                                   New New
+                                        NewPhotography
+                                            Photography
+                                       Photography     Required
+                                                        Required
+                                                   Required     ––Photo
+                                                            – PhotoPhoto
+                                                                    brief brief
+                                                                           briefattached
+                                                                                 attached
+                                                                          attached
+                                                                              New   Photography Required – Photo brief attached
+
+
+
+      NotesNotes
+            Notes
+             /    //                                                   Notes /
+                       :            ::                                                        :
+           Instructions
+            Instructions
+      Instructions                                                     Instructions
+
+
+
+         Mandatories
+          Mandatories
+      Mandatories  :                ::                                 Mandatories            :
+
+
+
+           Client’s
+            Client’s
+      Client’s      Approval
+                     Approval :
+               Approval                       ::                                    Date Date
+                                                                       Client’s Approval  Date :                       :      ::                          Date                         :
+
+
+
+
+     The focus is much more on delivering executions to a specified shape and size, and
+                                      File
+                                        FileLocation:
+                               File Location:Location:Macintosh
+                                                       Macintosh
+                                               Macintosh        HD:Users:ronniecook:Desktop:RedWorks
+                                                                 HD:Users:ronniecook:Desktop:RedWorks
+                                                         HD:Users:ronniecook:Desktop:RedWorksFile- Task -Brief
+                                                                                                          Task
+                                                                                                          - Task
+                                                                                                   Location:   - Brief
+                                                                                                                  Brief-(Amer.
+                                                                                                              Macintosh
+                                                                                                                 Print   Print
+                                                                                                                         - Print(Amer.
+                                                                                                                                  (Amer.sp).doc
+                                                                                                                                          sp).doc
+                                                                                                                           HD:Users:ronniecook:Desktop:RedWorks
+                                                                                                                                 sp).doc                          - Task Brief - Print (Amer. sp).doc
+     less    on    developing
+      CreatedCreated
+              Createdbybylucmccab:Spelling
+                           lucmccab:Spelling
+              by lucmccab:Spelling
+                                             new
+                                     Revise Revise
+                                                      creative
+                                               ReviseRCook
+                                              RCook   RCook
+                                                                    ideas.       RedWorks briefs          Page 1 Page
+                                                                       Created by lucmccab:Spelling Revise RCook
+                                                                                                                     require
+                                                                                                                  ofPage
+                                                                                                                      1 1 1ofof1 1     aDate:
+                                                                                                                                           different
+                                                                                                                                                Date:
+                                                                                                                                                              kind of Page 1 of 1
+                                                                                                                                                 Date:11/6/2010
+                                                                                                                                                       11/6/2010
+                                                                                                                                               11/6/2010                                             Date: 11/6/2010
+     clarity from the DO Brief. You need to be absolutely clear about the exact materials
+     the client needs.
+
+
+
+
+42
+THE ACTUAL BRIEFING
+
+Probably the worst thing to do is write a brief, slip it under the creatives’ door and
+run away. You are missing an opportunity to influence the work.
+
+Jeremy Bullmore, the former creative director of JWT London, explained how
+briefings lead to ideas.7 Ask a writer of fiction to write a story and he may not know
+how to begin. Ask him to write a story about, say, an international terrorist and
+a tube of toothpaste, and he’ll soon get started.
+
+Creatives in agencies may sometimes yearn for greater freedom, for release from
+the tyranny of the brief. But it is precisely this tyranny that provides stimulus for
+invention. David Ogilvy may have seen many black eye-patches, but it was not
+until his mind was preoccupied with the problem of selling Hathaway Shirts
+that he realized black eye-patches were the solution to his problem.
+
+However, the act of briefing requires a different kind of thinking from writing
+the brief. The brief comes at the end of the strategic process. Writing it involves
+logical, deductive thought based on information. The briefing comes at the start
+of the creative process. Its purpose is to spark ideas, to encourage lateral leaps
+and invention.
+
+Get to know the creative team before briefing them. What makes them tick as
+people? What creative work do they admire? What are their proudest achievements?
+What do they consider to be their best work? How do they like to be briefed—do they
+prefer briefs to be plain and simple, or do they prefer to improve on creative starters?
+Do they want mountains of information or just one word?8
+
+Briefings must motivate and inspire the creatives. Talk about communications ideas,
+not about marketing strategy. Be more enthusiastic about the creative possibilities
+than the business possibilities. Make the briefing fun, but keep it relevant.
+
+Use the briefing to start a conversation. The creative process needs fuel. Briefing
+is a process, not a one-off action. Stimulate an ongoing dialogue and discussion.
+
+ Consider extending the Inspiration section of the brief to the briefing’s venue
+ and style. Sometimes it can help to turn a key element of the brief into a visceral
+ experience—whether riding in the back of a BMW at 150 mph, or sitting naked
+ in a hot spring, or visiting a room where Picasso painted, or being shown the real
+ meaning of teamwork by Marines in an underwater tunnel, or sampling the
+“greasy spoon” lifestyle of van drivers, or spending an evening with prostitutes
+ 	
+Ɵ
+(all real examples from Ogilvy staff ).
+
+
+
+
+7
+ Bullmore, Jeremy: “Thinking Up Things: The Advertising Creative Process,” in More Bull More: Behind the Scenes in
+ Advertising (Mark III), WARC, 2003
+8
+  Two classics on creative briefing are well worth repeated reading: O’Malley, Damien: “Creative Briefing,”
+  in How to Plan Advertising, ed. Cowley, Don; Cassell, 1987; and Robertson, Charlie: “Creative Briefs and Briefings,”
+  in How to Plan Advertising, Second Edition, ed. Cooper, Alan; South-Western Cengage, 1997
+                                                                                                                         43
+     CONCLUSION
+
+     The DO Brief and the creative briefing are tools that help us reach the Twin Peaks.
+     Ogilvy is a creative business above all, a creative business that helps our clients
+     to grow. We measure our success by creative awards and by effectiveness awards,
+     but above all by our clients’ success.
+
+
+
+
+44
+Appendix:
+Examples of good DO Briefs from Ogilvy Public Relations Worldwide,
+OgilvyAction and OgilvyOne
+1. Pond’s (Ogilvy Public Relations Worldwide)
+
+
+
+
+     	
+
+
+     Brand                              Product                               Job No.                              Date
+
+      Pond’s                              White Beauty
+
+     Task                                                                     Success Criteria
+
+      360 Degree campaign to promote pinkish-white skin                         Switching data / consumers trading up
+
+
+
+     Why is this brief here?
+     Three-quarters of skin-lightening products sold are “discount”—i.e., the cheapest. There are significant millions
+     to be made by trading consumers up a step to Pond’s White Beauty. This is one level below Pond’s Flawless White.
+     The challenge is to convince these price-conscious consumers that Pond’s is superior to their existing product
+     because only we deliver a naturally pinkish-white result.
+
+
+     Who are we trying to influence?
+     I live in a big city. It’s not the capital, but it’s growing. You can see me on my scooter, skirting through traffic on my way
+     to work. I have a good job, office based, and the people are nice. I spend quite a lot of time on MSN and the mobile.
+     I like shopping, dancing, gossiping, flirting. Money is tight, but I’ll spend it if I think something is worth it. Right now
+     I use a skin-lightening brand called Dabao. It does not meet my needs, but I buy it out of habit. Good skin is important,
+     though, because it is the first thing boys see—and I want boys to see me.
+
+
+     What do we want them to DO as a result of this communication?
+     Put aside their spare change for the next trip to the skin-lightening aisle.
+
+
+     How do we expect communications to work towards achieving this?
+     Discount skin-lightening products may be inexpensive, but they give cheap results: they simply mask your face with a
+     blank, artificial white color. A natural complexion is pinkish-white, glowing from within and full of life. This is about quality,
+     not quantity—women must realize that White Beauty is several degrees superior to their current brand because it really
+     transforms the color of their skin.
+
+
+     What are we trying to convey?
+     Pinkish-white skin is priceless.
+
+
+     What will help people to KNOW this?                                                     What will help people to FEEL this?
+     s  /RDINARY WHITENING CREAMS MAKE YOU PALE AND WHITEAS IF YOU                          Pale beauty is chemical, anemic, empty,
+        were wearing an anonymous mask.                                                      lifeless and ignorable.
+     s  /NLY NEW 0ONDS 7HITE "EAUTY GIVES YOU A PINKISHWHITE GLOW 
+        from within…                                                                         Pinkish-white beauty is rich, alive, exciting
+     s  xBECAUSE 7HITE "EAUTY ADDS BACK LYCOPENE AND PROVITAMIN                              and attention grabbing.
+        B3 to your skin.
+
+
+     Mandatories                                        Channels                                        Supporting Materials
+     Use a three-card face transformation               360 Degree channels for Indonesia,              R&D clinical support claims
+                                                        Thailand, Philippines, Vietnam,
+                                                        China, Taiwan, India
+
+
+
+
+     Account Director                                Planning Director                               Creative Director
+
+
+
+     Creative Development Time   Final Review Date            Client Presentation Date     Final Deadline                 Production Budget
+
+
+
+
+46
+2. The North Face (OgilvyAction)
+
+
+
+
+     	
+
+
+     Brand                                 0RODUCT                                *OB .O                              Date
+
+      4HE .ORTH &ACE                         4HE .ORTH &ACE                                                              *ANUARY  
+
+     Task                                                             3UCCESS #RITERIA
+
+      Grow market share in the outdoor gear market                      s  -OVE UP FROM TH PLACE IN OUTDOOR GEAR CATEGORY TO ND PLACE 
+                                                                        s 2EPLACE #OLUMBIA IN ND PLACE IN THE "RAND %QUITY 2ANKING
+                                                                        s 2EPLACE #OLUMBIA IN ND PLACE IN THE 4OP  -OST &AVORITE "RANDS CATEGORY
+                                                                        s 3HOW A STEADY GROWTH THROUGH AWARENESS OF AND PARTICIPATION IN OUTDOOR SPORTS
+
+     Why is this brief here?
+     The North Face: the coldest, iciest and most difficult side of a mountain to climb. But dedication to adventure takes endurance and a desire
+     to keep going, as encapsulated by The North Face philosophy: “Never Stop Exploring.”
+     4HE .ORTH &ACE IS IN GOOD SHAPE ACTUALLY	 4HE BRAND ACHIEVED DOUBLEDIGIT SALES GROWTH IN  AND HAS ALREADY REACHED ITS  SALES 
+     TARGET YEARS IN ADVANCE )T ALSO ENJOYS HIGH ADVOCACY AMONG LOYAL USERS AND IS AMONG THE TOP  BRANDS IN 3HANGHAI ONLY	 THAT ENJOY HIGH 
+     SALIENCY WITHIN THE CATEGORY 4HEY CURRENTLY HAVE  STORES THROUGHOUT #HINA AND PLAN TO OPEN ANOTHER  STORES THIS YEAR "UT TO PAVE 
+     THE WAY FOR THE SUCCESS OF ITS RETAIL EXPANSION WE NEED TO BUILD AWARENESS FOR THE BRAND 
+     )N THEIR OWN TRACKING STUDY 4HE .ORTH &ACE FACES COMPARATIVELY LOWER AWARENESS AND EQUITY AGAINST ITS COMPETITORS SOURCE !#.IELSEN  
+     "RAND (EALTH 4RACKING 3TUDY 7AVE 	
+     s 4OTAL BRAND AWARENESS RANKED TH AT  FOLLOWING 4OREAD AT  #OLUMBIA AT  AND .IKKO AT 
+     s 7EAK BRAND AWARENESS IN 3OUTHERN #HINA RANKED  ONLY WHILE 4OREAD HAS  AND #OLUMBIA HAS 
+     s )N BRAND EQUITY RANKING IT PLACED RD WITH 4OREAD LEADING AND #OLUMBIA IN ND PLACE
+     s  )N THE 4OP  -OST &AVORITE "RANDS CATEGORY IT RANKED RD AT  WITH 4OREAD LEADING AGAIN AT  AND #OLUMBIA FOLLOWING AT 
+     4HE TASK IS TWOFOLD TO GIVE A CLEARER DIFFERENTIATION TO 4HE .ORTH &ACE BY MAKING ITS PHILOSOPHY OF h.EVER 3TOP %XPLORINGv MORE RESONANT 
+     AND MEANINGFUL TO THE AUDIENCE IN #HINA AND TO GROW THE OUTDOOR CATEGORY TO GIVE 4HE .ORTH &ACE THE MOMENTUM IT NEEDS TO GROW 
+
+     Who are we trying to influence?
+     s /UTDOOR ENTHUSIASTS PARTICIPATE IN n OUTDOOR ACTIVITIES ANNUALLY	
+     s /UTDOOR PARTICIPANTS OCCASIONAL PARTICIPATION n OUTDOOR ACTIVITIES PER ANNUM	
+     s .ONPARTICIPANTS NO PARTICIPATION IN OUTDOOR ACTIVITIES	
+     4HE OUTDOOR SPORTS COMMUNITY IS STILL IMMATURE WITH EVEN OCCASIONAL PARTICIPANTS NEEDING EDUCATION IN HOW TO PROPERLY GEAR UP FOR OUTDOOR 
+     ACTIVITIES 4ODAY OUR AUDIENCE STILL CONFUSES SPORTS WEAR WITH OUTDOOR WEAR PLEASE REFER TO THE ATTACHED 0$& l LE FOR SPECIl C CONSUMER STORIES	
+
+     What do we want them to DO as a result of this communication?
+     4O GET OUR AUDIENCE INTERESTED AND ENGAGED AND ULTIMATELY TO ENCOURAGE THEM TO EXPLORE THE OUTDOOR EXPERIENCE AND THINK OF 4HE .ORTH &ACE 
+     WHEN BUYING THEIR OUTDOOR GEAR
+
+     How do we expect communications to work towards achieving this?
+     7E WANT TO EMPOWER AND INSPIRE EVERY HUMAN BEINGS INNATE DESIRE TO EXPLOREAND BY DOING SO TO ENCOURAGE THEM TO TAKE THEIR l RST STEP 
+     TO hEXPLORE THEIR WORLDv VIA OUTDOOR SPORTS THUS BUILDING EMPATHY AND RELEVANCE BETWEEN OUR AUDIENCE AND 4HE .ORTH &ACE 
+
+     What are we trying to convey?
+     %XPLORE 9OUR 7ORLD 3EE -ORE AND $O -ORE WITH 4HE .ORTH &ACE	 
+
+     What will help people to KNOW this?                                                                What will help people to FEEL this?
+     7ITH  YEARS OF TECHNICAL AND OUTDOOR HERITAGE BEHIND IT 4HE .ORTH &ACE HAS AN                   PREMIERh"ESTINCLASSv PRODUCTS 
+     IMPRESSIVE TRACK RECORD AND EVERY PIECE OF CLOTHING OR ACCESSORY FROM 4HE .ORTH &ACE              AND SERVICE
+     IS DESIGNED TO PERFORM AND WITHSTAND THE HARSHEST CONDITIONS TO ENSURE THAT WHEREVER               AUTHENTIC4ESTED BY ATHLETES WHOSE LIVES 
+     YOU MAY l ND YOURSELF YOURE PROTECTEDSO YOU CAN ENJOY MORE OF THE OUTDOORS                     DEPEND ON THEIR GEAR
+                                                                                                        TECHNICAL,EADER IN ADOPTING AND APPLYING 
+     4HE .ORTH &ACE HAS INTRODUCED A NUMBER OF TECHNICAL l RSTS THE -%4 THE WORLDS l RST 
+                                                                                                        NEW TECHNOLOGY TO OUTDOOR PRODUCTS
+     BATTERYPOWERED m EECE THE $)!$ JACKET ONE OF THE LIGHTEST WATERPROOF JACKETS AVAILABLE 
+                                                                                                        INNOVATIVE0ASSIONATE FOCUS ON MAKING OUR 
+     THE WORLDS LIGHTEST SINGLESKIN TENT ABLE TO WITHSTAND WINDS OF  MPH AND A SNOW 
+                                                                                                        PRODUCTS BETTER
+     JACKET WITH BUILTIN '03
+
+     Mandatories                                       Channels                                                                    Supporting Materials
+     7E SHOULD STAY WITHIN THE BRANDS $.!             s !DVERTISING                                                               Print ads
+     OF h.EVER 3TOP %XPLORINGv                        s  0UBLIC RELATIONS ATHLETES AND GOVERNMENT RELATIONSHIP MANAGEMENT        #LIENT BRIEF 
+                                                       s !CTIVITYBASED hACTIVATIONv 
+                                                       s $IGITAL AND #2-
+                                                       s )NSTORE PROGRAM
+
+     !CCOUNT $IRECTOR                                    0LANNING $IRECTOR                               #REATIVE $IRECTOR
+
+
+
+     #REATIVE $EVELOPMENT 4IME     &INAL 2EVIEW $ATE              #LIENT 0RESENTATION $ATE     &INAL $EADLINE                 0RODUCTION "UDGET
+
+                                                                     &EBRUARY  
+
+
+
+
+                                                                                                                                                           47
+3. MetLife (OgilvyOne)
+
+
+
+
+     	
+
+
+     Brand                                 Product                                   Job No.                                   Date
+
+      MetLife                                Term Life Insurance (Middle Market)                                                June 2010
+
+     Task                                                                            Success Criteria
+
+      Develop a DRTV spot                                                              Improved response and closure rates
+
+     Why is this brief here?
+     The middle market life insurance need is sizable, with an $11 trillion coverage gap—a $20 billion annual premium opportunity—and MetLife
+     has made it a priority to sell twenty thousand policies via direct channels. Historically, DRTV efforts were less than satisfactory, and following
+     the momentum achieved with a quick fix to the current spot and new media plan, Ogilvy will develop entirely new work.
+
+     Who are we trying to influence?
+     Middle market consumers are “emerging families” whose heads are typically aged 25 – 45, in dual-income households earning $35K – $100K.
+     They have new responsibilities at this stage in their lives, with many new milestones such as marriage, buying a first home, and the birth
+     of a first child. While many women get the ball rolling, men convert at higher rates as they identify themselves as the primary breadwinner.
+     Many are worried about the economy and losing their jobs, are burdened with debt and are time pressured. With the recession, many wonder
+     how they’ll ever be able to retire and now believe they need to take responsibility for their own future security. They know they “should have”
+     life insurance, but either don’t feel confident buying it, see it as too expensive for their budgets, or have at some point started the process but
+     have given up after finding it too complex. If they do plan ahead, a 401(k) is more often seen as more desirable. Life insurance is just not sexy.
+                I don’t want to be pressured into something. I’m pretty sure we can’t afford it. I’m not sure we need it. It’s something
+                so far in the future.
+     With the recession, trust has eroded across most financial service brands. Consumers see MetLife as trustworthy and identify with Snoopy,
+     but still mistrust commissioned sales representatives as using high-pressure sales tactics.
+
+     What do we want them to DO as a result of this communication?
+     Call the toll-free phone number and get a free term life insurance quote (visit website for secondary CTA).
+     Test alternative: Call the toll-free number—today, getting life insurance is easier than you think (visit website for secondary CTA).
+
+     How do we expect communications to work towards achieving this?
+     Address the tension between prospects knowing they “should” have life insurance and their putting off facing the decision since
+     the consequences/benefits are seen as far in the future. Jump-start their action today with a free, no-obligation life insurance quote.
+     Reframe life insurance as a “financial safety net.”
+
+     What are we trying to convey?
+     An online or phone quote from MetLife is one of the easiest and most affordable grown-up things you’ll ever do to protect your family,
+     here and now.
+              Man up! Then live your life.
+
+     What will help people to KNOW this?                                                                            What will help people to FEEL this?
+     Forward-thinking leader—MetLife is innovating and actively changing the way people buy                         Focus on the what, not the who:
+     life insurance. It has remained solid through the recession and is one of the fastest-growing                  Ensure your loved ones can maintain
+     insurance companies globally.                                                                                  their standard of living if anything
+                                                                                                                    should happen—replace lost income,
+     Financial safety net—MetLife protects your assets and your family’s standard of living,
+                                                                                                                    relieve debt burden, save your home,
+     today and in the future.
+                                                                                                                    pay for college educations.
+     Convenience—MetLife provides the speediest, easiest, least pressured way to learn about
+                                                                                                                    It’s the here and now: Protection starts
+     life insurance. No sales pressure. No obligation. No personal information. You don’t even
+                                                                                                                    right now, when you need it most.
+     need to provide your name.
+                                                                                                                    Waiting has a price: Premiums rise
+     Affordable—Demonstrate “surprisingly affordable” by providing actual rates/coverage
+                                                                                                                    with your age.
+     amounts. $500K in coverage could cost as little as $30/month. At 1% of your income,
+     a policy could cost less than your 401(k) contribution.
+     Life insurance is one of the most powerful ways to protect your family, and it can also
+     be more affordable than you think.
+
+     Mandatories                                                                                 Channels                             Supporting Materials
+     Snoopy as “brand ambassador” to bring “approachable energy” to the brand.                   DRTV
+     Tagline: “Guarantees for the IF in life.” Strong, repetitive call to phone action.
+     :120 concept/:60 concept (consider male vs female skew).
+
+
+     Account Director                                    Planning Director                                    Creative Director
+       Tobin Hanspal                                        Phil Buehler                                         Joel Tretin
+
+     Creative Development Time      Final Review Date               Client Presentation Date       Final Deadline                     Production Budget
+
+
+
+
+48
+© Ogilvy & Mather, 2010
+

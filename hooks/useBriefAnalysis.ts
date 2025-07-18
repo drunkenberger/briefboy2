@@ -97,7 +97,9 @@ Formato JSON requerido (copia exactamente esta estructura):
   },
   "isReadyForProduction": true,
   "estimatedImprovementTime": "15-20 minutos"
-}`;
+}
+
+**REGLA CRÍTICA: Si el overallScore es inferior a 90, es OBLIGATORIO que los arrays 'weaknesses' y 'recommendations' contengan al menos dos elementos cada uno. Si el score es 90 o superior, pueden estar vacíos.**`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',

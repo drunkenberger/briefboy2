@@ -19,7 +19,7 @@ export default function TabLayout() {
         <Stack.Screen name="explore" />
       </Stack>
       <BrutalistFooter />
-      <ZohoSalesIQWidget widgetCode="siqcac6ccaff06943ac0b9dc85c19f146c8382faef57bf5a58fb3189ff00dca96ab" />
+      <ZohoSalesIQWidget />
     </View>
   );
 }

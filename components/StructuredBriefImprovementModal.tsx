@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   KeyboardAvoidingView, 
   Modal, 
@@ -11,6 +11,7 @@ import {
 import EducationalBriefAnalysis from './EducationalBriefAnalysis';
 import StructuredChatInterface from './StructuredChatInterface';
 import EditableBriefView from './EditableBriefView';
+import { useBriefAnalysis } from '../hooks/useBriefAnalysis';
 import { useEducationalBriefAnalysis } from '../hooks/useEducationalBriefAnalysis';
 import { useStructuredChat } from '../hooks/useStructuredChat';
 
@@ -34,14 +35,23 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
   onBriefImproved,
 }) => {
   const [currentStep, setCurrentStep] = useState<ModalStep>('analysis');
-  const [workingBrief, setWorkingBrief] = useState<any>(brief);
+  const [workingBrief, setWorkingBrief] = useState<any>(brief || {});
   const [isUpdatingBrief, setIsUpdatingBrief] = useState(false);
   const [improvementsApplied, setImprovementsApplied] = useState(false);
   
-  // Hook para análisis del brief
-  const { analysis, loading: analysisLoading, error: analysisError, reAnalyze } = useEducationalBriefAnalysis(brief);
+  // Sincronizar workingBrief cuando cambie el brief prop
+  useEffect(() => {
+    if (brief && (!workingBrief || Object.keys(workingBrief).length === 0)) {
+      console.log('📋 Inicializando workingBrief con brief recibido:', brief);
+      setWorkingBrief(brief);
+    }
+  }, [brief, workingBrief]);
   
-  // Hook para chat estructurado
+  // Usar AMBOS hooks de análisis
+  const { analysis: rawAnalysis, loading: rawAnalysisLoading, error: rawAnalysisError, reAnalyze: reAnalyzeRaw } = useBriefAnalysis(brief);
+  const { analysis: educationalAnalysis, loading: educationalAnalysisLoading, error: educationalAnalysisError, reAnalyze: reAnalyzeEducational } = useEducationalBriefAnalysis(brief);
+  
+  // Pasar el ANÁLISIS CRUDO al chat
   const { 
     messages, 
     currentQuestion,
@@ -52,7 +62,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     isConnected, 
     error: chatError,
     progress,
-  } = useStructuredChat(brief, analysis, handleBriefUpdate);
+  } = useStructuredChat(workingBrief, handleBriefUpdate);
 
   // Función para manejar actualizaciones del brief
   function handleBriefUpdate(updatedBrief: any) {
@@ -97,8 +107,16 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
 
   const handleStartStructuredImprovement = useCallback((selectedAreas: string[]) => {
     console.log('🎯 Iniciando mejoras estructuradas para áreas:', selectedAreas);
+    console.log('📋 Brief actual para mejoras:', brief);
+    
     setCurrentStep('structured-improvement');
-    setWorkingBrief(brief);
+    // Asegurarse de que workingBrief tenga el brief actual
+    if (brief && Object.keys(brief).length > 0) {
+      setWorkingBrief(brief);
+      console.log('✅ workingBrief actualizado con brief actual');
+    } else {
+      console.warn('⚠️ El brief está vacío o no definido');
+    }
     setImprovementsApplied(false);
     
     // Inicializar el chat estructurado
@@ -262,11 +280,14 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         <View style={styles.content}>
           {currentStep === 'analysis' ? (
             <EducationalBriefAnalysis
-              analysis={analysis}
-              loading={analysisLoading}
-              error={analysisError}
+              analysis={educationalAnalysis} // Usar el análisis educativo aquí
+              loading={educationalAnalysisLoading || rawAnalysisLoading} // Combinar estados de carga
+              error={educationalAnalysisError || rawAnalysisError} // Combinar errores
               onStartImprovement={handleStartStructuredImprovement}
-              onReAnalyze={reAnalyze}
+              onReAnalyze={() => {
+                reAnalyzeRaw();
+                reAnalyzeEducational();
+              }}
               brief={brief}
             />
           ) : (
