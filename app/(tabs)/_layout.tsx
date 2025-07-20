@@ -6,22 +6,25 @@ import BrutalistHeader from '@/components/BrutalistHeader';
 import BrutalistFooter from '@/components/BrutalistFooter';
 import ZohoSalesIQWidget from '@/components/ZohoSalesIQWidget';
 import PageSenseTracker from '@/components/PageSenseTracker';
+import AuthGuard from '@/components/AuthGuard';
 
 export default function TabLayout() {
   return (
-    <View style={{ flex: 1 }}>
-      <BrutalistHeader showBackButton={true} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="history" />
-        <Stack.Screen name="explore" />
-      </Stack>
-      <BrutalistFooter />
-      <ZohoSalesIQWidget />
-      <PageSenseTracker />
-    </View>
+    <AuthGuard>
+      <View style={{ flex: 1 }}>
+        <BrutalistHeader showBackButton={true} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="history" />
+          <Stack.Screen name="explore" />
+        </Stack>
+        <BrutalistFooter />
+        <ZohoSalesIQWidget />
+        <PageSenseTracker />
+      </View>
+    </AuthGuard>
   );
 }

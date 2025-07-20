@@ -69,7 +69,7 @@ export default function BrutalistNavHeader({ currentPage = 'home' }: BrutalistNa
           <View style={styles.divider} />
           
           <Pressable style={styles.signInButton} onPress={navigateToApp}>
-            <Text style={styles.signInText}>USAR APP</Text>
+            <Text style={styles.signInText}>🔐 ACCEDER A LA APP</Text>
           </Pressable>
         </View>
       </View>
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   signInButton: {
     backgroundColor: '#FFD700',
     paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },

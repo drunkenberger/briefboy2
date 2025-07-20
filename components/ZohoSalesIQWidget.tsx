@@ -30,7 +30,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
         ready: function() {
           console.log('✅ Zoho SalesIQ cargado exitosamente');
           
-          // Intentar forzar posición usando API de Zoho
+          // Intentar forzar posición usando API de Zoho - INMEDIATO
           setTimeout(() => {
             try {
               if ((window as any).$zoho.salesiq.chat) {
@@ -38,15 +38,46 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
                 console.log('🔄 Posición forzada a izquierda via API');
               }
               
-              // Forzar posición con JavaScript puro
-              const floatElement = document.querySelector('#zsiq_float, [id*="zsiq_float"], .zsiq_float');
-              if (floatElement) {
-                (floatElement as HTMLElement).style.left = '20px';
-                (floatElement as HTMLElement).style.right = 'unset';
-                (floatElement as HTMLElement).style.bottom = '20px';
-                (floatElement as HTMLElement).style.zIndex = '9999999';
-                console.log('🔄 Posición forzada con JavaScript');
-              }
+              // Forzar posición con JavaScript puro - múltiples intentos
+              const forcePosition = () => {
+                const selectors = [
+                  '#zsiq_float',
+                  '[id*="zsiq_float"]',
+                  '.zsiq_float',
+                  '.zsiq_floatmain',
+                  '#zsiq_floatmain'
+                ];
+                
+                selectors.forEach(selector => {
+                  const elements = document.querySelectorAll(selector);
+                  elements.forEach(element => {
+                    const htmlElement = element as HTMLElement;
+                    htmlElement.style.setProperty('left', '20px', 'important');
+                    htmlElement.style.setProperty('right', 'unset', 'important');
+                    htmlElement.style.setProperty('bottom', '20px', 'important');
+                    htmlElement.style.setProperty('position', 'fixed', 'important');
+                    htmlElement.style.setProperty('z-index', '9999999', 'important');
+                    htmlElement.style.setProperty('transform', 'none', 'important');
+                  });
+                });
+                console.log('🔄 Posición forzada con JavaScript agresivo');
+              };
+              
+              // Ejecutar inmediatamente
+              forcePosition();
+              
+              // Repetir cada segundo por 10 segundos para asegurar
+              const forceInterval = setInterval(forcePosition, 1000);
+              setTimeout(() => clearInterval(forceInterval), 10000);
+              
+              // Observer para detectar cambios
+              const observer = new MutationObserver(forcePosition);
+              observer.observe(document.body, { 
+                childList: true, 
+                subtree: true, 
+                attributes: true, 
+                attributeFilter: ['style', 'class'] 
+              });
               
               // Asegurar que el botón de cerrar del chat sea funcional
               const chatPanel = document.querySelector('#zsiq_chatpanel, .zsiq_chatpanel, [id*="zsiq_chat"]');
@@ -91,7 +122,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
             } catch (e) {
               console.warn('No se pudo forzar posición:', e);
             }
-          }, 1000);
+          }, 100);
         }
       };
 
@@ -103,7 +134,9 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
         #zsiq_float,
         .zsiq_float,
         [id*="zsiq_float"],
-        [class*="zsiq_float"] {
+        [class*="zsiq_float"],
+        div[id*="zsiq_float"],
+        div[class*="zsiq_float"] {
           left: 20px !important;
           right: unset !important;
           bottom: 20px !important;
@@ -125,7 +158,9 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
         .zsiq_floatmain,
         #zsiq_floatmain,
         [class*="floatmain"],
-        .zsiq_float_main {
+        .zsiq_float_main,
+        div.zsiq_floatmain,
+        div#zsiq_floatmain {
           background-color: #FFD700 !important;
           border: 4px solid #FFFFFF !important;
           border-radius: 0 !important;
@@ -135,6 +170,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           position: fixed !important;
           bottom: 20px !important;
           z-index: 9999999 !important;
+          transform: none !important;
         }
         
         /* Cambiar color del icono */
@@ -170,10 +206,29 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           right: unset !important;
         }
         
-        /* Override cualquier posición derecha */
-        *[style*="right"] {
+        /* Override cualquier posición derecha - MUY AGRESIVO */
+        *[style*="right"]:not(body):not(html) {
           right: unset !important;
           left: 20px !important;
+        }
+        
+        /* Selectores aún más específicos para Zoho */
+        [id^="zsiq"], [class^="zsiq"], [id*="float"], [class*="float"] {
+          left: 20px !important;
+          right: unset !important;
+          bottom: 20px !important;
+        }
+        
+        /* Override con máxima especificidad */
+        body #zsiq_float,
+        body .zsiq_float,
+        body .zsiq_floatmain,
+        body #zsiq_floatmain {
+          left: 20px !important;
+          right: unset !important;
+          bottom: 20px !important;
+          position: fixed !important;
+          z-index: 9999999 !important;
         }
         
         /* ESTILOS PARA EL PANEL DE CHAT Y BOTÓN DE CERRAR */
@@ -294,6 +349,23 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
         .zsiq_floatmain {
           box-sizing: border-box !important;
           margin: 0 !important;
+        }
+        
+        /* OVERRIDE FINAL - MÁXIMA PRIORIDAD */
+        html body div#zsiq_float,
+        html body div.zsiq_float,
+        html body div.zsiq_floatmain,
+        html body div#zsiq_floatmain,
+        html body [id*="zsiq"][id*="float"],
+        html body [class*="zsiq"][class*="float"] {
+          left: 20px !important;
+          right: unset !important;
+          bottom: 20px !important;
+          position: fixed !important;
+          z-index: 999999999 !important;
+          transform: none !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
         }
       `;
       document.head.appendChild(style);
