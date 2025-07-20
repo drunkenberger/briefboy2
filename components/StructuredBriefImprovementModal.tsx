@@ -47,9 +47,20 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     }
   }, [brief, workingBrief]);
   
-  // Usar AMBOS hooks de análisis
-  const { analysis: rawAnalysis, loading: rawAnalysisLoading, error: rawAnalysisError, reAnalyze: reAnalyzeRaw } = useBriefAnalysis(brief);
-  const { analysis: educationalAnalysis, loading: educationalAnalysisLoading, error: educationalAnalysisError, reAnalyze: reAnalyzeEducational } = useEducationalBriefAnalysis(brief);
+  // Usar AMBOS hooks de análisis - IMPORTANTE: usar workingBrief para análisis actualizado
+  const briefToAnalyze = workingBrief && Object.keys(workingBrief).length > 0 ? workingBrief : brief;
+  
+  // Debug logging para verificar que el brief tiene los metadatos correctos
+  console.log('🔍 [Modal] Brief para análisis:', {
+    timestamp: new Date().toLocaleTimeString(),
+    source: workingBrief && Object.keys(workingBrief).length > 0 ? 'workingBrief' : 'originalBrief',
+    hasImprovementMetadata: !!briefToAnalyze?.improvementMetadata,
+    iterations: briefToAnalyze?.improvementMetadata?.improvementIterations || 0,
+    briefKeys: briefToAnalyze ? Object.keys(briefToAnalyze).length : 0
+  });
+  
+  const { analysis: rawAnalysis, loading: rawAnalysisLoading, error: rawAnalysisError, reAnalyze: reAnalyzeRaw } = useBriefAnalysis(briefToAnalyze);
+  const { analysis: educationalAnalysis, loading: educationalAnalysisLoading, error: educationalAnalysisError, reAnalyze: reAnalyzeEducational } = useEducationalBriefAnalysis(briefToAnalyze);
   
   // Pasar el ANÁLISIS CRUDO al chat
   const { 
@@ -183,12 +194,15 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         updatedAt: new Date().toISOString(),
         improvedAt: new Date().toISOString(),
         
-        // Metadata de mejoras
+        // Metadata de mejoras con contador de iteraciones
         improvementMetadata: {
           originalBriefFields: brief ? Object.keys(brief).length : 0,
           improvedBriefFields: Object.keys(workingBrief).length,
           improvementDate: new Date().toISOString(),
-          structuredImprovementApplied: true
+          structuredImprovementApplied: true,
+          improvementIterations: (brief?.improvementMetadata?.improvementIterations || 0) + 1,
+          previousScores: brief?.improvementMetadata?.previousScores || [],
+          currentScore: null // Se actualizará después del análisis
         }
       };
       
@@ -202,6 +216,9 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
       // Aplicar las mejoras consolidadas
       onBriefImproved(consolidatedBrief);
       console.log('✅ Brief consolidado aplicado correctamente');
+      
+      // El re-análisis se disparará automáticamente cuando workingBrief cambie
+      console.log('✅ Brief mejorado aplicado - el análisis se actualizará automáticamente');
       
       // Mantener el feedback visual por más tiempo
       setTimeout(() => {

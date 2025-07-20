@@ -6,6 +6,7 @@ import BrutalistNavHeader from '../components/BrutalistNavHeader';
 import MatrixBriefTerms from '../components/MatrixBriefTerms';
 import ElevenLabsDirectWidget from '../components/ElevenLabsDirectWidget';
 import ZohoSalesIQWidget from '../components/ZohoSalesIQWidget';
+import PageSenseTracker from '../components/PageSenseTracker';
 import { InstagramIcon, LinkedInIcon, TwitterIcon, YouTubeIcon } from '../components/SocialIcons';
 
 const { width } = Dimensions.get('window');
@@ -308,7 +309,10 @@ export default function LandingPage() {
       </View>
       
       {/* Zoho SalesIQ Support Widget */}
-      <ZohoSalesIQWidget widgetCode="siqcac6ccaff06943ac0b9dc85c19f146c8382faef57bf5a58fb3189ff00dca96ab" />
+      <ZohoSalesIQWidget />
+      
+      {/* PageSense Analytics Tracker */}
+      <PageSenseTracker />
     </View>
   );
 }
@@ -730,11 +734,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 
-  // Floating Widget
+  // Floating Widget - Posicionado para no interferir con chat de ayuda
   floatingWidgetContainer: {
     position: 'fixed',
     bottom: 30,
-    left: 30,
+    left: 120, // Movido a la derecha del chat de ayuda
     width: 100,
     height: 100,
     zIndex: 9999,

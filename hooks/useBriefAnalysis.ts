@@ -40,6 +40,21 @@ export function useBriefAnalysis(brief: any) {
     setLoading(true);
     setError(null);
     
+    // Verificar si el brief ya ha pasado por múltiples iteraciones
+    const iterations = briefToAnalyze?.improvementMetadata?.improvementIterations || 0;
+    const previousScores = briefToAnalyze?.improvementMetadata?.previousScores || [];
+    
+    console.log('🔍 Analizando brief con', iterations, 'iteraciones previas');
+    console.log('🔍 Brief metadata completo:', briefToAnalyze?.improvementMetadata);
+    console.log('🔍 Brief completo para debug:', {
+      hasImprovementMetadata: !!briefToAnalyze?.improvementMetadata,
+      iterations: iterations,
+      previousScores: previousScores,
+      briefKeys: briefToAnalyze ? Object.keys(briefToAnalyze) : []
+    });
+    
+    // REMOVIDO: Override artificial eliminado para mantener objetividad del AI
+    
     try {
       const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
       if (!apiKey) {
@@ -70,14 +85,37 @@ export function useBriefAnalysis(brief: any) {
 BRIEF A ANALIZAR:
 ${JSON.stringify(briefToAnalyze, null, 2)}
 
+INSTRUCCIONES DE EVALUACIÓN OBJETIVA:
+1. Mantén SIEMPRE estándares profesionales altos pero justos
+2. Evalúa la CALIDAD REAL del contenido, no la cantidad de texto
+3. Un brief "Excelente" debe tener insights profundos, métricas específicas y estrategia clara
+4. Un brief "Muy Bueno" debe ser ejecutable con información suficientemente detallada
+5. Sé exigente pero reconoce cuando el contenido genuinamente alcanza estándares profesionales
+
 IMPORTANTE: Responde ÚNICAMENTE con JSON válido, sin texto adicional, comentarios o explicaciones.
 
-Evalúa estos aspectos con scores del 0-100:
-1. COMPLETITUD: ¿Están todos los campos necesarios?
+Evalúa estos aspectos con scores OBJETIVOS del 0-100:
+1. COMPLETITUD: ¿Están todos los campos necesarios con información útil?
 2. CALIDAD: ¿Es el contenido específico, actionable y profesional?
-3. CLARIDAD: ¿Es fácil de entender y ejecutar?
-4. ESTRATEGIA: ¿Tiene una dirección estratégica clara?
-5. CREATIVIDAD: ¿Inspira ideas creativas?
+3. CLARIDAD: ¿Un equipo creativo puede ejecutar esto sin confusión?
+4. ESTRATEGIA: ¿Hay una dirección clara y coherente?
+5. EJECUTABILIDAD: ¿Es práctico y realista?
+
+CRITERIOS DE CALIFICACIÓN BALANCEADOS:
+- 95-100: Excepcional - Brief de nivel Cannes/Effie con insights profundos, métricas específicas y estrategia cristalina
+- 85-94: Excelente - Brief profesional completo, ejecutable inmediatamente con claridad estratégica
+- 75-84: Muy bueno - Brief sólido con información suficiente, necesita refinamiento menor
+- 65-74: Bueno - Brief funcional pero requiere mayor especificidad y profundidad estratégica
+- 50-64: Regular - Brief básico con información general, necesita desarrollo significativo
+- <50: Insuficiente - Brief incompleto o con problemas fundamentales
+
+EVALUACIÓN DE CONTENIDO:
+- Para puntaje 85+: El contenido debe ser específico, incluir métricas/datos, mostrar insights profundos
+- Para puntaje 75+: El contenido debe ser claro, ejecutable y estratégicamente sólido
+- Para puntaje 65+: El contenido debe estar completo aunque sea básico
+- Evalúa la CALIDAD del contenido, no solo su existencia
+
+**IMPORTANTE**: Evalúa objetivamente la CALIDAD REAL del contenido. Un brief excelente debe tener información específica, insights profundos, métricas claras y estrategia ejecutable, independientemente de cuántas veces haya sido editado.
 
 Formato JSON requerido (copia exactamente esta estructura):
 {
@@ -95,11 +133,30 @@ Formato JSON requerido (copia exactamente esta estructura):
     "briefSummary": {"score": 80, "status": "good", "issues": [], "suggestions": ["Sugerencia"]},
     "strategicObjectives": {"score": 70, "status": "fair", "issues": ["Issue"], "suggestions": ["Sugerencia"]}
   },
-  "isReadyForProduction": true,
+  "isReadyForProduction": true/false basado en si el brief tiene TODO lo necesario para ejecutar una campaña profesional (no perfección, sino completitud funcional),
   "estimatedImprovementTime": "15-20 minutos"
 }
 
-**REGLA CRÍTICA: Si el overallScore es inferior a 90, es OBLIGATORIO que los arrays 'weaknesses' y 'recommendations' contengan al menos dos elementos cada uno. Si el score es 90 o superior, pueden estar vacíos.**`;
+CRITERIOS MÍNIMOS PARA "READY FOR PRODUCTION":
+1. ✓ Título claro del proyecto
+2. ✓ Objetivos medibles definidos
+3. ✓ Audiencia target identificada
+4. ✓ Estrategia creativa básica
+5. ✓ Presupuesto o rango definido
+6. ✓ Timeline o fases claras
+
+Si cumple estos 6 criterios mínimos + score 80+ = isReadyForProduction: true
+Si falta algún criterio esencial = isReadyForProduction: false (sin importar el score)
+
+**REGLA DE OBJETIVIDAD**: Evalúa el brief como si fueras a ejecutar la campaña mañana. ¿Tienes toda la información necesaria con el nivel de detalle apropiado? 
+
+- ¿El contenido incluye métricas específicas, insights profundos y dirección estratégica clara?
+- ¿Un equipo creativo podría ejecutar esto sin necesidad de más información?
+- ¿Los objetivos son medibles y específicos?
+- ¿La audiencia está bien definida con insights de comportamiento?
+- ¿La estrategia es ejecutable y diferenciadora?
+
+Si la respuesta es SÍ a todo = Excelente (85-95+). Si falta profundidad estratégica = Muy Bueno (75-84). Si es básico pero completo = Bueno (65-74).`;
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',

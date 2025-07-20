@@ -5,6 +5,7 @@ import { View } from 'react-native';
 import BrutalistHeader from '@/components/BrutalistHeader';
 import BrutalistFooter from '@/components/BrutalistFooter';
 import ZohoSalesIQWidget from '@/components/ZohoSalesIQWidget';
+import PageSenseTracker from '@/components/PageSenseTracker';
 
 export default function TabLayout() {
   return (
@@ -20,6 +21,7 @@ export default function TabLayout() {
       </Stack>
       <BrutalistFooter />
       <ZohoSalesIQWidget />
+      <PageSenseTracker />
     </View>
   );
 }

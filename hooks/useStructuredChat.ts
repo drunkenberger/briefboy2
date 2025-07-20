@@ -63,6 +63,15 @@ export function useStructuredChat(
     console.log('🤖 Iniciando análisis holístico para generar plan de preguntas...');
     console.log('📋 Brief recibido para análisis:', JSON.stringify(brief, null, 2));
 
+    // Verificar iteraciones previas
+    const iterations = brief?.improvementMetadata?.improvementIterations || 0;
+    console.log(`📊 Iteraciones de mejora previas: ${iterations}`);
+    
+    // Si ya pasó por 3+ iteraciones, ser mucho más selectivo
+    if (iterations >= 3) {
+      console.log('🎯 Brief con 3+ iteraciones. Siendo MUY selectivo con las preguntas.');
+    }
+
     // Verificar si el brief tiene título
     if (brief.projectTitle || brief.title) {
       console.log('✅ El brief YA TIENE título:', brief.projectTitle || brief.title);
@@ -275,22 +284,37 @@ GENERA PREGUNTAS SOLO PARA CAMPOS FALTANTES O ENRIQUECIMIENTO JUSTIFICADO.`;
     const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) return userResponse;
 
-    const systemPrompt = `Eres un experto en redacción de marketing con conocimiento de las mejores prácticas de la industria. Tu tarea es ENRIQUECER la respuesta del usuario, no reemplazarla.
+    const systemPrompt = `Eres un Director de Estrategia Senior con 20+ años creando briefs que han ganado Cannes Lions y Effies. Tu misión es transformar la respuesta del usuario en contenido de CLASE MUNDIAL que merezca una calificación de 90-100 puntos.
 
 CONOCIMIENTO DE MEJORES PRÁCTICAS:
 ${knowledgeBaseService.getBriefStructureGuidance()}
 
-INSTRUCCIONES DE ENRIQUECIMIENTO:
-- CONSERVA la esencia e intención original del usuario
-- AGREGA detalles profesionales y estratégicos
-- MEJORA la claridad y especificidad
-- MANTÉN el tono y estructura preferidos del usuario
-- SI la respuesta ya está bien, haz mejoras mínimas
-- NO cambies nombres, títulos o elementos específicos que estén bien
-- NO añadas etiquetas, comillas, ni formato especial
-- Si es una lista, devuelve una lista mejorada
-- Si es un párrafo, devuelve un párrafo enriquecido
-- Responde ÚNICAMENTE con el texto enriquecido. NADA MÁS.`;
+OBJETIVO: CREAR CONTENIDO PROFESIONAL EXCEPCIONAL
+Tu tarea es tomar la respuesta básica del usuario y crear una versión que:
+- Sea específica, medible y accionable
+- Incluya datos, métricas e insights cuando sea relevante
+- Use terminología profesional de marketing/publicidad
+- Proporcione contexto estratégico profundo
+- Sea lo suficientemente detallada para que cualquier equipo creativo pueda ejecutarla perfectamente
+
+EJEMPLOS DE TRANSFORMACIÓN REQUERIDA:
+
+Entrada del usuario: "Queremos aumentar ventas"
+Tu respuesta: "Incrementar las ventas en un 25% vs periodo anterior (Q4 2023), enfocándose en aumentar frecuencia de compra de usuarios existentes (de 2.3 a 3.1 transacciones promedio) y capturar 15% de market share en el segmento premium, con ROI mínimo de 3:1 en inversión publicitaria."
+
+Entrada del usuario: "Familias modernas"
+Tu respuesta: "Familias urbanas de ingresos medio-alto (NSE A/B+, ingresos familiares $80K-$150K USD anuales), padres millennials de 28-42 años con 1-3 hijos menores de 12 años. Priorizan conveniencia, calidad y experiencias familiares. Insight clave: 73% toma decisiones de compra influenciados por opiniones de otros padres en redes sociales. Comportamiento: Research digital extenso (4.2 touchpoints promedio) antes de compras importantes. Alta afinidad a marcas con propósito social y ambiental."
+
+REGLAS ESTRICTAS:
+- MANTÉN todos los nombres propios, marcas, títulos específicos del usuario
+- CONSERVA la intención original pero multiplica la profundidad profesional
+- AGREGA métricas, porcentajes, rangos específicos cuando sea apropiado
+- INCLUYE insights de comportamiento del consumidor
+- ESPECIFICA timelines, presupuestos, KPIs cuando corresponda
+- CADA palabra debe agregar valor estratégico
+- NO uses jerga innecesaria, pero SÍ terminología profesional precisa
+- El resultado debe ser 3-5x más detallado y específico que la entrada
+- Responde ÚNICAMENTE con el texto transformado y enriquecido. NADA MÁS.`;
 
     const userMessage = `Pregunta original: "${question}"\n\nRespuesta del usuario:\n---\n${userResponse}\n---\n\nRefina y enriquece esta respuesta.`;
 
@@ -301,8 +325,8 @@ INSTRUCCIONES DE ENRIQUECIMIENTO:
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }],
-          temperature: 0.4,
-          max_tokens: 500,
+          temperature: 0.3,
+          max_tokens: 1000,
         }),
       });
 

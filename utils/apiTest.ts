@@ -84,6 +84,11 @@ export const testOpenAIConnection = async (): Promise<{ success: boolean; messag
 };
 
 export const createSimpleAnalysis = (brief: any) => {
+  // Verificar si el brief ha sido mejorado múltiples veces
+  const iterations = brief?.improvementMetadata?.improvementIterations || 0;
+  
+  // REMOVIDO: Override artificial eliminado para mantener objetividad del AI
+
   return {
     overallScore: 75,
     completenessScore: 80,
