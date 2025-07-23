@@ -12,6 +12,7 @@ import FinalBriefEditorModal from '../../components/FinalBriefEditorModal';
 import { useBriefGeneration } from '../../hooks/useBriefGeneration';
 import { useBriefStorage } from '../../hooks/useBriefStorage';
 import { useWhisperTranscription } from '../../hooks/useWhisperTranscription';
+import { useContentParser } from '../../hooks/useContentParser';
 import { checkApiKeysOnStartup } from '../../utils/apiKeyValidator';
 import { FileExporter, Brief } from '../../utils/fileExporter';
 
@@ -28,6 +29,7 @@ const AudioToTextScreen: React.FC = () => {
   const [manualTranscription, setManualTranscription] = useState<string | null>(null);
   const [isFromFile, setIsFromFile] = useState(false);
   const [showFinalBriefEditor, setShowFinalBriefEditor] = useState(false);
+  const [enableContentParser, setEnableContentParser] = useState(false); // usar brief generation por defecto
 
   // Hook de transcripción automática (solo si hay audio)
   const { transcription: autoTranscription, loading, error } = useWhisperTranscription(
@@ -38,40 +40,51 @@ const AudioToTextScreen: React.FC = () => {
   // Usar transcripción manual (desde archivo) o automática (desde grabación)
   const transcription = manualTranscription || autoTranscription;
 
-  // Debug logging para transcripciones - DESACTIVADO TEMPORALMENTE
-  /*
+  // Debug logging para transcripciones 
   useEffect(() => {
-    console.log('📝 Estado de transcripciones:', {
-      manualTranscription: manualTranscription ? manualTranscription.substring(0, 50) + '...' : 'null',
-      autoTranscription: autoTranscription ? autoTranscription.substring(0, 50) + '...' : 'null',
-      finalTranscription: transcription ? transcription.substring(0, 50) + '...' : 'null',
-      loading,
-      error,
-      audioUri: audioUri ? audioUri.substring(0, 50) + '...' : 'null'
-    });
+    if (__DEV__) {
+      console.log('📝 Estado de transcripciones:', {
+        manualTranscription: manualTranscription ? manualTranscription.substring(0, 50) + '...' : 'null',
+        autoTranscription: autoTranscription ? autoTranscription.substring(0, 50) + '...' : 'null',
+        finalTranscription: transcription ? transcription.substring(0, 50) + '...' : 'null',
+        loading,
+        error,
+        audioUri: audioUri ? audioUri.substring(0, 50) + '...' : 'null'
+      });
+    }
   }, [manualTranscription, autoTranscription, transcription, loading, error, audioUri]);
-  */
 
-  // Hook de generación de brief - SOLO después de que termine la transcripción
-  const shouldGenerateBrief = !!transcription && !loading;
-  const { brief, loading: loadingBrief, error: errorBrief } = useBriefGeneration(transcription, shouldGenerateBrief);
+  // Hook de generación de brief - enableContentParser controla qué método usar
+  const shouldGenerateBrief = !!transcription && !loading && !enableContentParser;
+  const shouldParseContent = !!transcription && !loading && enableContentParser;
+  
+  // Hook para parsear contenido sin mejoras (nuevo flujo)
+  const { parsedBrief, loading: loadingParser, error: errorParser } = useContentParser(transcription, shouldParseContent);
+  
+  // Hook para generar brief con mejoras (flujo anterior)
+  const { brief: generatedBrief, loading: loadingGeneration, error: errorGeneration } = useBriefGeneration(transcription, shouldGenerateBrief);
+  
+  // Usar el brief parseado o generado según el modo
+  const brief = enableContentParser ? parsedBrief : generatedBrief;
+  const loadingBrief = enableContentParser ? loadingParser : loadingGeneration;
+  const errorBrief = enableContentParser ? errorParser : errorGeneration;
   const briefToShow = improvedBrief || brief;
   const iaSuggestionsToShow = improvedBrief ? iaSuggestions : null;
   
-  // Debug logging para estado de briefs - DESACTIVADO TEMPORALMENTE
-  /*
+  // Debug logging para estado de briefs - CORREGIDO: removida briefToShow de dependencias
   useEffect(() => {
-    console.log('📊 Estado de briefs:', {
-      brief: brief ? Object.keys(brief).length : 0,
-      improvedBrief: improvedBrief ? Object.keys(improvedBrief).length : 0,
-      briefToShow: briefToShow ? Object.keys(briefToShow).length : 0,
-      briefKeys: brief ? Object.keys(brief) : [],
-      improvedBriefKeys: improvedBrief ? Object.keys(improvedBrief) : [],
-      briefToShowKeys: briefToShow ? Object.keys(briefToShow) : [],
-      timestamp: new Date().toLocaleTimeString()
-    });
-  }, [brief, improvedBrief, briefToShow]);
-  */
+    if (__DEV__) {
+      console.log('📊 Estado de briefs:', {
+        brief: brief ? Object.keys(brief).length : 0,
+        improvedBrief: improvedBrief ? Object.keys(improvedBrief).length : 0,
+        briefKeys: brief ? Object.keys(brief) : [],
+        improvedBriefKeys: improvedBrief ? Object.keys(improvedBrief) : [],
+        loadingBrief,
+        errorBrief,
+        shouldGenerateBrief
+      });
+    }
+  }, [brief, improvedBrief, loadingBrief, errorBrief, shouldGenerateBrief]);
 
   // Hook de almacenamiento
   const { saveBrief, updateBrief, clearOldBriefs, getStorageInfo } = useBriefStorage();
@@ -105,49 +118,59 @@ const AudioToTextScreen: React.FC = () => {
 
   // Función reutilizable para exportar briefs
   const handleExportBrief = useCallback(async (brief: any, format: 'txt' | 'md' | 'html' | 'json' | 'all' = 'txt') => {
-    console.log('🚀 handleExportBrief called with:', {
-      brief: !!brief,
-      format,
-      briefType: typeof brief,
-      briefKeys: brief ? Object.keys(brief) : null
-    });
+    if (__DEV__) {
+      console.log('🚀 handleExportBrief called with:', {
+        brief: !!brief,
+        format,
+        briefType: typeof brief,
+        briefKeys: brief ? Object.keys(brief) : null
+      });
+    }
 
     if (!brief) {
-      console.error('❌ No brief available for export');
+      if (__DEV__) {
+        console.error('❌ No brief available for export');
+      }
       Alert.alert('⚠️ Error', 'No hay brief disponible para exportar');
       return;
     }
 
     try {
-      console.log(`📤 Starting export as ${format.toUpperCase()}`);
+      if (__DEV__) {
+        console.log(`📤 Starting export as ${format.toUpperCase()}`);
+      }
       switch (format) {
         case 'txt':
-          console.log('📝 Calling FileExporter.downloadAsText');
+          if (__DEV__) console.log('📝 Calling FileExporter.downloadAsText');
           await FileExporter.downloadAsText(brief);
           break;
         case 'md':
-          console.log('📝 Calling FileExporter.downloadAsMarkdown');
+          if (__DEV__) console.log('📝 Calling FileExporter.downloadAsMarkdown');
           await FileExporter.downloadAsMarkdown(brief);
           break;
         case 'html':
-          console.log('🌐 Calling FileExporter.downloadAsHTML');
+          if (__DEV__) console.log('🌐 Calling FileExporter.downloadAsHTML');
           await FileExporter.downloadAsHTML(brief);
           break;
         case 'json':
-          console.log('📊 Calling FileExporter.downloadAsJSON');
+          if (__DEV__) console.log('📊 Calling FileExporter.downloadAsJSON');
           await FileExporter.downloadAsJSON(brief);
           break;
         case 'all':
-          console.log('📦 Calling FileExporter.downloadAllFormats');
+          if (__DEV__) console.log('📦 Calling FileExporter.downloadAllFormats');
           await FileExporter.downloadAllFormats(brief);
           break;
         default:
-          console.log('📝 Calling FileExporter.downloadAsText (default)');
+          if (__DEV__) console.log('📝 Calling FileExporter.downloadAsText (default)');
           await FileExporter.downloadAsText(brief);
       }
-      console.log(`✅ Export completed successfully for ${format.toUpperCase()}`);
+      if (__DEV__) {
+        console.log(`✅ Export completed successfully for ${format.toUpperCase()}`);
+      }
     } catch (error) {
-      console.error(`❌ Error exporting ${format.toUpperCase()}:`, error);
+      if (__DEV__) {
+        console.error(`❌ Error exporting ${format.toUpperCase()}:`, error);
+      }
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
       Alert.alert('❌ Error', `No se pudo exportar el archivo ${format.toUpperCase()}: ${errorMessage}`);
     }
@@ -155,7 +178,9 @@ const AudioToTextScreen: React.FC = () => {
 
   // Recibe la URI del audio grabado desde el componente hijo
   const handleAudioRecorded = (uri: string | null) => {
-    console.log('🎤 handleAudioRecorded: Recibida URI de audio:', uri ? uri.substring(0, 100) + '...' : 'null');
+    if (__DEV__) {
+      console.log('🎤 handleAudioRecorded: Recibida URI de audio:', uri ? uri.substring(0, 100) + '...' : 'null');
+    }
 
     // Solo guardamos la URI, no iniciamos transcripción automática
     setAudioUri(null); // No activamos el hook automáticamente
@@ -169,7 +194,9 @@ const AudioToTextScreen: React.FC = () => {
 
   // Maneja la solicitud de transcripción del audio grabado
   const handleTranscriptionRequested = (uri: string) => {
-    console.log('🎤 index.tsx: handleTranscriptionRequested recibida:', uri.substring(0, 100) + '...');
+    if (__DEV__) {
+      console.log('🎤 index.tsx: handleTranscriptionRequested recibida:', uri.substring(0, 100) + '...');
+    }
 
     // Reset estado previo
     setImprovedBrief(null);
@@ -185,7 +212,9 @@ const AudioToTextScreen: React.FC = () => {
 
   // Maneja la transcripción desde archivo de texto/documento
   const handleFileTranscription = (fileTranscription: string) => {
-    console.log('📥 handleFileTranscription: Recibida transcripción de archivo:', fileTranscription.substring(0, 100) + '...');
+    if (__DEV__) {
+      console.log('📥 handleFileTranscription: Recibida transcripción de archivo:', fileTranscription.substring(0, 100) + '...');
+    }
 
     // Reset estado previo
     setAudioUri(null);
@@ -200,46 +229,46 @@ const AudioToTextScreen: React.FC = () => {
 
 
 
-  // Guardar brief automáticamente cuando esté listo - DESACTIVADO TEMPORALMENTE
-  /*
+  // Auto-save brief with debouncing to prevent excessive saves
   useEffect(() => {
-    if (brief && transcription && !loadingBrief && !errorBrief) {
-      const autoSave = async () => {
+    if (brief && transcription && !loadingBrief && !errorBrief && !currentBriefId) {
+      const timer = setTimeout(async () => {
         try {
           const title = brief.projectTitle || `Brief ${new Date().toLocaleDateString()}`;
           const briefId = await saveBrief(title, transcription, brief, audioUri || undefined);
           setCurrentBriefId(briefId);
-          console.log('Brief guardado automáticamente:', briefId);
+          if (__DEV__) {
+            console.log('Brief guardado automáticamente:', briefId);
+          }
         } catch (error) {
           console.error('Error auto-saving brief:', error);
-          // No mostrar error al usuario para el auto-save, solo loggear
         }
-      };
-      autoSave();
-    }
-  }, [brief, transcription, loadingBrief, errorBrief, audioUri, saveBrief]);
-  */
+      }, 1000); // Debounce 1 segundo
 
-  // Actualizar brief guardado cuando se mejore - DESACTIVADO TEMPORALMENTE
-  /*
+      return () => clearTimeout(timer);
+    }
+  }, [brief, transcription, loadingBrief, errorBrief, audioUri, saveBrief, currentBriefId]);
+
+  // Update saved brief with debouncing
   useEffect(() => {
     if (improvedBrief && currentBriefId) {
-      const updateSaved = async () => {
+      const timer = setTimeout(async () => {
         try {
           await updateBrief(currentBriefId, {
             brief: improvedBrief,
             title: improvedBrief.projectTitle || `Brief ${new Date().toLocaleDateString()}`,
           });
-          console.log('Brief actualizado automáticamente:', currentBriefId);
+          if (__DEV__) {
+            console.log('Brief actualizado automáticamente:', currentBriefId);
+          }
         } catch (error) {
           console.error('Error updating saved brief:', error);
-          // No mostrar error al usuario para el auto-update, solo loggear
         }
-      };
-      updateSaved();
+      }, 1000); // Debounce 1 segundo
+
+      return () => clearTimeout(timer);
     }
   }, [improvedBrief, currentBriefId, updateBrief]);
-  */
 
   const handleManualSave = () => {
     if (briefToShow) {
@@ -341,6 +370,7 @@ const AudioToTextScreen: React.FC = () => {
           isLoading={loading || loadingBrief}
         />
 
+
         <TranscriptionResult
           loading={loading}
           error={error}
@@ -352,7 +382,9 @@ const AudioToTextScreen: React.FC = () => {
           <View style={styles.briefGenerationContainer}>
             <View style={styles.briefGenerationCard}>
               <ActivityIndicator size="large" color="#9333ea" />
-              <Text style={styles.briefGenerationTitle}>Generando Brief...</Text>
+              <Text style={styles.briefGenerationTitle}>
+                Generando Brief...
+              </Text>
               <Text style={styles.briefGenerationSubtitle}>
                 IA analizando la transcripción y creando el brief publicitario
               </Text>
@@ -406,16 +438,13 @@ const AudioToTextScreen: React.FC = () => {
             <Pressable
               style={styles.improveButton}
               onPress={() => {
-                console.log('MEJORA ESTRUCTURADA PRESIONADO');
-                try {
-                  setShowChatModal(true);
-                } catch (error) {
-                  console.error('Error abriendo modal:', error);
-                  Alert.alert('Error', 'No se pudo abrir el modal');
+                if (__DEV__) {
+                  console.log('🔍 Abriendo modal de análisis');
                 }
+                setShowChatModal(true);
               }}
             >
-              <Text style={styles.improveButtonText}>🔄 Mejora Estructurada</Text>
+              <Text style={styles.improveButtonText}>📊 Analizar Brief</Text>
             </Pressable>
 
             <Pressable
@@ -462,19 +491,11 @@ const AudioToTextScreen: React.FC = () => {
               </Pressable>
               
               <Pressable
-                style={styles.finalBriefButton}
-                onPress={() => {
-                  console.log('🔥 EXPORT TXT BUTTON PRESSED!');
-                  handleExportBrief(briefToShow, 'txt');
-                }}
-              >
-                <Text style={styles.finalBriefButtonText}>💾 Exportar TXT</Text>
-              </Pressable>
-              
-              <Pressable
                 style={[styles.finalBriefButton, { marginLeft: 8 }]}
                 onPress={async () => {
-                  console.log('📢 SHARE BUTTON PRESSED!');
+                  if (__DEV__) {
+                    console.log('📢 SHARE BUTTON PRESSED!');
+                  }
                   if (!briefToShow) {
                     Alert.alert('⚠️ Error', 'No hay brief disponible para compartir');
                     return;
@@ -497,7 +518,9 @@ const AudioToTextScreen: React.FC = () => {
               <Pressable
                 style={[styles.finalBriefButton, { marginLeft: 8 }]}
                 onPress={async () => {
-                  console.log('📋 COPY BUTTON PRESSED!');
+                  if (__DEV__) {
+                    console.log('📋 COPY BUTTON PRESSED!');
+                  }
                   if (!briefToShow) {
                     Alert.alert('⚠️ Error', 'No hay brief disponible para copiar');
                     return;
@@ -515,6 +538,77 @@ const AudioToTextScreen: React.FC = () => {
                 <Text style={styles.finalBriefButtonText}>📋 Copiar</Text>
               </Pressable>
             </View>
+            
+            {/* Opciones de exportación completas para brief mejorado */}
+            <View style={styles.exportSection}>
+              <Text style={styles.exportSectionTitle}>📤 Exportar Brief Final</Text>
+              
+              <View style={styles.exportButtonsGrid}>
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    if (__DEV__) {
+                      console.log('📤 TXT EXPORT BUTTON PRESSED!');
+                    }
+                    handleExportBrief(briefToShow, 'txt');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>📄</Text>
+                  <Text style={styles.exportButtonText}>TXT</Text>
+                </Pressable>
+                
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    if (__DEV__) {
+                      console.log('📝 MD EXPORT BUTTON PRESSED!');
+                    }
+                    handleExportBrief(briefToShow, 'md');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>📝</Text>
+                  <Text style={styles.exportButtonText}>MD</Text>
+                </Pressable>
+                
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    if (__DEV__) {
+                      console.log('🌐 HTML EXPORT BUTTON PRESSED!');
+                    }
+                    handleExportBrief(briefToShow, 'html');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>🌐</Text>
+                  <Text style={styles.exportButtonText}>HTML</Text>
+                </Pressable>
+                
+                <Pressable
+                  style={styles.exportButton}
+                  onPress={() => {
+                    if (__DEV__) {
+                      console.log('📊 JSON EXPORT BUTTON PRESSED!');
+                    }
+                    handleExportBrief(briefToShow, 'json');
+                  }}
+                >
+                  <Text style={styles.exportButtonIcon}>📊</Text>
+                  <Text style={styles.exportButtonText}>JSON</Text>
+                </Pressable>
+              </View>
+              
+              <Pressable
+                style={styles.exportAllButton}
+                onPress={() => {
+                  if (__DEV__) {
+                    console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
+                  }
+                  handleExportBrief(briefToShow, 'all');
+                }}
+              >
+                <Text style={styles.exportAllButtonText}>📦 Exportar Todos los Formatos</Text>
+              </Pressable>
+            </View>
           </View>
         )}
 
@@ -529,65 +623,78 @@ const AudioToTextScreen: React.FC = () => {
               </Text>
             </Pressable>
             
-            <View style={styles.exportSection}>
-              <Text style={styles.exportSectionTitle}>📤 Exportar Brief</Text>
-              
-              <View style={styles.exportButtonsGrid}>
-                <Pressable
-                  style={styles.exportButton}
-                  onPress={() => {
-                    console.log('📤 TXT EXPORT BUTTON PRESSED!');
-                    handleExportBrief(briefToShow, 'txt');
-                  }}
-                >
-                  <Text style={styles.exportButtonIcon}>📄</Text>
-                  <Text style={styles.exportButtonText}>TXT</Text>
-                </Pressable>
+            {/* Solo mostrar exportación completa si no hay brief mejorado */}
+            {!improvedBrief && !(briefToShow && briefToShow !== brief) && (
+              <View style={styles.exportSection}>
+                <Text style={styles.exportSectionTitle}>📤 Exportar Brief</Text>
+                
+                <View style={styles.exportButtonsGrid}>
+                  <Pressable
+                    style={styles.exportButton}
+                    onPress={() => {
+                      if (__DEV__) {
+                        console.log('📤 TXT EXPORT BUTTON PRESSED!');
+                      }
+                      handleExportBrief(briefToShow, 'txt');
+                    }}
+                  >
+                    <Text style={styles.exportButtonIcon}>📄</Text>
+                    <Text style={styles.exportButtonText}>TXT</Text>
+                  </Pressable>
+                  
+                  <Pressable
+                    style={styles.exportButton}
+                    onPress={() => {
+                      if (__DEV__) {
+                        console.log('📝 MD EXPORT BUTTON PRESSED!');
+                      }
+                      handleExportBrief(briefToShow, 'md');
+                    }}
+                  >
+                    <Text style={styles.exportButtonIcon}>📝</Text>
+                    <Text style={styles.exportButtonText}>MD</Text>
+                  </Pressable>
+                  
+                  <Pressable
+                    style={styles.exportButton}
+                    onPress={() => {
+                      if (__DEV__) {
+                        console.log('🌐 HTML EXPORT BUTTON PRESSED!');
+                      }
+                      handleExportBrief(briefToShow, 'html');
+                    }}
+                  >
+                    <Text style={styles.exportButtonIcon}>🌐</Text>
+                    <Text style={styles.exportButtonText}>HTML</Text>
+                  </Pressable>
+                  
+                  <Pressable
+                    style={styles.exportButton}
+                    onPress={() => {
+                      if (__DEV__) {
+                        console.log('📊 JSON EXPORT BUTTON PRESSED!');
+                      }
+                      handleExportBrief(briefToShow, 'json');
+                    }}
+                  >
+                    <Text style={styles.exportButtonIcon}>📊</Text>
+                    <Text style={styles.exportButtonText}>JSON</Text>
+                  </Pressable>
+                </View>
                 
                 <Pressable
-                  style={styles.exportButton}
+                  style={styles.exportAllButton}
                   onPress={() => {
-                    console.log('📝 MD EXPORT BUTTON PRESSED!');
-                    handleExportBrief(briefToShow, 'md');
+                    if (__DEV__) {
+                      console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
+                    }
+                    handleExportBrief(briefToShow, 'all');
                   }}
                 >
-                  <Text style={styles.exportButtonIcon}>📝</Text>
-                  <Text style={styles.exportButtonText}>MD</Text>
-                </Pressable>
-                
-                <Pressable
-                  style={styles.exportButton}
-                  onPress={() => {
-                    console.log('🌐 HTML EXPORT BUTTON PRESSED!');
-                    handleExportBrief(briefToShow, 'html');
-                  }}
-                >
-                  <Text style={styles.exportButtonIcon}>🌐</Text>
-                  <Text style={styles.exportButtonText}>HTML</Text>
-                </Pressable>
-                
-                <Pressable
-                  style={styles.exportButton}
-                  onPress={() => {
-                    console.log('📊 JSON EXPORT BUTTON PRESSED!');
-                    handleExportBrief(briefToShow, 'json');
-                  }}
-                >
-                  <Text style={styles.exportButtonIcon}>📊</Text>
-                  <Text style={styles.exportButtonText}>JSON</Text>
+                  <Text style={styles.exportAllButtonText}>📦 Exportar Todos los Formatos</Text>
                 </Pressable>
               </View>
-              
-              <Pressable
-                style={styles.exportAllButton}
-                onPress={() => {
-                  console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
-                  handleExportBrief(briefToShow, 'all');
-                }}
-              >
-                <Text style={styles.exportAllButtonText}>📦 Exportar Todos los Formatos</Text>
-              </Pressable>
-            </View>
+            )}
             
             {currentBriefId && (
               <Text style={styles.autoSaveText}>

@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 8, // Reduced from 15 to 8
   },
   logo: {
     fontSize: 24,

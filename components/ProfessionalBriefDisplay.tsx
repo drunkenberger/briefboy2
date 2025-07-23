@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface ProfessionalBriefDisplayProps {
@@ -41,10 +41,20 @@ const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ bri
     );
   }
 
-  // Helper functions to extract content from either AI format or normalized format
-  const getTitle = () => brief.title || brief.projectTitle || 'Marketing Brief';
-  const getSummary = () => brief.summary || brief.briefSummary || '';
-  const getObjectives = () => brief.objectives || brief.strategicObjectives || [];
+  // Memoized helper functions to prevent recalculation on every render
+  const memoizedData = useMemo(() => {
+    if (!brief) return null;
+    
+    return {
+      title: brief.title || brief.projectTitle || 'Marketing Brief',
+      summary: brief.summary || brief.briefSummary || '',
+      objectives: brief.objectives || brief.strategicObjectives || []
+    };
+  }, [brief]);
+
+  const getTitle = () => memoizedData?.title || 'Marketing Brief';
+  const getSummary = () => memoizedData?.summary || '';
+  const getObjectives = () => memoizedData?.objectives || [];
   const getTargetAudience = () => {
     console.log('👥 getTargetAudience: Analizando targetAudience:', {
       exists: !!brief.targetAudience,

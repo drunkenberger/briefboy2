@@ -24,13 +24,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     borderTopWidth: 4,
     borderTopColor: '#FFFFFF',
-    paddingVertical: 40,
+    paddingVertical: 20, // Reduced from 40 to 20
     paddingHorizontal: 20,
   },
   footerContent: {
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 24,
+    gap: 16, // Reduced from 24 to 16
   },
   topRow: {
     flexDirection: 'row',

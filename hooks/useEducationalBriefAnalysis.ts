@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // Tipos de evaluación verbal
 export type VerbalScore = 
@@ -226,15 +226,27 @@ const BRIEF_CRITERIA = {
     },
     checks: [
       {
-        test: (strategy: any) => strategy && (strategy.recommendedMix || strategy.channels),
-        insight: 'Seleccionar canales específicos maximiza el presupuesto - estar en todos lados es estar en ningún lado'
+        test: (strategy: any) => {
+          const channels = strategy?.recommendedMix || strategy?.channels || [];
+          return Array.isArray(channels) && channels.length >= 2;
+        },
+        insight: '❌ CRÍTICO: Necesitas al menos 2 canales específicos con detalles para una estrategia viable'
       },
       {
         test: (strategy: any) => {
           const channels = strategy?.recommendedMix || strategy?.channels || [];
-          return channels.some((ch: any) => ch.rationale || ch.strategy);
+          return channels.every((ch: any) => ch.channel && ch.rationale && ch.allocation);
         },
-        insight: 'Justificar por qué elegiste cada canal demuestra pensamiento estratégico, no solo intuición'
+        insight: '❌ FALTA: Cada canal debe tener nombre específico, justificación estratégica y % de presupuesto'
+      },
+      {
+        test: (strategy: any) => {
+          const channels = strategy?.recommendedMix || strategy?.channels || [];
+          const allocations = channels.map((ch: any) => parseFloat(ch.allocation) || 0);
+          const total = allocations.reduce((sum, val) => sum + val, 0);
+          return Math.abs(total - 100) < 5; // Allow 5% margin
+        },
+        insight: '❌ ERROR: Las asignaciones de presupuesto por canal deben sumar 100%'
       }
     ]
   },
@@ -248,15 +260,29 @@ const BRIEF_CRITERIA = {
     },
     checks: [
       {
-        test: (budget: any) => budget && (budget.estimatedRange || typeof budget === 'string'),
-        insight: 'Un rango presupuestario realista evita sorpresas y permite planificar recursos adecuadamente'
+        test: (budget: any) => {
+          if (!budget) return false;
+          const hasRange = budget.estimatedRange || budget.totalBudget;
+          const hasAmount = /\$[\d,]+|\d+\s*(USD|EUR|MXN)|\d+K|\d+M/i.test(JSON.stringify(budget));
+          return hasRange && hasAmount;
+        },
+        insight: '❌ CRÍTICO: Necesitas un monto o rango presupuestario específico ($X,XXX) para evaluar viabilidad'
+      },
+      {
+        test: (budget: any) => {
+          const investments = budget?.keyInvestments || [];
+          const percentages = JSON.stringify(investments).match(/\d+%/g) || [];
+          const total = percentages.reduce((sum, p) => sum + parseInt(p), 0);
+          return investments.length >= 3 && Math.abs(total - 100) < 10;
+        },
+        insight: '❌ FALTA: Desglose detallado de inversión por categorías (mín. 3) que sume ~100%'
       },
       {
         test: (budget: any) => {
           const text = JSON.stringify(budget).toLowerCase();
-          return /\b(\d+%|pauta|producción|herramientas|personal)\b/.test(text);
+          return /\b(producción|pauta|media|content|creative|talent|tools|herramientas)\b/.test(text);
         },
-        insight: 'Desglosar la inversión por categorías ayuda a optimizar el ROI y justificar cada gasto'
+        insight: '❌ INCOMPLETO: Especifica categorías como producción, pauta, talento, herramientas'
       }
     ]
   },
@@ -270,15 +296,62 @@ const BRIEF_CRITERIA = {
     },
     checks: [
       {
-        test: (metrics: any) => metrics && (metrics.primary || Array.isArray(metrics)),
-        insight: 'Sin métricas claras, es imposible saber si la campaña funcionó - "me gusta" no es suficiente'
+        test: (metrics: any) => {
+          const primary = metrics?.primary || [];
+          const secondary = metrics?.secondary || [];
+          return Array.isArray(primary) && primary.length >= 2 && primary.some(m => /\d+/.test(m));
+        },
+        insight: '❌ CRÍTICO: Necesitas al menos 2 métricas primarias con valores numéricos específicos'
       },
       {
         test: (metrics: any) => {
           const text = JSON.stringify(metrics).toLowerCase();
-          return /\b(\d+|ctr|reach|impresiones|conversiones|ventas)\b/.test(text);
+          const hasBusinessMetrics = /\b(roi|roas|cpa|ltv|revenue|ventas|leads)\b/.test(text);
+          const hasEngagementMetrics = /\b(ctr|reach|engagement|impresiones|views)\b/.test(text);
+          return hasBusinessMetrics && hasEngagementMetrics;
         },
-        insight: 'Métricas específicas y numéricas permiten optimizar la campaña en tiempo real'
+        insight: '❌ FALTA: Combina métricas de negocio (ROI, ventas) con métricas de engagement (CTR, reach)'
+      },
+      {
+        test: (metrics: any) => metrics?.measurementFramework || metrics?.reportingSchedule,
+        insight: '❌ AUSENTE: Define cómo y cuándo vas a medir (framework de reporte/dashboard)'
+      }
+    ]
+  },
+
+  // NUEVO: Campo crítico para timeline y ruta crítica
+  timeline: {
+    category: 'Ruta Crítica y Ejecución',
+    icon: '📅',
+    goodExample: {
+      phases: [
+        { phase: 'Preproducción', duration: '2 semanas', tasks: ['Brief creativo', 'Casting', 'Locaciones'] },
+        { phase: 'Producción', duration: '1 semana', tasks: ['Filmación', 'Fotografía', 'Audio'] },
+        { phase: 'Postproducción', duration: '2 semanas', tasks: ['Edición', 'Motion graphics', 'Aprobaciones'] },
+        { phase: 'Lanzamiento', duration: '1 semana', tasks: ['Setup de campañas', 'Contenido en vivo'] }
+      ],
+      criticalPath: 'Aprobaciones cliente → Producción → Review final → Go-live',
+      totalDuration: '6 semanas'
+    },
+    checks: [
+      {
+        test: (timeline: any) => {
+          if (!timeline) return false;
+          const phases = timeline.phases || timeline.milestones || [];
+          return Array.isArray(phases) && phases.length >= 3;
+        },
+        insight: '❌ CRÍTICO: Sin timeline detallado es imposible coordinar equipos y cumplir deadlines'
+      },
+      {
+        test: (timeline: any) => {
+          const phases = timeline?.phases || timeline?.milestones || [];
+          return phases.every((p: any) => p.duration || p.timeline || p.deadline);
+        },
+        insight: '❌ FALTA: Cada fase debe tener duración específica (días/semanas) para planificación real'
+      },
+      {
+        test: (timeline: any) => timeline?.criticalPath || timeline?.dependencies,
+        insight: '❌ AUSENTE: Identifica la ruta crítica - qué tareas bloquean todo si se retrasan'
       }
     ]
   }
@@ -291,17 +364,30 @@ export function useEducationalBriefAnalysis(brief: any) {
   const [analysis, setAnalysis] = useState<EducationalAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isAnalyzing = useRef(false);
+  const lastAnalyzedBriefRef = useRef<string>('');
 
   const analyzeBrief = async (briefToAnalyze: any) => {
-    if (!briefToAnalyze) return;
+    if (!briefToAnalyze || isAnalyzing.current) return;
     
+    // Check if brief has actually changed
+    const briefString = JSON.stringify(briefToAnalyze);
+    if (briefString === lastAnalyzedBriefRef.current) {
+      return; // Skip if same brief
+    }
+    
+    isAnalyzing.current = true;
     setLoading(true);
     setError(null);
     
     try {
+      // Add small delay to prevent rapid re-renders
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Realizar análisis educativo local (más rápido y didáctico)
       const educationalAnalysis = performEducationalAnalysis(briefToAnalyze);
       setAnalysis(educationalAnalysis);
+      lastAnalyzedBriefRef.current = briefString;
       
       // Opcionalmente, enriquecer con AI para insights más profundos
       // await enrichWithAIInsights(educationalAnalysis, briefToAnalyze);
@@ -311,13 +397,18 @@ export function useEducationalBriefAnalysis(brief: any) {
       setError('No pudimos analizar tu brief en este momento. Intenta de nuevo.');
     } finally {
       setLoading(false);
+      isAnalyzing.current = false;
     }
   };
 
   useEffect(() => {
-    if (brief) {
-      analyzeBrief(brief);
-    }
+    const timer = setTimeout(() => {
+      if (brief && !isAnalyzing.current) {
+        analyzeBrief(brief);
+      }
+    }, 500); // Debounce por 500ms
+
+    return () => clearTimeout(timer);
   }, [brief]);
 
   return {
@@ -333,16 +424,18 @@ function performEducationalAnalysis(brief: any): EducationalAnalysisResult {
   let totalScore = 0;
   let maxScore = 0;
 
-  // Analizar cada sección del brief
-  Object.entries(BRIEF_CRITERIA).forEach(([sectionKey, criteria]) => {
+  try {
+    // Analizar cada sección del brief
+    Object.entries(BRIEF_CRITERIA).forEach(([sectionKey, criteria]) => {
     const sectionData = brief[sectionKey];
     const insights: AnalysisInsight[] = [];
     let sectionScore = 0;
-    let sectionMaxScore = criteria.checks.length * 25; // 25 puntos por check
+    let sectionMaxScore = criteria.checks.length * 20; // 20 puntos por check (más estricto)
     
     criteria.checks.forEach((check, index) => {
       const passed = check.test(sectionData);
-      if (passed) sectionScore += 25;
+      // Scoring más estricto: solo puntos completos si pasa TODOS los checks de la sección
+      if (passed) sectionScore += 20; // Reducido de 25 a 20
       
       insights.push({
         id: `${sectionKey}_${index}`,
@@ -454,32 +547,61 @@ function performEducationalAnalysis(brief: any): EducationalAnalysisResult {
       nextMilestone: getNextMilestone(overallPercentage)
     }
   };
+  } catch (error) {
+    console.error('Error in performEducationalAnalysis:', error);
+    // Return a minimal analysis result to prevent crashes
+    return {
+      overallAssessment: 'basico',
+      overallScore: 'puede-mejorar',
+      readinessLevel: 'requiere-desarrollo',
+      healthChecks: [],
+      didYouKnow: ['El análisis encontró un error. Por favor intenta de nuevo.'],
+      bestPractices: [],
+      commonMistakes: [],
+      actionPlan: {
+        summary: 'No se pudo completar el análisis',
+        estimatedTimeTotal: '0 minutos',
+        difficulty: 'facil',
+        expectedImprovement: '0',
+        phases: []
+      },
+      priorityActions: [],
+      progressIndicators: {
+        completedWell: [],
+        improvementAreas: [],
+        nextMilestone: 'Reintentar análisis'
+      }
+    };
+  }
 }
 
 // Funciones de conversión verbal
 function getVerbalScore(percentage: number): VerbalScore {
-  if (percentage >= 90) return 'excelente';
-  if (percentage >= 80) return 'muy-bueno';
-  if (percentage >= 70) return 'bueno';
-  if (percentage >= 60) return 'regular';
-  if (percentage >= 40) return 'puede-mejorar';
-  if (percentage >= 20) return 'necesita-trabajo';
-  return 'incompleto';
+  // Scoring MÁS ESTRICTO - criterios profesionales reales
+  if (percentage >= 95) return 'excelente';      // Solo 95%+ es excelente
+  if (percentage >= 85) return 'muy-bueno';      // 85%+ es muy bueno  
+  if (percentage >= 75) return 'bueno';          // 75%+ es bueno
+  if (percentage >= 60) return 'regular';        // 60%+ es regular
+  if (percentage >= 40) return 'puede-mejorar';  // 40%+ puede mejorar
+  if (percentage >= 20) return 'necesita-trabajo'; // 20%+ necesita trabajo
+  return 'incompleto';                           // <20% incompleto
 }
 
 function getOverallAssessment(percentage: number): OverallAssessment {
-  if (percentage >= 85) return 'muy-completo';
-  if (percentage >= 70) return 'bien-estructurado';
-  if (percentage >= 55) return 'funcional';
-  if (percentage >= 35) return 'basico';
-  return 'incompleto';
+  // Assessment general más estricto
+  if (percentage >= 90) return 'muy-completo';        // Solo 90%+ es muy completo
+  if (percentage >= 80) return 'bien-estructurado';   // 80%+ bien estructurado
+  if (percentage >= 65) return 'funcional';           // 65%+ funcional
+  if (percentage >= 45) return 'basico';              // 45%+ básico
+  return 'incompleto';                                // <45% incompleto
 }
 
 function getReadinessLevel(percentage: number): ReadinessLevel {
-  if (percentage >= 85) return 'listo-para-presentar';
-  if (percentage >= 70) return 'casi-listo';
-  if (percentage >= 50) return 'necesita-pulir';
-  return 'requiere-desarrollo';
+  // Readiness más estricto - estándares profesionales
+  if (percentage >= 90) return 'listo-para-presentar';  // Solo 90%+ listo para cliente
+  if (percentage >= 80) return 'casi-listo';            // 80%+ casi listo
+  if (percentage >= 65) return 'necesita-pulir';        // 65%+ necesita pulir
+  return 'requiere-desarrollo';                         // <65% requiere desarrollo
 }
 
 function getVerbalScoreInfo(verbalScore: VerbalScore): {

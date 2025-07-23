@@ -388,3 +388,25 @@ function generateKeyMessages(brief: NormalizedBrief): string[] {
 
   return messages;
 }
+
+/**
+ * Evalúa la calidad de un título de proyecto
+ * @param value El título a evaluar
+ * @returns 'basic' | 'good' | 'excellent'
+ */
+export function evaluateTitle(value: string): 'basic' | 'good' | 'excellent' {
+  if (value.length < 10) return 'basic';
+  
+  const genericTitles = ['proyecto', 'campaña', 'brief', 'sin título', 'untitled', 'new project'];
+  const isGeneric = genericTitles.some(generic => 
+    value.toLowerCase().includes(generic) && value.split(' ').length <= 3
+  );
+  
+  if (isGeneric) return 'basic';
+  
+  if (value.length > 15 || value.includes(':') || value.split(' ').length >= 3) {
+    return 'excellent';
+  }
+  
+  return 'good';
+}

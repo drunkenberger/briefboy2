@@ -32,6 +32,16 @@ const EducationalBriefAnalysis: React.FC<EducationalBriefAnalysisProps> = ({
   onReAnalyze,
   brief,
 }) => {
+  if (__DEV__) {
+    console.log('📚 [EducationalBriefAnalysis] Renderizando con:', {
+      hasAnalysis: !!analysis,
+      loading,
+      error,
+      hasBrief: !!brief,
+      timestamp: new Date().toLocaleTimeString()
+    });
+  }
+
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [selectedHealthCheck, setSelectedHealthCheck] = useState<BriefHealthCheck | null>(null);
   const [selectedActions, setSelectedActions] = useState<string[]>([]);

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { 
   KeyboardAvoidingView, 
   Modal, 
@@ -11,7 +11,6 @@ import {
 import EducationalBriefAnalysis from './EducationalBriefAnalysis';
 import StructuredChatInterface from './StructuredChatInterface';
 import EditableBriefView from './EditableBriefView';
-import { useBriefAnalysis } from '../hooks/useBriefAnalysis';
 import { useEducationalBriefAnalysis } from '../hooks/useEducationalBriefAnalysis';
 import { useStructuredChat } from '../hooks/useStructuredChat';
 
@@ -34,33 +33,67 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
   onClose,
   onBriefImproved,
 }) => {
+  if (__DEV__) {
+    console.log('🎯 [Modal] Props recibidas:', {
+      visible,
+      briefExists: !!brief,
+      briefKeys: brief ? Object.keys(brief).length : 0,
+      briefContent: brief ? Object.keys(brief) : [],
+      timestamp: new Date().toLocaleTimeString()
+    });
+  }
+
   const [currentStep, setCurrentStep] = useState<ModalStep>('analysis');
   const [workingBrief, setWorkingBrief] = useState<any>(brief || {});
   const [isUpdatingBrief, setIsUpdatingBrief] = useState(false);
   const [improvementsApplied, setImprovementsApplied] = useState(false);
   
-  // Sincronizar workingBrief cuando cambie el brief prop
+  // Sincronizar workingBrief cuando cambie el brief prop - CORREGIDO: remover workingBrief de dependencias
   useEffect(() => {
     if (brief && (!workingBrief || Object.keys(workingBrief).length === 0)) {
-      console.log('📋 Inicializando workingBrief con brief recibido:', brief);
+      if (__DEV__) {
+        console.log('📋 Inicializando workingBrief con brief recibido:', brief);
+      }
       setWorkingBrief(brief);
     }
-  }, [brief, workingBrief]);
+  }, [brief]); // CORREGIDO: solo depender de brief, no de workingBrief
   
-  // Usar AMBOS hooks de análisis - IMPORTANTE: usar workingBrief para análisis actualizado
-  const briefToAnalyze = workingBrief && Object.keys(workingBrief).length > 0 ? workingBrief : brief;
+  // Usar useMemo para evitar recrear el objeto en cada render
+  const briefToAnalyze = useMemo(() => {
+    return workingBrief && Object.keys(workingBrief).length > 0 ? workingBrief : brief;
+  }, [workingBrief, brief]);
   
-  // Debug logging para verificar que el brief tiene los metadatos correctos
-  console.log('🔍 [Modal] Brief para análisis:', {
-    timestamp: new Date().toLocaleTimeString(),
-    source: workingBrief && Object.keys(workingBrief).length > 0 ? 'workingBrief' : 'originalBrief',
-    hasImprovementMetadata: !!briefToAnalyze?.improvementMetadata,
-    iterations: briefToAnalyze?.improvementMetadata?.improvementIterations || 0,
-    briefKeys: briefToAnalyze ? Object.keys(briefToAnalyze).length : 0
-  });
+  // Debug logging controlado para evitar renders excesivos
+  useEffect(() => {
+    if (__DEV__) {
+      console.log('🔍 [Modal] Brief para análisis:', {
+        timestamp: new Date().toLocaleTimeString(),
+        source: workingBrief && Object.keys(workingBrief).length > 0 ? 'workingBrief' : 'originalBrief',
+        hasImprovementMetadata: !!briefToAnalyze?.improvementMetadata,
+        iterations: briefToAnalyze?.improvementMetadata?.improvementIterations || 0,
+        briefKeys: briefToAnalyze ? Object.keys(briefToAnalyze).length : 0
+      });
+    }
+  }, [brief]); // Solo depender de brief para evitar ciclos infinitos
   
-  const { analysis: rawAnalysis, loading: rawAnalysisLoading, error: rawAnalysisError, reAnalyze: reAnalyzeRaw } = useBriefAnalysis(briefToAnalyze);
-  const { analysis: educationalAnalysis, loading: educationalAnalysisLoading, error: educationalAnalysisError, reAnalyze: reAnalyzeEducational } = useEducationalBriefAnalysis(briefToAnalyze);
+  // Use only educational analysis to avoid conflicts and performance issues
+  // Only analyze if modal is visible and has a brief
+  const shouldAnalyze = visible && briefToAnalyze && Object.keys(briefToAnalyze).length > 0;
+  const { analysis: educationalAnalysis, loading: educationalAnalysisLoading, error: educationalAnalysisError, reAnalyze: reAnalyzeEducational } = useEducationalBriefAnalysis(shouldAnalyze ? briefToAnalyze : null);
+  
+  // Debug analysis hook states
+  useEffect(() => {
+    if (__DEV__) {
+      console.log('🔧 [Modal] Analysis hook status:', {
+        timestamp: new Date().toLocaleTimeString(),
+        educationalAnalysis: { 
+          hasAnalysis: !!educationalAnalysis, 
+          loading: educationalAnalysisLoading, 
+          error: educationalAnalysisError 
+        }
+      });
+    }
+  }, [educationalAnalysis, educationalAnalysisLoading, educationalAnalysisError]);
   
   // Pasar el ANÁLISIS CRUDO al chat
   const { 
@@ -78,19 +111,22 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
   // Función para manejar actualizaciones del brief
   function handleBriefUpdate(updatedBrief: any) {
     const timestamp = new Date().toLocaleTimeString();
-    console.log(`📝 [${timestamp}] Modal recibió actualización del brief:`, {
-      hasUpdate: !!updatedBrief,
-      previousFieldCount: workingBrief ? Object.keys(workingBrief).length : 0,
-      newFieldCount: updatedBrief ? Object.keys(updatedBrief).length : 0,
-      briefChanged: updatedBrief !== workingBrief,
-      sampleFields: {
-        projectTitle: updatedBrief?.projectTitle,
-        briefSummary: updatedBrief?.briefSummary?.substring(0, 50) + '...',
-        targetAudience: updatedBrief?.targetAudience
-      }
-    });
+    if (__DEV__) {
+      console.log(`📝 [${timestamp}] Modal recibió actualización del brief:`, {
+        hasUpdate: !!updatedBrief,
+        previousFieldCount: workingBrief ? Object.keys(workingBrief).length : 0,
+        newFieldCount: updatedBrief ? Object.keys(updatedBrief).length : 0,
+        briefChanged: updatedBrief !== workingBrief,
+        sampleFields: {
+          projectTitle: updatedBrief?.projectTitle,
+          briefSummary: updatedBrief?.briefSummary?.substring(0, 50) + '...',
+          targetAudience: updatedBrief?.targetAudience
+        }
+      });
+    }
     
-    if (updatedBrief) {
+    // Prevenir actualizaciones si el brief es el mismo para evitar bucles
+    if (updatedBrief && updatedBrief !== workingBrief) {
       // ACTUALIZACIÓN INMEDIATA sin demoras
       setWorkingBrief(updatedBrief);
       setIsUpdatingBrief(true);
@@ -101,32 +137,42 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         return value && (typeof value === 'string' ? value.trim() : true);
       });
       
-      console.log(`✅ [${timestamp}] Modal SINCRONIZADO:`, {
-        hasContent,
-        fieldCount: Object.keys(updatedBrief).length,
-        briefUpdated: true
-      });
+      if (__DEV__) {
+        console.log(`✅ [${timestamp}] Modal SINCRONIZADO:`, {
+          hasContent,
+          fieldCount: Object.keys(updatedBrief).length,
+          briefUpdated: true
+        });
+      }
       
       // Feedback visual mínimo
       setTimeout(() => {
         setIsUpdatingBrief(false);
       }, 1000);
     } else {
-      console.error(`❌ [${timestamp}] Modal recibió brief NULO - esto es un error crítico`);
+      if (__DEV__) {
+        console.error(`❌ [${timestamp}] Modal recibió brief NULO - esto es un error crítico`);
+      }
     }
   }
 
   const handleStartStructuredImprovement = useCallback((selectedAreas: string[]) => {
-    console.log('🎯 Iniciando mejoras estructuradas para áreas:', selectedAreas);
-    console.log('📋 Brief actual para mejoras:', brief);
+    if (__DEV__) {
+      console.log('🎯 Iniciando mejoras estructuradas para áreas:', selectedAreas);
+      console.log('📋 Brief actual para mejoras:', brief);
+    }
     
     setCurrentStep('structured-improvement');
     // Asegurarse de que workingBrief tenga el brief actual
     if (brief && Object.keys(brief).length > 0) {
       setWorkingBrief(brief);
-      console.log('✅ workingBrief actualizado con brief actual');
+      if (__DEV__) {
+        console.log('✅ workingBrief actualizado con brief actual');
+      }
     } else {
-      console.warn('⚠️ El brief está vacío o no definido');
+      if (__DEV__) {
+        console.warn('⚠️ El brief está vacío o no definido');
+      }
     }
     setImprovementsApplied(false);
     
@@ -153,12 +199,14 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
   }, [brief, clearChat, onClose, workingBrief, onBriefImproved]);
 
   const handleApplyImprovements = useCallback(() => {
-    console.log('🚀 Aplicando mejoras del brief:', {
-      hasWorkingBrief: !!workingBrief,
-      workingBriefFields: workingBrief ? Object.keys(workingBrief).length : 0,
-      originalBriefFields: brief ? Object.keys(brief).length : 0,
-      briefChanged: workingBrief !== brief
-    });
+    if (__DEV__) {
+      console.log('🚀 Aplicando mejoras del brief:', {
+        hasWorkingBrief: !!workingBrief,
+        workingBriefFields: workingBrief ? Object.keys(workingBrief).length : 0,
+        originalBriefFields: brief ? Object.keys(brief).length : 0,
+        briefChanged: workingBrief !== brief
+      });
+    }
     
     if (workingBrief) {
       // Mostrar feedback visual INMEDIATAMENTE
@@ -175,14 +223,16 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
                 typeof valor === 'string' ? valor.trim().length > 0 : true);
       });
       
-      console.log('🚀 APLICANDO MEJORAS - Verificación previa:', {
-        totalCampos: Object.keys(workingBrief).length,
-        camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
-        businessChallenge: workingBrief.businessChallenge ? '✅' : '❌',
-        targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅' : '❌',
-        bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅' : '❌',
-        timestamp: new Date().toLocaleTimeString()
-      });
+      if (__DEV__) {
+        console.log('🚀 APLICANDO MEJORAS - Verificación previa:', {
+          totalCampos: Object.keys(workingBrief).length,
+          camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
+          businessChallenge: workingBrief.businessChallenge ? '✅' : '❌',
+          targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅' : '❌',
+          bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅' : '❌',
+          timestamp: new Date().toLocaleTimeString()
+        });
+      }
       
       // Crear brief consolidado con mejoras aplicadas
       const consolidatedBrief = {
@@ -206,19 +256,25 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         }
       };
       
-      console.log('🎯 Brief consolidado creado:', {
-        originalFields: brief ? Object.keys(brief).length : 0,
-        improvedFields: Object.keys(workingBrief).length,
-        consolidatedFields: Object.keys(consolidatedBrief).length,
-        hasBriefSummary: !!consolidatedBrief.briefSummary
-      });
+      if (__DEV__) {
+        console.log('🎯 Brief consolidado creado:', {
+          originalFields: brief ? Object.keys(brief).length : 0,
+          improvedFields: Object.keys(workingBrief).length,
+          consolidatedFields: Object.keys(consolidatedBrief).length,
+          hasBriefSummary: !!consolidatedBrief.briefSummary
+        });
+      }
       
       // Aplicar las mejoras consolidadas
       onBriefImproved(consolidatedBrief);
-      console.log('✅ Brief consolidado aplicado correctamente');
+      if (__DEV__) {
+        console.log('✅ Brief consolidado aplicado correctamente');
+      }
       
       // El re-análisis se disparará automáticamente cuando workingBrief cambie
-      console.log('✅ Brief mejorado aplicado - el análisis se actualizará automáticamente');
+      if (__DEV__) {
+        console.log('✅ Brief mejorado aplicado - el análisis se actualizará automáticamente');
+      }
       
       // Mantener el feedback visual por más tiempo
       setTimeout(() => {
@@ -232,17 +288,37 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
       // NO cerrar el modal automáticamente - mantener la vista abierta
       // handleCloseModal();
     } else {
-      console.warn('⚠️ No hay workingBrief para aplicar');
+      if (__DEV__) {
+        console.warn('⚠️ No hay workingBrief para aplicar');
+      }
     }
   }, [workingBrief, onBriefImproved, brief]);
 
   const handleManualBriefChange = useCallback((updatedBrief: any) => {
-    console.log('🖊️ Cambio manual desde EditableBriefView:', {
-      timestamp: new Date().toLocaleTimeString(),
-      camposActualizados: Object.keys(updatedBrief).length
-    });
+    if (__DEV__) {
+      console.log('🖊️ Cambio manual desde EditableBriefView:', {
+        timestamp: new Date().toLocaleTimeString(),
+        camposActualizados: Object.keys(updatedBrief).length
+      });
+    }
     setWorkingBrief(updatedBrief);
   }, []);
+
+  // Effect para logging cuando el modal se abre/cierra
+  useEffect(() => {
+    if (__DEV__) {
+      if (visible) {
+        console.log('👀 [Modal] MODAL ABIERTO - Estado inicial:', {
+          currentStep,
+          workingBriefExists: !!workingBrief,
+          workingBriefFields: workingBrief ? Object.keys(workingBrief).length : 0,
+          briefExists: !!brief
+        });
+      } else {
+        console.log('🔒 [Modal] MODAL CERRADO');
+      }
+    }
+  }, [visible, currentStep, workingBrief, brief]);
 
   return (
     <Modal
@@ -297,14 +373,11 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         <View style={styles.content}>
           {currentStep === 'analysis' ? (
             <EducationalBriefAnalysis
-              analysis={educationalAnalysis} // Usar el análisis educativo aquí
-              loading={educationalAnalysisLoading || rawAnalysisLoading} // Combinar estados de carga
-              error={educationalAnalysisError || rawAnalysisError} // Combinar errores
+              analysis={educationalAnalysis}
+              loading={educationalAnalysisLoading}
+              error={educationalAnalysisError}
               onStartImprovement={handleStartStructuredImprovement}
-              onReAnalyze={() => {
-                reAnalyzeRaw();
-                reAnalyzeEducational();
-              }}
+              onReAnalyze={reAnalyzeEducational}
               brief={brief}
             />
           ) : (
@@ -365,31 +438,33 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
               <Pressable 
                 style={styles.debugButton}
                 onPress={() => {
-                  console.log('🔧 FORZANDO SINCRONIZACIÓN MANUAL...');
-                  if (workingBrief) {
-                    setIsUpdatingBrief(true);
-                    
-                    // Verificar integridad del brief actual
-                    const camposCriticos = ['projectTitle', 'briefSummary', 'businessChallenge', 'strategicObjectives', 'targetAudience', 'creativeStrategy'];
-                    const camposPresentes = camposCriticos.filter(campo => {
-                      const valor = workingBrief[campo];
-                      return valor !== undefined && valor !== null && 
-                             (Array.isArray(valor) ? valor.length > 0 : 
-                              typeof valor === 'object' ? Object.keys(valor).length > 0 : 
-                              typeof valor === 'string' ? valor.trim().length > 0 : true);
-                    });
-                    
-                    console.log('🔄 ESTADO ACTUAL DEL BRIEF:', {
-                      totalCampos: Object.keys(workingBrief).length,
-                      camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
-                      businessChallenge: workingBrief.businessChallenge ? '✅ Presente' : '❌ Falta',
-                      targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅ Presente' : '❌ Falta',
-                      targetAudienceSecondary: workingBrief.targetAudience?.secondary ? '✅ Presente' : '❌ Falta',
-                      bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅ Presente' : '❌ Falta',
-                      briefCompleto: workingBrief
-                    });
-                    
-                    setTimeout(() => setIsUpdatingBrief(false), 1000);
+                  if (__DEV__) {
+                    console.log('🔧 FORZANDO SINCRONIZACIÓN MANUAL...');
+                    if (workingBrief) {
+                      setIsUpdatingBrief(true);
+                      
+                      // Verificar integridad del brief actual
+                      const camposCriticos = ['projectTitle', 'briefSummary', 'businessChallenge', 'strategicObjectives', 'targetAudience', 'creativeStrategy'];
+                      const camposPresentes = camposCriticos.filter(campo => {
+                        const valor = workingBrief[campo];
+                        return valor !== undefined && valor !== null && 
+                               (Array.isArray(valor) ? valor.length > 0 : 
+                                typeof valor === 'object' ? Object.keys(valor).length > 0 : 
+                                typeof valor === 'string' ? valor.trim().length > 0 : true);
+                      });
+                      
+                      console.log('🔄 ESTADO ACTUAL DEL BRIEF:', {
+                        totalCampos: Object.keys(workingBrief).length,
+                        camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
+                        businessChallenge: workingBrief.businessChallenge ? '✅ Presente' : '❌ Falta',
+                        targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅ Presente' : '❌ Falta',
+                        targetAudienceSecondary: workingBrief.targetAudience?.secondary ? '✅ Presente' : '❌ Falta',
+                        bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅ Presente' : '❌ Falta',
+                        briefCompleto: workingBrief
+                      });
+                      
+                      setTimeout(() => setIsUpdatingBrief(false), 1000);
+                    }
                   }
                 }}
               >

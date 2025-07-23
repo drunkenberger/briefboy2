@@ -1,5 +1,6 @@
 import {
     completeBrief,
+    evaluateTitle,
     generateBriefTitle,
     normalizeBrief,
     validateBrief
@@ -218,6 +219,37 @@ describe('briefValidation', () => {
 
       expect(completed.briefSummary).not.toContain('dirigida a');
       expect(completed.problemStatement).toContain('Existe una oportunidad en el mercado');
+    });
+  });
+
+  describe('evaluateTitle', () => {
+    it('should classify short titles as basic', () => {
+      expect(evaluateTitle('Test')).toBe('basic');
+      expect(evaluateTitle('Campaign')).toBe('basic');
+    });
+
+    it('should classify generic titles as basic', () => {
+      expect(evaluateTitle('Campaña')).toBe('basic');
+      expect(evaluateTitle('Proyecto Brief')).toBe('basic');
+      expect(evaluateTitle('Sin título')).toBe('basic');
+      expect(evaluateTitle('New project')).toBe('basic');
+    });
+
+    it('should classify descriptive titles as excellent', () => {
+      expect(evaluateTitle('Campaña de Lanzamiento: Libera tu Espíritu')).toBe('excellent');
+      expect(evaluateTitle('Revolución Digital 2024')).toBe('excellent');
+      expect(evaluateTitle('La Nueva Era de la Sustentabilidad')).toBe('excellent');
+      expect(evaluateTitle('Marketing Campaign for Tech Startups')).toBe('excellent');
+    });
+
+    it('should classify medium-length specific titles as good', () => {
+      expect(evaluateTitle('Tech Launch')).toBe('good');
+      expect(evaluateTitle('Summer Sale')).toBe('good');
+    });
+
+    it('should handle titles with special characters', () => {
+      expect(evaluateTitle('Campaign 2024: Digital Revolution!')).toBe('excellent');
+      expect(evaluateTitle('Innovation Summit: Digital Transformation')).toBe('excellent');
     });
   });
 });

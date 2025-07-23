@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     borderBottomWidth: 4,
     borderBottomColor: '#FFFFFF',
-    paddingTop: 50,
+    paddingTop: 20, // Reduced from 50 to 20
     paddingBottom: 0,
   },
   container: {
@@ -90,8 +90,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: width > 768 ? 'center' : 'flex-start',
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    gap: width > 768 ? 0 : 20,
+    paddingVertical: 12, // Reduced from 20 to 12
+    gap: width > 768 ? 0 : 15, // Reduced gap from 20 to 15
   },
   logo: {
     alignSelf: 'flex-start',
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   navItem: {
     paddingHorizontal: width > 768 ? 20 : 0,
-    paddingVertical: 8,
+    paddingVertical: 6, // Reduced from 8 to 6
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     backgroundColor: '#FFD700',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: 8, // Reduced from 12 to 8
+    paddingHorizontal: 20, // Reduced from 24 to 20
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },

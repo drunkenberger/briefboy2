@@ -56,7 +56,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
                     htmlElement.style.setProperty('right', 'unset', 'important');
                     htmlElement.style.setProperty('bottom', '20px', 'important');
                     htmlElement.style.setProperty('position', 'fixed', 'important');
-                    htmlElement.style.setProperty('z-index', '9999999', 'important');
+                    htmlElement.style.setProperty('z-index', '1001', 'important');
                     htmlElement.style.setProperty('transform', 'none', 'important');
                   });
                 });
@@ -109,7 +109,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
                       cursor: pointer !important;
                       font-size: 16px !important;
                       font-weight: bold !important;
-                      z-index: 9999999 !important;
+                      z-index: 1002 !important;
                     `;
                     customCloseBtn.onclick = () => {
                       (chatPanel as HTMLElement).style.display = 'none';
@@ -141,7 +141,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           right: unset !important;
           bottom: 20px !important;
           position: fixed !important;
-          z-index: 9999999 !important;
+          z-index: 1001 !important;
         }
         
         /* Contenedor principal del widget */
@@ -169,7 +169,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           right: unset !important;
           position: fixed !important;
           bottom: 20px !important;
-          z-index: 9999999 !important;
+          z-index: 1001 !important;
           transform: none !important;
         }
         
@@ -228,7 +228,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           right: unset !important;
           bottom: 20px !important;
           position: fixed !important;
-          z-index: 9999999 !important;
+          z-index: 1001 !important;
         }
         
         /* ESTILOS PARA EL PANEL DE CHAT Y BOTÓN DE CERRAR */
@@ -243,7 +243,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           right: unset !important;
           width: 350px !important;
           height: 500px !important;
-          z-index: 999999 !important;
+          z-index: 1001 !important;
         }
         
         /* Header del chat con botón de cerrar */
@@ -284,7 +284,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           text-align: center !important;
           line-height: 26px !important;
           position: relative !important;
-          z-index: 9999999 !important;
+          z-index: 1001 !important;
         }
         
         /* Hover del botón de cerrar */
@@ -362,7 +362,7 @@ const ZohoSalesIQWidget: React.FC<ZohoSalesIQWidgetProps> = () => {
           right: unset !important;
           bottom: 20px !important;
           position: fixed !important;
-          z-index: 999999999 !important;
+          z-index: 1001 !important;
           transform: none !important;
           margin-left: 0 !important;
           margin-right: 0 !important;
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    zIndex: 9999,
+    zIndex: 1001,
   },
   mobileText: {
     fontSize: 12,

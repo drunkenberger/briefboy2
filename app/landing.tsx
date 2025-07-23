@@ -252,53 +252,54 @@ export default function LandingPage() {
         {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.footerLeft}>
+            {/* Social icons moved above copyright */}
+            <View style={styles.footerSocials}>
+              <Pressable 
+                style={({ pressed }) => [
+                  styles.socialIcon,
+                  pressed && styles.socialIconPressed
+                ]}
+                onPress={() => openSocialMedia('instagram')}
+              >
+                <InstagramIcon size={20} color="#FFFFFF" />
+              </Pressable>
+              
+              <Pressable 
+                style={({ pressed }) => [
+                  styles.socialIcon,
+                  pressed && styles.socialIconPressed
+                ]}
+                onPress={() => openSocialMedia('linkedin')}
+              >
+                <LinkedInIcon size={20} color="#FFFFFF" />
+              </Pressable>
+              
+              <Pressable 
+                style={({ pressed }) => [
+                  styles.socialIcon,
+                  pressed && styles.socialIconPressed
+                ]}
+                onPress={() => openSocialMedia('twitter')}
+              >
+                <TwitterIcon size={20} color="#FFFFFF" />
+              </Pressable>
+              
+              <Pressable 
+                style={({ pressed }) => [
+                  styles.socialIcon,
+                  pressed && styles.socialIconPressed
+                ]}
+                onPress={() => openSocialMedia('youtube')}
+              >
+                <YouTubeIcon size={20} color="#FFFFFF" />
+              </Pressable>
+            </View>
+            
             <Text style={styles.footerText}>© 2025 BRIEF BOY</Text>
             <Text style={styles.footerTagline}>BRIEFS SIN BULLSHIT</Text>
             <Text style={styles.footerWaza}>
               Desarrollo by <Text style={styles.footerWazaHighlight}>WAZA</Text> - We are WAZA and we are coding an easier world <Text style={styles.footerHeart}>❤️</Text>
             </Text>
-          </View>
-          
-          <View style={styles.footerSocials}>
-            <Pressable 
-              style={({ pressed }) => [
-                styles.socialIcon,
-                pressed && styles.socialIconPressed
-              ]}
-              onPress={() => openSocialMedia('instagram')}
-            >
-              <InstagramIcon size={20} color="#FFFFFF" />
-            </Pressable>
-            
-            <Pressable 
-              style={({ pressed }) => [
-                styles.socialIcon,
-                pressed && styles.socialIconPressed
-              ]}
-              onPress={() => openSocialMedia('linkedin')}
-            >
-              <LinkedInIcon size={20} color="#FFFFFF" />
-            </Pressable>
-            
-            <Pressable 
-              style={({ pressed }) => [
-                styles.socialIcon,
-                pressed && styles.socialIconPressed
-              ]}
-              onPress={() => openSocialMedia('twitter')}
-            >
-              <TwitterIcon size={20} color="#FFFFFF" />
-            </Pressable>
-            
-            <Pressable 
-              style={({ pressed }) => [
-                styles.socialIcon,
-                pressed && styles.socialIconPressed
-              ]}
-              onPress={() => openSocialMedia('youtube')}
-            >
-              <YouTubeIcon size={20} color="#FFFFFF" />
-            </Pressable>
           </View>
         </View>
       </ScrollView>
@@ -665,21 +666,22 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: {
-    paddingVertical: 40,
+    paddingVertical: 20, // Reduced from 40 to 20
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column', // Changed from row to column
+    alignItems: 'flex-start', // Changed from center to flex-start
     maxWidth: 1200,
     alignSelf: 'center',
     width: '100%',
     borderTopWidth: 2,
     borderTopColor: '#FFD700',
-    marginTop: 60,
+    marginTop: 40, // Reduced from 60 to 40
+    zIndex: 10000, // Higher than chat widgets
+    position: 'relative',
   },
   footerLeft: {
     flexDirection: 'column',
-    gap: 4,
+    gap: 12, // Increased gap to accommodate social icons spacing
   },
   footerText: {
     color: '#FFFFFF',
@@ -716,6 +718,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 16,
     alignItems: 'center',
+    zIndex: 10001, // Even higher to ensure visibility
+    position: 'relative',
   },
   socialIcon: {
     width: 40,
@@ -734,14 +738,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 
-  // Floating Widget - Posicionado para no interferir con chat de ayuda
+  // Floating Widget - Posicionado para no interferir con chat de ayuda y footer
   floatingWidgetContainer: {
     position: 'fixed',
-    bottom: 30,
-    left: 120, // Movido a la derecha del chat de ayuda
+    bottom: 200, // Moved much higher to avoid footer area
+    right: 120, // Changed to right side, away from social icons
     width: 100,
     height: 100,
-    zIndex: 9999,
+    zIndex: 1000, // Lower than footer to avoid blocking social icons
     elevation: 10,
   },
 });

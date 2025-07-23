@@ -145,8 +145,9 @@ CRITERIOS MÍNIMOS PARA "READY FOR PRODUCTION":
 5. ✓ Presupuesto o rango definido
 6. ✓ Timeline o fases claras
 
-Si cumple estos 6 criterios mínimos + score 80+ = isReadyForProduction: true
+Si cumple estos 6 criterios mínimos + score 85+ = isReadyForProduction: true
 Si falta algún criterio esencial = isReadyForProduction: false (sin importar el score)
+**IMPORTANTE: El contenido debe ser ESPECÍFICO, no genérico. Evalúa la CALIDAD del contenido, no solo su existencia.**
 
 **REGLA DE OBJETIVIDAD**: Evalúa el brief como si fueras a ejecutar la campaña mañana. ¿Tienes toda la información necesaria con el nivel de detalle apropiado? 
 
@@ -169,7 +170,7 @@ Si la respuesta es SÍ a todo = Excelente (85-95+). Si falta profundidad estrat�
           messages: [
             {
               role: 'system',
-              content: 'Eres un experto evaluador de briefs publicitarios. CRUCIAL: Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin explicaciones, sin markdown. Solo el objeto JSON.'
+              content: 'Eres un experto evaluador de briefs publicitarios. CRUCIAL: Responde ÚNICAMENTE con JSON válido, sin texto adicional, sin explicaciones, sin markdown. Solo el objeto JSON. TODO EL CONTENIDO DEL JSON DEBE ESTAR EN ESPAÑOL.'
             },
             {
               role: 'user',

@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { knowledgeBaseService } from '../services/knowledgeBaseService';
+import { useCallback, useState, useEffect, useRef } from 'react';
+
 import { normalizeBrief } from '../utils/briefValidation';
 
 // --- INTERFACES ---
@@ -20,6 +20,15 @@ export interface StructuredQuestion {
   completed: boolean;
 }
 
+export interface BriefQualityAssessment {
+  overallScore: number;
+  isExcellent: boolean;
+  readyForProduction: boolean;
+  strengths: string[];
+  remainingGaps: string[];
+  recommendation: string;
+}
+
 export interface UseStructuredChatResult {
   messages: ChatMessage[];
   currentQuestion: StructuredQuestion | null;
@@ -30,25 +39,54 @@ export interface UseStructuredChatResult {
   isConnected: boolean;
   error: string | null;
   progress: { current: number; total: number };
+  briefQuality: BriefQualityAssessment | null;
+  evaluateBriefQuality: () => Promise<void>;
 }
 
 /**
- * Hook rediseñado para un chat de mejora de briefs.
- * Funciona como un "Estratega Holístico".
- * 1. Analiza el brief completo UNA VEZ para crear un plan de preguntas.
- * 2. Para cada pregunta, enriquece la respuesta del usuario usando IA antes de actualizar el brief.
+ * Hook dinámico para un chat de mejora de briefs.
+ * Funciona como un "Estratega Dinámico" que reevalúa el brief en cada paso.
  */
 export function useStructuredChat(
   initialBrief: any,
   onBriefChange: (updatedBrief: any) => void
 ): UseStructuredChatResult {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [questions, setQuestions] = useState<StructuredQuestion[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questionHistory, setQuestionHistory] = useState<string[]>([]);
+  const [currentQuestion, setCurrentQuestion] = useState<StructuredQuestion | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [workingBrief, setWorkingBrief] = useState<any>(normalizeBrief(initialBrief));
+  const [workingBrief, setWorkingBrief] = useState<any>(initialBrief);
+  const [briefQuality, setBriefQuality] = useState<BriefQualityAssessment | null>(null);
+  
+  // Abort controller ref para cancelar requests en desmontaje
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Sincronizar el workingBrief si el brief inicial cambia desde fuera
+  useEffect(() => {
+    setWorkingBrief(normalizeBrief(initialBrief));
+  }, [initialBrief]);
+
+  // Cleanup: cancelar requests pendientes cuando el componente se desmonta
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Helper para crear nuevo abort controller
+  const createNewAbortController = useCallback(() => {
+    // Cancelar el controller anterior si existe
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    // Crear nuevo controller
+    abortControllerRef.current = new AbortController();
+    return abortControllerRef.current;
+  }, []);
 
   const getArrayFields = useCallback(() => [
     'strategicObjectives', 'targetAudience.insights', 'creativeStrategy.messageHierarchy',
@@ -57,271 +95,272 @@ export function useStructuredChat(
     'riskAssessment.risks', 'implementationRoadmap.phases', 'nextSteps', 'appendix.assumptions', 'appendix.references'
   ], []);
 
-  // --- FASE 1: ANÁLISIS HOLÍSTICO Y PLAN DE PREGUNTAS ---
+  // --- LÓGICA DE PREGUNTAS DINÁMICAS ---
 
-  const generateQuestionPlan = useCallback(async (brief: any): Promise<StructuredQuestion[]> => {
-    console.log('🤖 Iniciando análisis holístico para generar plan de preguntas...');
-    console.log('📋 Brief recibido para análisis:', JSON.stringify(brief, null, 2));
-
-    // Verificar iteraciones previas
-    const iterations = brief?.improvementMetadata?.improvementIterations || 0;
-    console.log(`📊 Iteraciones de mejora previas: ${iterations}`);
+  /**
+   * Intenta obtener una pregunta alternativa cuando se detecta un duplicado
+   */
+  const attemptAlternativeQuestion = useCallback(async (
+    brief: any, 
+    history: string[], 
+    duplicatedQuestion: StructuredQuestion
+  ): Promise<StructuredQuestion | null> => {
+    const MAX_ATTEMPTS = 3;
     
-    // Si ya pasó por 3+ iteraciones, ser mucho más selectivo
-    if (iterations >= 3) {
-      console.log('🎯 Brief con 3+ iteraciones. Siendo MUY selectivo con las preguntas.');
-    }
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      console.log(`🔄 Intento ${attempt}/${MAX_ATTEMPTS} para obtener pregunta alternativa`);
+      
+      try {
+        const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+        if (!apiKey) throw new Error("OpenAI API key no encontrada");
 
-    // Verificar si el brief tiene título
-    if (brief.projectTitle || brief.title) {
-      console.log('✅ El brief YA TIENE título:', brief.projectTitle || brief.title);
-    }
+        // Prompt específico para obtener pregunta alternativa
+        const systemPrompt = `Eres un Director de Estrategia de Marketing. Se detectó una pregunta DUPLICADA sobre el brief. Tu tarea es encontrar una pregunta DIFERENTE y VALIOSA.
 
+PREGUNTA DUPLICADA DETECTADA: "${duplicatedQuestion.question}"
+CAMPO QUE SE IBA A ACTUALIZAR: "${duplicatedQuestion.field}"
+
+REGLAS CRÍTICAS:
+1. NO repitas la pregunta duplicada ni variaciones similares
+2. NO preguntes sobre campos que ya tienen contenido completo
+3. Busca un campo DIFERENTE que esté vacío o incompleto
+4. La pregunta debe ser estratégicamente valiosa
+5. Si no encuentras una pregunta válida, devuelve null
+
+FORMATO: Responde ÚNICAMENTE con JSON:
+{
+  "nextQuestion": {
+    "id": "q-alt-123",
+    "field": "campo_diferente",
+    "question": "Pregunta completamente diferente...",
+    "priority": "high|medium|low"
+  }
+}
+O si no hay preguntas válidas:
+{
+  "nextQuestion": null
+}`;
+
+        const abortController = createNewAbortController();
+        
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          signal: abortController.signal,
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { 
+                role: 'user', 
+                content: `BRIEF ACTUAL:
+${JSON.stringify(brief, null, 2)}
+
+HISTORIAL DE PREGUNTAS:
+${history.map(q => `- ${q}`).join('\n')}
+
+Encuentra una pregunta alternativa que NO sea duplicada.`
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 300
+          })
+        });
+
+        if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+        const data = await response.json();
+        const result = JSON.parse(data.choices[0].message.content.trim());
+        
+        if (result.nextQuestion && !history.includes(result.nextQuestion.question)) {
+          console.log(`✅ Pregunta alternativa válida encontrada en intento ${attempt}`);
+          return { ...result.nextQuestion, completed: false };
+        } else {
+          console.log(`❌ Intento ${attempt} falló - pregunta duplicada o nula`);
+        }
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          console.log(`⚠️ Request cancelado en intento ${attempt}`);
+          return null; // Salir temprano si fue cancelado
+        }
+        console.error(`❌ Error en intento ${attempt}:`, error);
+      }
+    }
+    
+    console.log('❌ No se pudo obtener pregunta alternativa después de todos los intentos');
+    return null;
+  }, [createNewAbortController]);
+
+  const determineNextQuestion = useCallback(async (brief: any, history: string[]): Promise<StructuredQuestion | null> => {
+    console.log('🤖 Determinando la siguiente mejor pregunta...');
+    console.log('📝 Historial de preguntas:', history);
+    console.log('📋 Brief actual:', JSON.stringify(brief, null, 2));
+    
+    // Límite de seguridad para evitar loops infinitos
+    const MAX_QUESTIONS = 20;
+    if (history.length >= MAX_QUESTIONS) {
+      console.log('⚠️ Se alcanzó el límite máximo de preguntas. Finalizando chat.');
+      return null;
+    }
+    
     const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) throw new Error("OpenAI API key no encontrada.");
 
-    const systemPrompt = `Eres un Director de Estrategia de Marketing de clase mundial con 20+ años de experiencia en las mejores agencias. Tu tarea es analizar un brief existente y generar SOLO preguntas que agreguen valor real al brief. Tu objetic¡vo es ayudar al usuario a generar un brief claro y completo que tenga toda la informacion necesaria para producir una campaña de clase mundial.
+    const systemPrompt = `Eres un Director de Estrategia de Marketing de clase mundial. Tu objetivo es determinar la SIGUIENTE MEJOR PREGUNTA para hacerle a un usuario para mejorar un brief de marketing. Debes ser dinámico y basar tu decisión en el estado ACTUAL del brief y las preguntas YA HECHAS.
 
-CONOCIMIENTO DE MEJORES PRÁCTICAS:
-${knowledgeBaseService.getAllKnowledge()}
+CONTEXTO:
+- El usuario está en un chat interactivo para mejorar su brief.
+- Tu trabajo es actuar como un consultor inteligente, no como un bot que sigue un script.
+- Debes analizar el brief que se te proporciona y el historial de preguntas para decidir qué preguntar a continuación.
 
-ERRORES COMUNES A EVITAR:
-${knowledgeBaseService.getCommonMistakes()}
+REGLAS CRÍTICAS:
+1. NO REPETIR: NUNCA hagas una pregunta sobre un tema que ya esté en el historial. Si ya preguntaste sobre KPIs, métricas, objetivos o cualquier otro tema, NO lo vuelvas a preguntar.
+2. VERIFICAR CONTENIDO: ANTES de sugerir una pregunta, verifica si ese campo ya tiene contenido en el brief. Si un campo ya tiene datos válidos (no vacío, no null, no array vacío), busca OTRO campo que esté vacío.
+3. BUSCAR VACÍOS: Tu prioridad es encontrar campos que estén VACÍOS o INCOMPLETOS en el brief.
+4. SER CONTEXTUAL: La pregunta debe basarse en la información existente y faltante en el brief.
+5. PRIORIZAR: Enfócate en los vacíos más críticos primero (ej. objetivos, audiencia) antes de pasar a detalles menores.
+6. SER CONVERSACIONAL: Formula la pregunta de una manera natural y consultiva, reconociendo lo que ya existe.
+7. UNA SOLA PREGUNTA: Devuelve solo UNA pregunta, la más importante para el momento actual.
+8. CAMPO CORRECTO: El campo "field" debe corresponder exactamente al campo del brief que se va a actualizar y debe estar VACÍO o INCOMPLETO.
 
-⚠️ ADVERTENCIA CRÍTICA: Si preguntas por información que YA EXISTE en el brief (como preguntar el título cuando ya tiene uno), serás considerado incompetente, es importante que todas las preguntas enriquezcan el brief, evita preguntar acerca de información que ya está presente en el brief, sólo haz preguntas que generen respuestas  que contengan información ausente en el brief. LEE EL BRIEF ANTES DE PREGUNTAR.
+Si hay campos vacíos, DEBES hacer una pregunta sobre uno de ellos. Solo devuelve null si:
+1. No hay campos vacíos o incompletos
+2. Ya se han hecho todas las preguntas relevantes
+3. El brief está realmente completo y bien desarrollado
 
-EJEMPLOS DE PREGUNTAS CORRECTAS E INCORRECTAS:
+FORMATO DE SALIDA: Responde ÚNICAMENTE con un objeto JSON que contenga la siguiente pregunta, o null si no hay más.
 
-❌ INCORRECTO:
-- Brief: "projectTitle": "Campaña Navidad 2024"
-- Pregunta: "¿Cuál es el título del proyecto?" (YA ESTÁ DEFINIDO)
-
-❌ INCORRECTO:
-- Brief: "briefSummary": "Campaña para aumentar ventas en temporada navideña"
-- Pregunta: "¿Podrías resumir el proyecto?" (YA ESTÁ RESUMIDO)
-
-✅ CORRECTO:
-- Brief: "strategicObjectives": ["Aumentar ventas"]
-- Pregunta: "Veo que quieres aumentar ventas. ¿Tienes una meta específica de crecimiento porcentual vs el año anterior?"
-
-✅ CORRECTO:
-- Brief: "targetAudience": {"primary": "Familias"}
-- Pregunta: "Describes a familias como audiencia. ¿Qué insight específico has identificado sobre sus hábitos de compra navideños?"
-
-✅ CORRECTO:
-- Brief: "projectTitle": "Campaña XYZ", "brandPositioning": "Marca líder"
-- Pregunta: "El posicionamiento como 'marca líder' es claro. ¿Qué atributos específicos te diferencian de la competencia?"
-
-PROCESO DE ENRIQUECIMIENTO ESTRATÉGICO:
-1. LEE cada campo del brief completamente
-2. Evalúa la CALIDAD del contenido, no solo si existe
-3. Para cada campo, pregúntate:
-   - ¿Está bien escrito, su informacion es completa y es claro? → NO necesita mejoras, no preguntes por eso
-   - ¿Es demasiado genérico o vago? → Pregunta para enriquecer, para que el usuario pueda agregar más detalles
-   - ¿Tiene errores o no hace sentido? → Sugiere sustituirlo por una mejor opción o agregar información que haga sentido
-   - ¿Falta profundidad estratégica? → Pregunta para profundizar
-
-EJEMPLOS DE PREGUNTAS DE ENRIQUECIMIENTO:
-- Profundización: "Veo que [campo existente]. ¿Podrías agregar más detalles sobre [aspecto específico]?"
-- Enriquecimiento: "El [campo] está bien definido. ¿Qué [elemento adicional] podrías agregar para fortalecerlo?"
-- Conexiones: "Mencionas [A] y [B]. ¿Cómo se conectan estratégicamente?"
-- Contexto: "Para [elemento existente], ¿qué contexto competitivo o cultural es importante?"
-- Especificidad: "Los [objetivos/métricas] están claros. ¿Qué números específicos tienes en mente?"
-
-NUNCA PREGUNTES POR:
-- Títulos que están bien escritos y son claros
-- Información que ya está completa y específica
-- Campos que no necesitan mejoras obvias
-
-Haz sólo las preguntas que consideres necesarias para que el brief quede completo y listo para produccion.
-
-MÁXIMO 10 preguntas de enriquecimiento. Si el brief está bien estructurado, enfócate en PROFUNDIZAR, no en cambiar.
-
-Devuelve ÚNICAMENTE un objeto JSON:
 {
-  "questions": [
-    {
-      "id": "q1",
-      "field": "campo_relacionado",
-      "question": "pregunta estratégica basada en mejores prácticas que AGREGA VALOR",
-      "priority": "high|medium|low",
-      "justification": "Explica POR QUÉ esta pregunta es necesaria y QUÉ información específica falta o necesita enriquecimiento"
-    }
-  ]
-}`
+  "nextQuestion": {
+    "id": "q-dinamica-123",
+    "field": "campo_a_mejorar",
+    "question": "Tu pregunta conversacional y estratégica aquí...",
+    "priority": "high|medium|low"
+  }
+}
 
-    const userPrompt = `SISTEMA DE VALIDACIÓN DE PREGUNTAS - FASE 1: ANÁLISIS DEL BRIEF
+O si no hay más preguntas:
 
-========== CONTENIDO ACTUAL DEL BRIEF ==========
+{
+  "nextQuestion": null
+}`;
+
+    // Identificar campos vacíos o incompletos
+    const emptyFields: string[] = [];
+    const checkField = (obj: any, path: string = '') => {
+      Object.keys(obj).forEach(key => {
+        const fullPath = path ? `${path}.${key}` : key;
+        const value = obj[key];
+        
+        if (value === null || value === undefined || value === '' || 
+            (Array.isArray(value) && value.length === 0) ||
+            (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)) {
+          emptyFields.push(fullPath);
+        } else if (typeof value === 'object' && !Array.isArray(value)) {
+          checkField(value, fullPath);
+        }
+      });
+    };
+    
+    checkField(brief);
+    
+    console.log('📋 Campos vacíos detectados:', emptyFields);
+    
+    const userPrompt = `BRIEF ACTUAL:
 ${JSON.stringify(brief, null, 2)}
-================================================
 
+CAMPOS VACÍOS O INCOMPLETOS:
+${emptyFields.length > 0 ? emptyFields.map(f => `- ${f}`).join('\n') : 'Ninguno'}
 
+PREGUNTAS YA HECHAS (HISTORIAL):
+${history.length > 0 ? history.map(q => `- ${q}`).join('\n') : 'Ninguna pregunta hecha aún'}
 
-REGLAS ESTRICTAS:
-1. Si un campo existe con contenido específico y consideras que noecesita mas informacion o detalles → NO preguntes por ese campo
-2. Solo haz preguntas de enriquecimiento sobre campos existentes si hace informacion relevante para la creacion de una campaña publicitaria sólida. Utiliza los contenidos en la knowledge base del proyecto.
-3. Cada pregunta debe tener una justificación sólida
-
-
-GENERA PREGUNTAS SOLO PARA CAMPOS FALTANTES O ENRIQUECIMIENTO JUSTIFICADO.`;
+Basado en el brief actual, los campos vacíos y el historial, ¿cuál es la siguiente pregunta más valiosa y estratégica que debo hacer? 
+IMPORTANTE: Enfócate en los campos que están VACÍOS o INCOMPLETOS.`;
 
     try {
+      const abortController = createNewAbortController();
+      
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        signal: abortController.signal,
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
-          temperature: 0.2,
+          temperature: 0.5,
+          max_tokens: 1000,
           response_format: { type: "json_object" },
         }),
       });
 
-      if (!response.ok) throw new Error(`Error de la API de OpenAI: ${response.statusText}`);
-
+      if (!response.ok) throw new Error(`Error de la API de OpenAI: ${response.status}`);
+      
       const data = await response.json();
-      const plan = data.choices?.[0]?.message?.content;
-      const parsedPlan = JSON.parse(plan);
-
-      if (!parsedPlan.questions || !Array.isArray(parsedPlan.questions)) {
-        throw new Error("La respuesta de la IA no contiene un array de 'questions' válido.");
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(data.choices[0].message.content);
+      } catch (parseError) {
+        console.error('Error parsing JSON response:', parseError);
+        throw new Error('Respuesta inválida de la API');
       }
-
-      console.log(`✅ Plan de ${parsedPlan.questions.length} preguntas generado.`);
-
-      // Validar que las preguntas no sean redundantes
-      const validQuestions = parsedPlan.questions.filter((q: any) => {
-        const field = q.field;
-        const question = q.question?.toLowerCase() || '';
-
-        // Validaciones específicas por campo
-        if (field === 'projectTitle' || field === 'title') {
-          if (brief.projectTitle || brief.title) {
-            console.error(`🚫 PREGUNTA RECHAZADA: "${q.question}" - El título YA EXISTE: "${brief.projectTitle || brief.title}"`);
-            return false;
-          }
-        }
-
-        if (field === 'briefSummary' || field === 'summary') {
-          if (brief.briefSummary || brief.summary) {
-            console.error(`🚫 PREGUNTA RECHAZADA: "${q.question}" - El resumen YA EXISTE`);
-            return false;
-          }
-        }
-
-        if (field === 'businessChallenge' || field === 'problemStatement') {
-          if (brief.businessChallenge || brief.problemStatement) {
-            console.error(`🚫 PREGUNTA RECHAZADA: "${q.question}" - El desafío YA EXISTE`);
-            return false;
-          }
-        }
-
-        // Validar que la pregunta no sea sobre información básica existente
-        const basicPhrases = ['cuál es el título', 'qué es el proyecto', 'podrías decirme el nombre', 'cuál es el nombre'];
-        if (basicPhrases.some(phrase => question.includes(phrase))) {
-          console.error(`🚫 PREGUNTA RECHAZADA: "${q.question}" - Pregunta sobre información básica existente`);
-          return false;
-        }
-
-        // Validar que la pregunta no sea genérica
-        const genericPhrases = ['cuál es', 'qué es', 'podrías decirme', 'podrías definir'];
-        if (genericPhrases.some(phrase => question.includes(phrase)) && !q.justification) {
-          console.error(`🚫 PREGUNTA RECHAZADA: "${q.question}" - Pregunta genérica sin justificación`);
-          return false;
-        }
-
-        return true;
-      });
-
-      console.log(`✅ Preguntas válidas después de filtrado: ${validQuestions.length}`);
-      return validQuestions.map((q: any) => ({ ...q, completed: false }));
-
-    } catch (e) {
-      console.error("Error generando el plan de preguntas:", e);
-      // Devolver un plan de respaldo más inteligente basado en el brief actual
-      const fallbackQuestions = [];
-
-      // Solo preguntar por campos que realmente faltan
-      if (!brief.projectTitle && !brief.title) {
-        fallbackQuestions.push({ id: 'fallback-1', field: 'projectTitle', question: "¿Cuál es el título exacto de este proyecto o campaña?", priority: 'high', completed: false });
+      
+      if (parsedResponse.nextQuestion) {
+        const nextQ = parsedResponse.nextQuestion;
+        console.log('✅ Siguiente pregunta determinada:', nextQ.question);
+        console.log('📝 Campo objetivo:', nextQ.field);
+        return { ...nextQ, completed: false };
+      } else {
+        console.log('✅ No hay más preguntas valiosas. Finalizando chat.');
+        return null;
       }
-
-      if (!brief.briefSummary && !brief.summary) {
-        fallbackQuestions.push({ id: 'fallback-2', field: 'briefSummary', question: "¿Podrías resumir en 2-3 frases de qué trata este proyecto y qué busca lograr?", priority: 'high', completed: false });
+    } catch (e: any) {
+      if (e.name === 'AbortError') {
+        console.log('⚠️ Request cancelado para determinar siguiente pregunta');
+        return null;
       }
-
-      if (!brief.businessChallenge && !brief.problemStatement) {
-        fallbackQuestions.push({ id: 'fallback-3', field: 'businessChallenge', question: "¿Cuál es el principal desafío de negocio que esta campaña debe resolver?", priority: 'high', completed: false });
-      }
-
-      if (!brief.strategicObjectives && !brief.objectives) {
-        fallbackQuestions.push({ id: 'fallback-4', field: 'strategicObjectives', question: "¿Cuáles son los objetivos estratégicos clave que esperas alcanzar?", priority: 'high', completed: false });
-      }
-
-      if (!brief.targetAudience?.primary && !brief.targetAudience) {
-        fallbackQuestions.push({ id: 'fallback-5', field: 'targetAudience.primary', question: "¿Quién es tu audiencia principal y qué sabes de sus motivaciones?", priority: 'medium', completed: false });
-      }
-
-      if (!brief.creativeStrategy?.bigIdea) {
-        fallbackQuestions.push({ id: 'fallback-6', field: 'creativeStrategy.bigIdea', question: "¿Cuál es la gran idea que debería guiar la creatividad de esta campaña?", priority: 'medium', completed: false });
-      }
-
-      // Si no hay preguntas de respaldo, significa que el brief está completo
-      if (fallbackQuestions.length === 0) {
-        return []; // No questions needed
-      }
-
-      return fallbackQuestions;
+      console.error("Error determinando la siguiente pregunta:", e);
+      setError("No pude determinar la siguiente pregunta. Intenta de nuevo.");
+      return null;
     }
-  }, []);
+  }, [createNewAbortController]);
 
-
-  // --- FASE 2: DIÁLOGO DE ENRIQUECIMIENTO ---
-
+  // --- LÓGICA DE ENRIQUECIMIENTO DE RESPUESTAS ---
   const enrichUserResponse = useCallback(async (question: string, userResponse: string): Promise<string> => {
     console.log('🤖 Enriqueciendo la respuesta del usuario con IA...');
     const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) return userResponse;
 
-    const systemPrompt = `Eres un Director de Estrategia Senior con 20+ años creando briefs que han ganado Cannes Lions y Effies. Tu misión es transformar la respuesta del usuario en contenido de CLASE MUNDIAL que merezca una calificación de 90-100 puntos.
+    const systemPrompt = `Eres un Director de Estrategia Senior. Tu misión es transformar la respuesta de un usuario en contenido de CLASE MUNDIAL para un brief de marketing.
 
-CONOCIMIENTO DE MEJORES PRÁCTICAS:
-${knowledgeBaseService.getBriefStructureGuidance()}
+OBJETIVO: Tomar la respuesta del usuario y crear una versión que sea específica, medible, accionable y profesional. Agrega métricas, insights y contexto estratégico.
 
-OBJETIVO: CREAR CONTENIDO PROFESIONAL EXCEPCIONAL
-Tu tarea es tomar la respuesta básica del usuario y crear una versión que:
-- Sea específica, medible y accionable
-- Incluya datos, métricas e insights cuando sea relevante
-- Use terminología profesional de marketing/publicidad
-- Proporcione contexto estratégico profundo
-- Sea lo suficientemente detallada para que cualquier equipo creativo pueda ejecutarla perfectamente
+EJEMPLO:
+- Pregunta: "¿Cuál es el objetivo principal?"
+- Respuesta de Usuario: "Vender más"
+- TU SALIDA ENRIQUECIDA: "Incrementar las ventas en un 25% vs Q4 2023, enfocándose en aumentar la frecuencia de compra de usuarios existentes y capturar un 15% de market share en el segmento premium, con un ROI mínimo de 3:1."
 
-EJEMPLOS DE TRANSFORMACIÓN REQUERIDA:
+REGLAS:
+- Mantén la intención original del usuario.
+- Multiplica la profundidad y profesionalismo.
+- Responde ÚNICAMENTE con el texto transformado. NADA MÁS.`;
 
-Entrada del usuario: "Queremos aumentar ventas"
-Tu respuesta: "Incrementar las ventas en un 25% vs periodo anterior (Q4 2023), enfocándose en aumentar frecuencia de compra de usuarios existentes (de 2.3 a 3.1 transacciones promedio) y capturar 15% de market share en el segmento premium, con ROI mínimo de 3:1 en inversión publicitaria."
+    const userMessage = `Pregunta original: "${question}"
 
-Entrada del usuario: "Familias modernas"
-Tu respuesta: "Familias urbanas de ingresos medio-alto (NSE A/B+, ingresos familiares $80K-$150K USD anuales), padres millennials de 28-42 años con 1-3 hijos menores de 12 años. Priorizan conveniencia, calidad y experiencias familiares. Insight clave: 73% toma decisiones de compra influenciados por opiniones de otros padres en redes sociales. Comportamiento: Research digital extenso (4.2 touchpoints promedio) antes de compras importantes. Alta afinidad a marcas con propósito social y ambiental."
+Respuesta del usuario:
+---
+${userResponse}
+---
 
-REGLAS ESTRICTAS:
-- MANTÉN todos los nombres propios, marcas, títulos específicos del usuario
-- CONSERVA la intención original pero multiplica la profundidad profesional
-- AGREGA métricas, porcentajes, rangos específicos cuando sea apropiado
-- INCLUYE insights de comportamiento del consumidor
-- ESPECIFICA timelines, presupuestos, KPIs cuando corresponda
-- CADA palabra debe agregar valor estratégico
-- NO uses jerga innecesaria, pero SÍ terminología profesional precisa
-- El resultado debe ser 3-5x más detallado y específico que la entrada
-- Responde ÚNICAMENTE con el texto transformado y enriquecido. NADA MÁS.`;
-
-    const userMessage = `Pregunta original: "${question}"\n\nRespuesta del usuario:\n---\n${userResponse}\n---\n\nRefina y enriquece esta respuesta.`;
+Refina y enriquece esta respuesta.`;
 
     try {
+      const abortController = createNewAbortController();
+      
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        signal: abortController.signal,
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }],
@@ -330,102 +369,68 @@ REGLAS ESTRICTAS:
         }),
       });
 
-      if (!response.ok) throw new Error(`Error de la API de OpenAI: ${response.statusText}`);
-
+      if (!response.ok) throw new Error(`Error de la API de OpenAI: ${response.status}`);
       const data = await response.json();
       const improvedText = data.choices?.[0]?.message?.content.trim();
       console.log("✅ Respuesta enriquecida:", improvedText);
       return improvedText || userResponse;
-
-    } catch (e) {
+    } catch (e: any) {
+      if (e.name === 'AbortError') {
+        console.log('⚠️ Request cancelado para enriquecer respuesta');
+        return userResponse; // Devolver respuesta original si fue cancelado
+      }
       console.error("Error enriqueciendo la respuesta:", e);
-      return userResponse; // Devolver respuesta original si la IA falla
+      return userResponse;
     }
-  }, []);
+  }, [createNewAbortController]);
 
-
-  // --- LÓGICA DEL CHAT ---
+  // --- LÓGICA PRINCIPAL DEL CHAT ---
 
   const initializeChat = useCallback(async () => {
-    console.log('🔄 Inicializando chat con enfoque holístico...');
+    console.log('🔄 Inicializando chat dinámico...');
     setIsTyping(true);
     setError(null);
     setMessages([]);
+    setQuestionHistory([]);
+    setCurrentQuestion(null);
 
     const welcomeMessage: ChatMessage = {
       id: `assistant-${Date.now()}`,
       role: 'assistant',
-      content: "He analizado tu brief completo. Voy a hacerte preguntas estratégicas sobre las áreas que necesitan más profundidad o claridad. No te preguntaré sobre información que ya está bien definida.",
+      content: "¡Hola! He analizado tu brief. Empecemos a mejorarlo juntos. Haré preguntas una por una para refinar cada sección. ¿Listo?",
       timestamp: Date.now(),
     };
     setMessages([welcomeMessage]);
 
-    const questionPlan = await generateQuestionPlan(workingBrief);
-    setQuestions(questionPlan);
-
-    if (questionPlan.length > 0) {
-      const firstQuestion: ChatMessage = {
+    const nextQuestion = await determineNextQuestion(workingBrief, []);
+    if (nextQuestion) {
+      setCurrentQuestion(nextQuestion);
+      setQuestionHistory(prev => [...prev, nextQuestion.question]);
+      const firstQuestionMessage: ChatMessage = {
         id: `assistant-${Date.now() + 1}`,
-        role: 'assistant',
-        content: questionPlan[0].question,
-        timestamp: Date.now(),
-        questionId: questionPlan[0].id,
-        briefField: questionPlan[0].field,
-      };
-      setMessages(prev => [...prev, firstQuestion]);
-    } else {
-       const noQuestionsMessage: ChatMessage = {
-        id: `assistant-${Date.now() + 1}`,
-        role: 'assistant',
-        content: "🎉 ¡Excelente! Tu brief está muy completo y bien estructurado. No he encontrado áreas críticas que requieran mejoras inmediatas. El documento tiene toda la información necesaria para ejecutar la campaña exitosamente.",
-        timestamp: Date.now(),
-      };
-      setMessages(prev => [...prev, noQuestionsMessage]);
-    }
-
-    setIsTyping(false);
-  }, [initialBrief, generateQuestionPlan]);
-
-  const processNextQuestion = useCallback(() => {
-    const nextIndex = currentQuestionIndex + 1;
-
-    if (nextIndex < questions.length) {
-      setCurrentQuestionIndex(nextIndex);
-      const nextQuestion = questions[nextIndex];
-
-      const nextQuestionMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
         role: 'assistant',
         content: nextQuestion.question,
         timestamp: Date.now(),
         questionId: nextQuestion.id,
         briefField: nextQuestion.field,
       };
-
-      setMessages(prev => [...prev, nextQuestionMessage]);
+      setMessages(prev => [...prev, firstQuestionMessage]);
     } else {
-      // No hay más preguntas
-      const completionMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
+      // No hay preguntas, el brief ya es excelente
+      const noQuestionsMessage: ChatMessage = {
+        id: `assistant-${Date.now() + 1}`,
         role: 'assistant',
-        content: "🎉 ¡Excelente! Hemos completado todas las mejoras al brief. Tu documento ahora está mucho más completo y profesional. ¿Hay algo más específico que te gustaría ajustar?",
+        content: "🎉 ¡Excelente! Tu brief está muy completo. No he encontrado áreas críticas que requieran mejoras inmediatas.",
         timestamp: Date.now(),
       };
-
-      setMessages(prev => [...prev, completionMessage]);
+      setMessages(prev => [...prev, noQuestionsMessage]);
     }
-  }, [currentQuestionIndex, questions]);
+
+    setIsTyping(false);
+  }, [workingBrief, determineNextQuestion]);
 
   const sendMessage = useCallback(async (messageContent: string) => {
-    if (!messageContent.trim() || isTyping) return;
-
-    console.log('📨 sendMessage iniciado. currentQuestionIndex:', currentQuestionIndex, 'questions.length:', questions.length);
-
-    const currentQuestion = questions[currentQuestionIndex];
-    if (!currentQuestion) {
-      console.warn('sendMessage: No current question found.');
-      return;
-    }
+    if (!messageContent.trim() || isTyping || !currentQuestion) return;
 
     setIsTyping(true);
 
@@ -435,7 +440,6 @@ REGLAS ESTRICTAS:
       content: messageContent.trim(),
       timestamp: Date.now(),
       questionId: currentQuestion.id,
-      briefField: currentQuestion.field,
     };
     setMessages(prev => [...prev, userMessage]);
 
@@ -443,83 +447,276 @@ REGLAS ESTRICTAS:
       // 1. Enriquecer la respuesta del usuario
       const enrichedResponse = await enrichUserResponse(currentQuestion.question, messageContent.trim());
 
-      // 2. Actualizar el brief localmente con la respuesta enriquecida
+      // 2. Actualizar el brief localmente
       const updatedBrief = { ...workingBrief };
-      const shouldBeArray = getArrayFields().includes(currentQuestion.field);
+      const field = currentQuestion.field;
+      const shouldBeArray = getArrayFields().includes(field);
       const finalValue = shouldBeArray
         ? enrichedResponse.split('\n').map(item => item.replace(/^- /, '').trim()).filter(Boolean)
         : enrichedResponse;
 
-      if (currentQuestion.field.includes('.')) {
-        const [parent, child] = currentQuestion.field.split('.');
+      if (field.includes('.')) {
+        const [parent, child] = field.split('.');
         if (!updatedBrief[parent]) updatedBrief[parent] = {};
-        updatedBrief[parent][child] = finalValue;
+        
+        // Validar el tipo de campo existente antes del reemplazo
+        const existingValue = updatedBrief[parent][child];
+        const existingIsArray = Array.isArray(existingValue);
+        const newValueIsArray = Array.isArray(finalValue);
+        
+        if (shouldBeArray) {
+          // El campo DEBERÍA ser un array según la configuración
+          if (existingIsArray || existingValue === undefined || existingValue === null) {
+            // Seguro reemplazar: campo existente es array, undefined o null
+            updatedBrief[parent][child] = finalValue;
+            console.log(`✅ Actualizado campo array ${field}:`, updatedBrief[parent][child]);
+          } else {
+            // Campo existente no es array pero DEBERÍA serlo - convertir o reemplazar cuidadosamente
+            console.warn(`⚠️ Campo ${field} debería ser array pero tiene valor no-array:`, existingValue);
+            if (typeof existingValue === 'string' && existingValue.trim()) {
+              // Si es string no vacío, convertir a array combinando valores
+              const existingAsArray = [existingValue.trim()];
+              updatedBrief[parent][child] = newValueIsArray ? 
+                [...existingAsArray, ...finalValue] : 
+                [...existingAsArray, finalValue];
+            } else {
+              // Reemplazar completamente si no es string válido
+              updatedBrief[parent][child] = finalValue;
+            }
+            console.log(`✅ Convertido y actualizado ${field}:`, updatedBrief[parent][child]);
+          }
+        } else {
+          // El campo NO debería ser un array según la configuración
+          if (newValueIsArray) {
+            console.warn(`⚠️ Valor nuevo es array pero campo ${field} no debería ser array`);
+            // Tomar el primer elemento del array o unir como string
+            updatedBrief[parent][child] = finalValue.length > 0 ? 
+              (finalValue.length === 1 ? finalValue[0] : finalValue.join(', ')) : 
+              existingValue; // Mantener valor existente si el array está vacío
+          } else {
+            // Reemplazo normal para campos no-array
+            updatedBrief[parent][child] = finalValue;
+          }
+          console.log(`✅ Actualizado campo no-array ${field}:`, updatedBrief[parent][child]);
+        }
       } else {
-        updatedBrief[currentQuestion.field] = finalValue;
+        // Campo de nivel superior (sin punto)
+        const existingValue = updatedBrief[field];
+        const existingIsArray = Array.isArray(existingValue);
+        const newValueIsArray = Array.isArray(finalValue);
+        
+        if (shouldBeArray) {
+          // El campo DEBERÍA ser un array
+          if (existingIsArray || existingValue === undefined || existingValue === null) {
+            updatedBrief[field] = finalValue;
+            console.log(`✅ Actualizado campo array ${field}:`, updatedBrief[field]);
+          } else {
+            console.warn(`⚠️ Campo ${field} debería ser array pero tiene valor no-array:`, existingValue);
+            if (typeof existingValue === 'string' && existingValue.trim()) {
+              const existingAsArray = [existingValue.trim()];
+              updatedBrief[field] = newValueIsArray ? 
+                [...existingAsArray, ...finalValue] : 
+                [...existingAsArray, finalValue];
+            } else {
+              updatedBrief[field] = finalValue;
+            }
+            console.log(`✅ Convertido y actualizado ${field}:`, updatedBrief[field]);
+          }
+        } else {
+          // El campo NO debería ser un array
+          if (newValueIsArray) {
+            console.warn(`⚠️ Valor nuevo es array pero campo ${field} no debería ser array`);
+            updatedBrief[field] = finalValue.length > 0 ? 
+              (finalValue.length === 1 ? finalValue[0] : finalValue.join(', ')) : 
+              existingValue;
+          } else {
+            updatedBrief[field] = finalValue;
+          }
+          console.log(`✅ Actualizado campo no-array ${field}:`, updatedBrief[field]);
+        }
       }
 
       setWorkingBrief(updatedBrief);
-      onBriefChange(updatedBrief);
+      onBriefChange(updatedBrief); // Notificar al componente padre
 
-      // 3. Confirmar y pasar a la siguiente pregunta
-      const confirmationMessage: ChatMessage = {
-        id: `assistant-${Date.now() + 1}`,
-        role: 'assistant',
-        content: `¡Perfecto! He refinado tu respuesta y actualizado el brief. \n\nAquí tienes la siguiente pregunta:`,
-        timestamp: Date.now(),
-      };
+      // 3. Determinar la siguiente pregunta basada en el brief actualizado
+      const nextQuestion = await determineNextQuestion(updatedBrief, questionHistory);
 
-      setMessages(prev => [...prev, confirmationMessage]);
+      if (nextQuestion) {
+        // Verificar si la pregunta es duplicada O si el campo ya fue procesado recientemente
+        const isDuplicateQuestion = questionHistory.includes(nextQuestion.question);
+        const recentFields = questionHistory.slice(-3); // Últimos 3 campos procesados
+        const isRepeatingField = recentFields.filter(q => q.includes(nextQuestion.field)).length > 1;
+        
+        if (isDuplicateQuestion || isRepeatingField) {
+          const reason = isDuplicateQuestion ? 'pregunta duplicada' : 'campo procesado recientemente';
+          console.warn(`⚠️ Se detectó ${reason}, intentando obtener una alternativa:`, nextQuestion.question);
+          
+          // Intentar obtener una pregunta alternativa
+          const alternativeQuestion = await attemptAlternativeQuestion(updatedBrief, questionHistory, nextQuestion);
+          
+          if (alternativeQuestion) {
+            console.log('✅ Pregunta alternativa obtenida:', alternativeQuestion.question);
+            setCurrentQuestion(alternativeQuestion);
+            setQuestionHistory(prev => [...prev, alternativeQuestion.question]);
+            
+            const alternativeQuestionMessage: ChatMessage = {
+              id: `assistant-${Date.now() + 1}`,
+              role: 'assistant',
+              content: `¡Perfecto! He actualizado el brief con esa información.
 
-      // Avanzar a la siguiente pregunta
-      setTimeout(() => {
-        processNextQuestion();
-      }, 500);
+${alternativeQuestion.question}`,
+              timestamp: Date.now(),
+              questionId: alternativeQuestion.id,
+              briefField: alternativeQuestion.field,
+            };
+            setMessages(prev => [...prev, alternativeQuestionMessage]);
+          } else {
+            console.log('ℹ️ No se encontró pregunta alternativa válida. Finalizando chat.');
+            // No hay pregunta alternativa válida, finalizar el chat
+            setCurrentQuestion(null);
+            const completionMessage: ChatMessage = {
+              id: `assistant-${Date.now() + 1}`,
+              role: 'assistant',
+              content: "🎉 ¡Excelente trabajo! Hemos completado todas las mejoras disponibles. Tu brief está listo para usar.",
+              timestamp: Date.now(),
+            };
+            setMessages(prev => [...prev, completionMessage]);
+          }
+        } else {
+          // Pregunta no duplicada, procesar normalmente
+          setCurrentQuestion(nextQuestion);
+          setQuestionHistory(prev => [...prev, nextQuestion.question]);
+          
+          const nextQuestionMessage: ChatMessage = {
+            id: `assistant-${Date.now() + 1}`,
+            role: 'assistant',
+            content: `¡Perfecto! He actualizado el brief con esa información.
 
+${nextQuestion.question}`,
+            timestamp: Date.now(),
+            questionId: nextQuestion.id,
+            briefField: nextQuestion.field,
+          };
+          setMessages(prev => [...prev, nextQuestionMessage]);
+        }
+      } else {
+        // No hay más preguntas
+        setCurrentQuestion(null);
+        const completionMessage: ChatMessage = {
+          id: `assistant-${Date.now() + 1}`,
+          role: 'assistant',
+          content: "🎉 ¡Hemos completado todas las mejoras! Tu brief ahora está mucho más robusto y profesional. Puedes revisarlo y aplicar los cambios.",
+          timestamp: Date.now(),
+        };
+        setMessages(prev => [...prev, completionMessage]);
+      }
     } catch (err: any) {
       console.error('Error en sendMessage:', err);
       setError(err.message || 'Error en la comunicación');
-      const errorMessage: ChatMessage = {
-        id: `assistant-${Date.now() + 1}`,
-        role: 'assistant',
-        content: '❌ Disculpa, tuve un problema técnico al procesar tu respuesta.',
-        timestamp: Date.now(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
   }, [
     isTyping,
-    questions,
-    currentQuestionIndex,
+    currentQuestion,
     workingBrief,
+    questionHistory,
     enrichUserResponse,
+    determineNextQuestion,
     getArrayFields,
     onBriefChange,
-    processNextQuestion,
+    attemptAlternativeQuestion,
   ]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
-    setQuestions([]);
-    setCurrentQuestionIndex(0);
+    setCurrentQuestion(null);
+    setQuestionHistory([]);
     setError(null);
+    setBriefQuality(null);
     setWorkingBrief(normalizeBrief(initialBrief));
   }, [initialBrief]);
+  
+  // Evaluate brief quality
+  const evaluateBriefQuality = useCallback(async (): Promise<void> => {
+    try {
+      setError(null);
+      const openaiApiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+      
+      if (!openaiApiKey) {
+        throw new Error("API key no configurada");
+      }
+
+      const abortController = createNewAbortController();
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`
+        },
+        signal: abortController.signal,
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: `Eres un evaluador experto de briefs publicitarios. Analiza el brief y devuelve SOLO un JSON con este formato exacto:
+{
+  "overallScore": <número del 0 al 100>,
+  "isExcellent": <true si el score es 90 o más>,
+  "readyForProduction": <true si el score es 70 o más>,
+  "strengths": [<array de fortalezas clave>],
+  "remainingGaps": [<array de áreas de mejora>],
+  "recommendation": "<recomendación breve>"
+}`
+            },
+            {
+              role: 'user',
+              content: `Evalúa este brief:\n${JSON.stringify(workingBrief, null, 2)}`
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 500
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la API: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices[0]?.message?.content;
+      
+      if (content) {
+        const quality = JSON.parse(content);
+        setBriefQuality(quality);
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        console.log('⚠️ Request cancelado para evaluar calidad del brief');
+        return; // Salir temprano si fue cancelado
+      }
+      setError(err instanceof Error ? err.message : "Error evaluando calidad del brief");
+      console.error('Error evaluating brief quality:', err);
+    }
+  }, [workingBrief, createNewAbortController]);
 
   return {
     messages,
-    currentQuestion: questions[currentQuestionIndex] || null,
+    currentQuestion,
     isTyping,
     sendMessage,
     clearChat,
     initializeChat,
     isConnected,
     error,
-    progress: {
-      current: currentQuestionIndex,
-      total: questions.length,
+    progress: { // Progreso ya no se basa en un plan estático
+      current: questionHistory.length,
+      total: questionHistory.length + (currentQuestion ? 1 : 0),
     },
+    briefQuality,
+    evaluateBriefQuality,
   };
 }

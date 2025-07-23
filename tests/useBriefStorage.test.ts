@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useBriefStorage } from '../hooks/useBriefStorage';
 
@@ -19,12 +19,13 @@ describe('useBriefStorage', () => {
   it('should initialize with empty array when no stored data', async () => {
     mockAsyncStorage.getItem.mockResolvedValue(null);
     
-    const { result, waitForNextUpdate } = renderHook(() => useBriefStorage());
+    const { result } = renderHook(() => useBriefStorage());
     
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     
     expect(result.current.savedBriefs).toEqual([]);
-    expect(result.current.loading).toBe(false);
   });
 
   it('should load saved briefs from storage', async () => {
@@ -41,21 +42,24 @@ describe('useBriefStorage', () => {
     
     mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(mockBriefs));
     
-    const { result, waitForNextUpdate } = renderHook(() => useBriefStorage());
+    const { result } = renderHook(() => useBriefStorage());
     
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     
     expect(result.current.savedBriefs).toEqual(mockBriefs);
-    expect(result.current.loading).toBe(false);
   });
 
   it('should save a new brief', async () => {
     mockAsyncStorage.getItem.mockResolvedValue(null);
     mockAsyncStorage.setItem.mockResolvedValue(undefined);
     
-    const { result, waitForNextUpdate } = renderHook(() => useBriefStorage());
+    const { result } = renderHook(() => useBriefStorage());
     
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     
     let briefId: string = '';
     
@@ -89,9 +93,11 @@ describe('useBriefStorage', () => {
     mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(mockBriefs));
     mockAsyncStorage.setItem.mockResolvedValue(undefined);
     
-    const { result, waitForNextUpdate } = renderHook(() => useBriefStorage());
+    const { result } = renderHook(() => useBriefStorage());
     
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     
     await act(async () => {
       await result.current.updateBrief('1', { title: 'Updated Title' });
@@ -116,9 +122,11 @@ describe('useBriefStorage', () => {
     mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(mockBriefs));
     mockAsyncStorage.setItem.mockResolvedValue(undefined);
     
-    const { result, waitForNextUpdate } = renderHook(() => useBriefStorage());
+    const { result } = renderHook(() => useBriefStorage());
     
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     
     await act(async () => {
       await result.current.deleteBrief('1');
@@ -142,9 +150,11 @@ describe('useBriefStorage', () => {
     
     mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(mockBriefs));
     
-    const { result, waitForNextUpdate } = renderHook(() => useBriefStorage());
+    const { result } = renderHook(() => useBriefStorage());
     
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     
     const foundBrief = result.current.getBriefById('1');
     
@@ -166,9 +176,11 @@ describe('useBriefStorage', () => {
     mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(mockBriefs));
     mockAsyncStorage.removeItem.mockResolvedValue(undefined);
     
-    const { result, waitForNextUpdate } = renderHook(() => useBriefStorage());
+    const { result } = renderHook(() => useBriefStorage());
     
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
     
     await act(async () => {
       await result.current.clearAllBriefs();

@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm start:*)",
+      "Bash(ls:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(node:*)",
+      "Bash(npx expo start:*)",
+      "Bash(npx expo install:*)",
+      "Bash(cat:*)",
+      "Bash(file:*)",
+      "Bash(npx react-native:*)",
+      "Bash(git status:*)",
+      "Bash(git checkout:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm test)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run test:*)",
+      "Bash(grep:*)",
+      "Bash(del nul)",
+      "Bash(npm run lint:*)"
+    ],
+    "deny": []
+  }
+}
