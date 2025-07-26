@@ -271,7 +271,7 @@ const AuthFlow: React.FC<AuthFlowProps> = ({ onCancel }) => {
             ]}
             value={formData.betaCode}
             onChangeText={(value) => handleInputChange('betaCode', value.toUpperCase())}
-            placeholder="BRIEFBOY2024"
+            placeholder="Ingresa tu código de acceso"
             placeholderTextColor="#666666"
             autoCapitalize="characters"
             autoCorrect={false}
