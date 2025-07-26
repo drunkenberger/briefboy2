@@ -6,8 +6,13 @@ export default function BrutalistFooter() {
     <View style={styles.footer}>
       <View style={styles.footerContent}>
         <View style={styles.topRow}>
-          <Text style={styles.footerText}>© 2025 BRIEF BOY</Text>
-          <Text style={styles.footerTagline}>BRIEFS SIN BULLSHIT</Text>
+          <View style={styles.leftSection}>
+            {/* Espacio vacío para evitar el chat widget */}
+          </View>
+          <View style={styles.rightSection}>
+            <Text style={styles.footerTagline}>BRIEFS SIN BULLSHIT</Text>
+            <Text style={styles.footerText}>© 2025 BRIEF BOY</Text>
+          </View>
         </View>
         <View style={styles.bottomRow}>
           <Text style={styles.developedText}>
@@ -35,8 +40,16 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     width: '100%',
+  },
+  leftSection: {
+    flex: 1,
+    // Espacio vacío para el chat widget
+  },
+  rightSection: {
+    alignItems: 'flex-end',
+    gap: 4,
   },
   bottomRow: {
     alignItems: 'center',

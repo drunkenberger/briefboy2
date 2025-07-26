@@ -95,8 +95,16 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
       pulseAnimation.stopAnimation();
       pulseAnimation.setValue(1);
 
-      // Ya no enviamos automáticamente el audio, solo notificamos que se grabó
+      // Notificar que se grabó
       if (onAudioRecorded) onAudioRecorded(uri || null);
+      
+      // Auto-transcribir después de grabar
+      if (uri && onTranscriptionRequested) {
+        console.log('🚀 Auto-transcribiendo audio grabado...');
+        setTimeout(() => {
+          onTranscriptionRequested(uri);
+        }, 500); // Pequeño delay para mejor UX
+      }
     } catch (error: any) {
       console.error('Error stopping recording:', error);
       setError('No se pudo detener la grabación.');
@@ -166,9 +174,14 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
             )}
 
             {recordedUri && !isRecording && (
-              <Text style={styles.successText}>
-                ✅ Audio guardado correctamente
-              </Text>
+              <View style={styles.processingContainer}>
+                <Text style={styles.successText}>
+                  ✅ Procesando audio...
+                </Text>
+                <Text style={styles.processingSubtext}>
+                  Transcripción automática en progreso
+                </Text>
+              </View>
             )}
           </View>
         </View>
@@ -176,17 +189,10 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
         {recordedUri && !isRecording && (
           <View style={styles.actionContainer}>
             <Pressable
-              style={styles.transcribeButton}
-              onPress={handleTranscriptionRequest}
-            >
-              <Text style={styles.transcribeButtonText}>🎤 Transcribir Audio</Text>
-            </Pressable>
-
-            <Pressable
               style={styles.resetButton}
               onPress={resetRecording}
             >
-              <Text style={styles.resetButtonText}>🔄 Nuevo Audio</Text>
+              <Text style={styles.resetButtonText}>🔄 Nueva Grabación</Text>
             </Pressable>
           </View>
         )}
@@ -327,14 +333,24 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   resetButton: {
-    flex: 1,
     backgroundColor: '#000000',
     borderRadius: 0,
     paddingVertical: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 40,
     alignItems: 'center',
     borderWidth: 4,
     borderColor: '#FFFFFF',
+  },
+  processingContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  processingSubtext: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginTop: 4,
   },
   resetButtonText: {
     color: '#FFFFFF',

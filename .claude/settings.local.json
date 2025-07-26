@@ -21,7 +21,8 @@
       "Bash(npm run test:*)",
       "Bash(grep:*)",
       "Bash(del nul)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }

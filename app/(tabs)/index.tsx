@@ -9,6 +9,7 @@ import TranscriptionResult from '../../components/TranscriptionResult';
 import BriefValidationAlert from '../../components/BriefValidationAlert';
 import FileUploadButton from '../../components/FileUploadButton';
 import FinalBriefEditorModal from '../../components/FinalBriefEditorModal';
+import ExportDropdown from '../../components/ExportDropdown';
 import { useBriefGeneration } from '../../hooks/useBriefGeneration';
 import { useBriefStorage } from '../../hooks/useBriefStorage';
 import { useWhisperTranscription } from '../../hooks/useWhisperTranscription';
@@ -434,9 +435,9 @@ const AudioToTextScreen: React.FC = () => {
         )}
 
         {brief && !loadingBrief && !errorBrief && (
-          <View style={styles.actionsContainer}>
+          <View style={styles.primaryActionsContainer}>
             <Pressable
-              style={styles.improveButton}
+              style={styles.primaryActionButton}
               onPress={() => {
                 if (__DEV__) {
                   console.log('🔍 Abriendo modal de análisis');
@@ -444,17 +445,56 @@ const AudioToTextScreen: React.FC = () => {
                 setShowChatModal(true);
               }}
             >
-              <Text style={styles.improveButtonText}>📊 Analizar Brief</Text>
+              <Text style={styles.primaryActionIcon}>📊</Text>
+              <Text style={styles.primaryActionText}>Mejorar Brief</Text>
+              <Text style={styles.primaryActionSubtext}>Análisis y optimización con IA</Text>
             </Pressable>
 
-            <Pressable
-              style={styles.toggleButton}
-              onPress={() => setUseNewDisplay(!useNewDisplay)}
-            >
-              <Text style={styles.toggleButtonText}>
-                {useNewDisplay ? '🔄 Vista Clásica' : '🎆 Vista Profesional'}
-              </Text>
-            </Pressable>
+            <View style={styles.secondaryActionsRow}>
+              <Pressable
+                style={styles.secondaryActionButton}
+                onPress={async () => {
+                  if (!briefToShow) return;
+                  try {
+                    const briefText = FileExporter.formatBriefAsText(briefToShow);
+                    await Clipboard.setStringAsync(briefText);
+                    Alert.alert('✅', 'Brief copiado al portapapeles');
+                  } catch (error) {
+                    Alert.alert('❌ Error', 'No se pudo copiar');
+                  }
+                }}
+              >
+                <Text style={styles.secondaryActionIcon}>📋</Text>
+                <Text style={styles.secondaryActionText}>Copiar</Text>
+              </Pressable>
+              
+              <Pressable
+                style={styles.secondaryActionButton}
+                onPress={async () => {
+                  if (!briefToShow) return;
+                  try {
+                    const briefText = FileExporter.formatBriefAsText(briefToShow);
+                    await Share.share({
+                      message: briefText,
+                      title: `Brief: ${briefToShow.projectTitle || 'Sin título'}`
+                    });
+                  } catch (error) {
+                    Alert.alert('❌ Error', 'No se pudo compartir');
+                  }
+                }}
+              >
+                <Text style={styles.secondaryActionIcon}>📤</Text>
+                <Text style={styles.secondaryActionText}>Compartir</Text>
+              </Pressable>
+              
+              <Pressable
+                style={styles.secondaryActionButton}
+                onPress={() => setUseNewDisplay(!useNewDisplay)}
+              >
+                <Text style={styles.secondaryActionIcon}>🔄</Text>
+                <Text style={styles.secondaryActionText}>Vista</Text>
+              </Pressable>
+            </View>
           </View>
         )}
 
@@ -539,162 +579,80 @@ const AudioToTextScreen: React.FC = () => {
               </Pressable>
             </View>
             
-            {/* Opciones de exportación completas para brief mejorado */}
-            <View style={styles.exportSection}>
-              <Text style={styles.exportSectionTitle}>📤 Exportar Brief Final</Text>
+            {/* Acciones simplificadas para brief mejorado */}
+            <View style={styles.finalBriefQuickActions}>
+              <ExportDropdown 
+                briefToShow={briefToShow} 
+                handleExportBrief={handleExportBrief}
+              />
               
-              <View style={styles.exportButtonsGrid}>
+              <View style={styles.finalBriefActionRow}>
                 <Pressable
-                  style={styles.exportButton}
-                  onPress={() => {
-                    if (__DEV__) {
-                      console.log('📤 TXT EXPORT BUTTON PRESSED!');
+                  style={styles.finalBriefActionButton}
+                  onPress={async () => {
+                    if (!briefToShow) return;
+                    try {
+                      const briefText = FileExporter.formatBriefAsText(briefToShow);
+                      await Share.share({
+                        message: briefText,
+                        title: `Brief: ${briefToShow.projectTitle || 'Sin título'}`
+                      });
+                    } catch (error) {
+                      Alert.alert('❌ Error', 'No se pudo compartir');
                     }
-                    handleExportBrief(briefToShow, 'txt');
                   }}
                 >
-                  <Text style={styles.exportButtonIcon}>📄</Text>
-                  <Text style={styles.exportButtonText}>TXT</Text>
+                  <Text style={styles.finalBriefActionIcon}>📤</Text>
+                  <Text style={styles.finalBriefActionText}>Compartir</Text>
                 </Pressable>
                 
                 <Pressable
-                  style={styles.exportButton}
-                  onPress={() => {
-                    if (__DEV__) {
-                      console.log('📝 MD EXPORT BUTTON PRESSED!');
+                  style={styles.finalBriefActionButton}
+                  onPress={async () => {
+                    if (!briefToShow) return;
+                    try {
+                      const briefText = FileExporter.formatBriefAsText(briefToShow);
+                      await Clipboard.setStringAsync(briefText);
+                      Alert.alert('✅', 'Brief copiado al portapapeles');
+                    } catch (error) {
+                      Alert.alert('❌ Error', 'No se pudo copiar');
                     }
-                    handleExportBrief(briefToShow, 'md');
                   }}
                 >
-                  <Text style={styles.exportButtonIcon}>📝</Text>
-                  <Text style={styles.exportButtonText}>MD</Text>
+                  <Text style={styles.finalBriefActionIcon}>📋</Text>
+                  <Text style={styles.finalBriefActionText}>Copiar</Text>
                 </Pressable>
                 
                 <Pressable
-                  style={styles.exportButton}
-                  onPress={() => {
-                    if (__DEV__) {
-                      console.log('🌐 HTML EXPORT BUTTON PRESSED!');
-                    }
-                    handleExportBrief(briefToShow, 'html');
-                  }}
+                  style={styles.finalBriefActionButton}
+                  onPress={handleManualSave}
                 >
-                  <Text style={styles.exportButtonIcon}>🌐</Text>
-                  <Text style={styles.exportButtonText}>HTML</Text>
-                </Pressable>
-                
-                <Pressable
-                  style={styles.exportButton}
-                  onPress={() => {
-                    if (__DEV__) {
-                      console.log('📊 JSON EXPORT BUTTON PRESSED!');
-                    }
-                    handleExportBrief(briefToShow, 'json');
-                  }}
-                >
-                  <Text style={styles.exportButtonIcon}>📊</Text>
-                  <Text style={styles.exportButtonText}>JSON</Text>
+                  <Text style={styles.finalBriefActionIcon}>💾</Text>
+                  <Text style={styles.finalBriefActionText}>Guardar</Text>
                 </Pressable>
               </View>
-              
-              <Pressable
-                style={styles.exportAllButton}
-                onPress={() => {
-                  if (__DEV__) {
-                    console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
-                  }
-                  handleExportBrief(briefToShow, 'all');
-                }}
-              >
-                <Text style={styles.exportAllButtonText}>📦 Exportar Todos los Formatos</Text>
-              </Pressable>
             </View>
           </View>
         )}
 
-        {briefToShow && (
+        {briefToShow && !improvedBrief && (
           <View style={styles.saveContainer}>
-            <Pressable
-              style={styles.saveButton}
-              onPress={handleManualSave}
-            >
-              <Text style={styles.saveButtonText}>
-                {currentBriefId ? '💾 Guardar Copia' : '💾 Guardar Brief'}
-              </Text>
-            </Pressable>
-            
-            {/* Solo mostrar exportación completa si no hay brief mejorado */}
-            {!improvedBrief && !(briefToShow && briefToShow !== brief) && (
-              <View style={styles.exportSection}>
-                <Text style={styles.exportSectionTitle}>📤 Exportar Brief</Text>
-                
-                <View style={styles.exportButtonsGrid}>
-                  <Pressable
-                    style={styles.exportButton}
-                    onPress={() => {
-                      if (__DEV__) {
-                        console.log('📤 TXT EXPORT BUTTON PRESSED!');
-                      }
-                      handleExportBrief(briefToShow, 'txt');
-                    }}
-                  >
-                    <Text style={styles.exportButtonIcon}>📄</Text>
-                    <Text style={styles.exportButtonText}>TXT</Text>
-                  </Pressable>
-                  
-                  <Pressable
-                    style={styles.exportButton}
-                    onPress={() => {
-                      if (__DEV__) {
-                        console.log('📝 MD EXPORT BUTTON PRESSED!');
-                      }
-                      handleExportBrief(briefToShow, 'md');
-                    }}
-                  >
-                    <Text style={styles.exportButtonIcon}>📝</Text>
-                    <Text style={styles.exportButtonText}>MD</Text>
-                  </Pressable>
-                  
-                  <Pressable
-                    style={styles.exportButton}
-                    onPress={() => {
-                      if (__DEV__) {
-                        console.log('🌐 HTML EXPORT BUTTON PRESSED!');
-                      }
-                      handleExportBrief(briefToShow, 'html');
-                    }}
-                  >
-                    <Text style={styles.exportButtonIcon}>🌐</Text>
-                    <Text style={styles.exportButtonText}>HTML</Text>
-                  </Pressable>
-                  
-                  <Pressable
-                    style={styles.exportButton}
-                    onPress={() => {
-                      if (__DEV__) {
-                        console.log('📊 JSON EXPORT BUTTON PRESSED!');
-                      }
-                      handleExportBrief(briefToShow, 'json');
-                    }}
-                  >
-                    <Text style={styles.exportButtonIcon}>📊</Text>
-                    <Text style={styles.exportButtonText}>JSON</Text>
-                  </Pressable>
-                </View>
-                
-                <Pressable
-                  style={styles.exportAllButton}
-                  onPress={() => {
-                    if (__DEV__) {
-                      console.log('📦 ALL FORMATS EXPORT BUTTON PRESSED!');
-                    }
-                    handleExportBrief(briefToShow, 'all');
-                  }}
-                >
-                  <Text style={styles.exportAllButtonText}>📦 Exportar Todos los Formatos</Text>
-                </Pressable>
-              </View>
-            )}
+            <View style={styles.bottomActionsRow}>
+              <Pressable
+                style={styles.bottomActionButton}
+                onPress={handleManualSave}
+              >
+                <Text style={styles.bottomActionIcon}>💾</Text>
+                <Text style={styles.bottomActionText}>
+                  {currentBriefId ? 'Guardar Copia' : 'Guardar'}
+                </Text>
+              </Pressable>
+              
+              <ExportDropdown 
+                briefToShow={briefToShow} 
+                handleExportBrief={handleExportBrief}
+              />
+            </View>
             
             {currentBriefId && (
               <Text style={styles.autoSaveText}>
@@ -839,6 +797,61 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
+  primaryActionsContainer: {
+    marginTop: 24,
+    width: '100%',
+  },
+  primaryActionButton: {
+    backgroundColor: '#FFD700',
+    paddingVertical: 24,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  primaryActionIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  primaryActionText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#000000',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  primaryActionSubtext: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#000000',
+    opacity: 0.8,
+    letterSpacing: 0.5,
+  },
+  secondaryActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  secondaryActionButton: {
+    flex: 1,
+    backgroundColor: '#000000',
+    borderWidth: 2,
+    borderColor: '#333333',
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  secondaryActionIcon: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  secondaryActionText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
   saveContainer: {
     alignItems: 'center',
     marginTop: 16,
@@ -864,6 +877,32 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     marginTop: 12,
     fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  bottomActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'center',
+  },
+  bottomActionButton: {
+    backgroundColor: '#000000',
+    borderWidth: 3,
+    borderColor: '#FFD700',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  bottomActionIcon: {
+    fontSize: 20,
+  },
+  bottomActionText: {
+    color: '#FFD700',
+    fontSize: 16,
+    fontWeight: '900',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
@@ -1029,6 +1068,51 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#000000',
     letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  finalBriefPrimaryButton: {
+    backgroundColor: '#FFD700',
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+  },
+  finalBriefPrimaryButtonText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#000000',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
+  finalBriefQuickActions: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  finalBriefActionRow: {
+    flexDirection: 'row',
+    marginTop: 16,
+    gap: 8,
+  },
+  finalBriefActionButton: {
+    backgroundColor: '#000000',
+    borderWidth: 2,
+    borderColor: '#333333',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    flex: 1,
+  },
+  finalBriefActionIcon: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  finalBriefActionText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   briefContainer: {

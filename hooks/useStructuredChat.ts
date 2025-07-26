@@ -215,18 +215,25 @@ CONTEXTO:
 
 REGLAS CRÍTICAS:
 1. NO REPETIR: NUNCA hagas una pregunta sobre un tema que ya esté en el historial. Si ya preguntaste sobre KPIs, métricas, objetivos o cualquier otro tema, NO lo vuelvas a preguntar.
-2. VERIFICAR CONTENIDO: ANTES de sugerir una pregunta, verifica si ese campo ya tiene contenido en el brief. Si un campo ya tiene datos válidos (no vacío, no null, no array vacío), busca OTRO campo que esté vacío.
-3. BUSCAR VACÍOS: Tu prioridad es encontrar campos que estén VACÍOS o INCOMPLETOS en el brief.
+2. VERIFICAR CONTENIDO EXISTENTE: ANTES de sugerir una pregunta, verifica si ese campo ya tiene contenido sustancial en el brief. 
+   - Si channelStrategy.recommendedMix ya tiene canales definidos con allocation y rationale, NO preguntes sobre canales.
+   - Si los objetivos estratégicos ya están definidos con métricas específicas, NO preguntes sobre objetivos.
+   - Si la audiencia ya está bien segmentada con insights, NO preguntes sobre audiencia.
+3. BUSCAR VACÍOS REALES: Tu prioridad es encontrar campos que estén REALMENTE VACÍOS o SUPERFICIALES en el brief.
 4. SER CONTEXTUAL: La pregunta debe basarse en la información existente y faltante en el brief.
 5. PRIORIZAR: Enfócate en los vacíos más críticos primero (ej. objetivos, audiencia) antes de pasar a detalles menores.
 6. SER CONVERSACIONAL: Formula la pregunta de una manera natural y consultiva, reconociendo lo que ya existe.
 7. UNA SOLA PREGUNTA: Devuelve solo UNA pregunta, la más importante para el momento actual.
 8. CAMPO CORRECTO: El campo "field" debe corresponder exactamente al campo del brief que se va a actualizar y debe estar VACÍO o INCOMPLETO.
+9. ANÁLISIS PROFUNDO: Analiza el contenido real del brief, no solo si los campos existen. Por ejemplo:
+   - channelStrategy.recommendedMix con 4 canales definidos = NO preguntar sobre canales
+   - strategicObjectives con 3 objetivos SMART = NO preguntar sobre objetivos
+   - targetAudience con segmentación e insights = NO preguntar sobre audiencia
 
-Si hay campos vacíos, DEBES hacer una pregunta sobre uno de ellos. Solo devuelve null si:
-1. No hay campos vacíos o incompletos
+Si hay campos vacíos o con contenido superficial, DEBES hacer una pregunta sobre uno de ellos. Solo devuelve null si:
+1. No hay campos vacíos o con contenido insuficiente
 2. Ya se han hecho todas las preguntas relevantes
-3. El brief está realmente completo y bien desarrollado
+3. El brief está realmente completo y bien desarrollado con información sustancial en todas las secciones
 
 FORMATO DE SALIDA: Responde ÚNICAMENTE con un objeto JSON que contenga la siguiente pregunta, o null si no hay más.
 
@@ -245,19 +252,53 @@ O si no hay más preguntas:
   "nextQuestion": null
 }`;
 
-    // Identificar campos vacíos o incompletos
+    // Identificar campos vacíos o incompletos con análisis más inteligente
     const emptyFields: string[] = [];
+    const fieldsWithContent: { [key: string]: string } = {};
+    
     const checkField = (obj: any, path: string = '') => {
       Object.keys(obj).forEach(key => {
         const fullPath = path ? `${path}.${key}` : key;
         const value = obj[key];
         
-        if (value === null || value === undefined || value === '' || 
-            (Array.isArray(value) && value.length === 0) ||
-            (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)) {
+        // Verificación más inteligente para arrays
+        if (Array.isArray(value)) {
+          if (value.length === 0) {
+            emptyFields.push(fullPath);
+          } else {
+            // Para arrays como channelStrategy.recommendedMix, verificar si tienen contenido real
+            const hasSubstantialContent = value.some(item => {
+              if (typeof item === 'object') {
+                // Si es un objeto (como canales), verificar que tenga propiedades con contenido
+                return Object.values(item).some(v => v && String(v).trim().length > 0);
+              }
+              return item && String(item).trim().length > 0;
+            });
+            
+            if (hasSubstantialContent) {
+              fieldsWithContent[fullPath] = `Array con ${value.length} elementos con contenido`;
+            } else {
+              emptyFields.push(fullPath);
+            }
+          }
+        } else if (value === null || value === undefined || value === '' || 
+                  (typeof value === 'string' && value.trim() === '')) {
           emptyFields.push(fullPath);
         } else if (typeof value === 'object' && !Array.isArray(value)) {
-          checkField(value, fullPath);
+          // Verificar si el objeto tiene al menos alguna propiedad con contenido
+          const hasContent = Object.values(value).some(v => 
+            v !== null && v !== undefined && 
+            (typeof v !== 'string' || v.trim() !== '') &&
+            (!Array.isArray(v) || v.length > 0)
+          );
+          
+          if (!hasContent) {
+            emptyFields.push(fullPath);
+          } else {
+            checkField(value, fullPath);
+          }
+        } else if (typeof value === 'string' && value.trim().length > 0) {
+          fieldsWithContent[fullPath] = value.substring(0, 50) + (value.length > 50 ? '...' : '');
         }
       });
     };
@@ -265,6 +306,7 @@ O si no hay más preguntas:
     checkField(brief);
     
     console.log('📋 Campos vacíos detectados:', emptyFields);
+    console.log('✅ Campos con contenido:', Object.keys(fieldsWithContent).length, 'campos');
     
     const userPrompt = `BRIEF ACTUAL:
 ${JSON.stringify(brief, null, 2)}
@@ -272,11 +314,18 @@ ${JSON.stringify(brief, null, 2)}
 CAMPOS VACÍOS O INCOMPLETOS:
 ${emptyFields.length > 0 ? emptyFields.map(f => `- ${f}`).join('\n') : 'Ninguno'}
 
+CAMPOS QUE YA TIENEN CONTENIDO SUSTANCIAL (NO PREGUNTAR SOBRE ESTOS):
+${Object.entries(fieldsWithContent).slice(0, 10).map(([field, preview]) => `- ${field}: ${preview}`).join('\n')}
+${Object.keys(fieldsWithContent).length > 10 ? `... y ${Object.keys(fieldsWithContent).length - 10} campos más con contenido` : ''}
+
 PREGUNTAS YA HECHAS (HISTORIAL):
 ${history.length > 0 ? history.map(q => `- ${q}`).join('\n') : 'Ninguna pregunta hecha aún'}
 
 Basado en el brief actual, los campos vacíos y el historial, ¿cuál es la siguiente pregunta más valiosa y estratégica que debo hacer? 
-IMPORTANTE: Enfócate en los campos que están VACÍOS o INCOMPLETOS.`;
+IMPORTANTE: 
+- Enfócate SOLO en los campos que están VACÍOS o INCOMPLETOS
+- NO preguntes sobre campos que ya tienen contenido sustancial
+- Si channelStrategy.recommendedMix ya tiene canales definidos, NO preguntes sobre canales`;
 
     try {
       const abortController = createNewAbortController();
