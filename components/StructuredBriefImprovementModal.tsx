@@ -1,12 +1,15 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { 
-  KeyboardAvoidingView, 
   Modal, 
-  Platform, 
   Pressable, 
   StyleSheet, 
   Text, 
-  View
+  View,
+  ScrollView,
+  Dimensions,
+  Platform,
+  KeyboardAvoidingView,
+  Animated
 } from 'react-native';
 import EducationalBriefAnalysis from './EducationalBriefAnalysis';
 import StructuredChatInterface from './StructuredChatInterface';
@@ -22,10 +25,14 @@ interface StructuredBriefImprovementModalProps {
 }
 
 type ModalStep = 'analysis' | 'structured-improvement';
+type ViewMode = 'chat-focus' | 'brief-focus' | 'side-by-side';
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const isTablet = screenWidth > 768;
 
 /**
  * Modal mejorado con vista side-by-side para chat estructurado y brief editable
+ * NUEVA VERSIÓN CON UX OPTIMIZADA
  */
 const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalProps> = ({
   visible,
@@ -44,11 +51,17 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
   }
 
   const [currentStep, setCurrentStep] = useState<ModalStep>('analysis');
+  const [viewMode, setViewMode] = useState<ViewMode>(isTablet ? 'side-by-side' : 'chat-focus');
   const [workingBrief, setWorkingBrief] = useState<any>(brief || {});
   const [isUpdatingBrief, setIsUpdatingBrief] = useState(false);
   const [improvementsApplied, setImprovementsApplied] = useState(false);
-  
-  // Sincronizar workingBrief cuando cambie el brief prop - CORREGIDO: remover workingBrief de dependencias
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  // Animations
+  const slideAnim = React.useRef(new Animated.Value(0)).current;
+  const fadeAnim = React.useRef(new Animated.Value(1)).current;
+
+  // Sync working brief with prop
   useEffect(() => {
     if (brief && (!workingBrief || Object.keys(workingBrief).length === 0)) {
       if (__DEV__) {
@@ -56,46 +69,22 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
       }
       setWorkingBrief(brief);
     }
-  }, [brief]); // CORREGIDO: solo depender de brief, no de workingBrief
-  
-  // Usar useMemo para evitar recrear el objeto en cada render
+  }, [brief]);
+
+  // Analysis hook
   const briefToAnalyze = useMemo(() => {
     return workingBrief && Object.keys(workingBrief).length > 0 ? workingBrief : brief;
   }, [workingBrief, brief]);
-  
-  // Debug logging controlado para evitar renders excesivos
-  useEffect(() => {
-    if (__DEV__) {
-      console.log('🔍 [Modal] Brief para análisis:', {
-        timestamp: new Date().toLocaleTimeString(),
-        source: workingBrief && Object.keys(workingBrief).length > 0 ? 'workingBrief' : 'originalBrief',
-        hasImprovementMetadata: !!briefToAnalyze?.improvementMetadata,
-        iterations: briefToAnalyze?.improvementMetadata?.improvementIterations || 0,
-        briefKeys: briefToAnalyze ? Object.keys(briefToAnalyze).length : 0
-      });
-    }
-  }, [brief]); // Solo depender de brief para evitar ciclos infinitos
-  
-  // Use only educational analysis to avoid conflicts and performance issues
-  // Only analyze if modal is visible and has a brief
+
   const shouldAnalyze = visible && briefToAnalyze && Object.keys(briefToAnalyze).length > 0;
-  const { analysis: educationalAnalysis, loading: educationalAnalysisLoading, error: educationalAnalysisError, reAnalyze: reAnalyzeEducational } = useEducationalBriefAnalysis(shouldAnalyze ? briefToAnalyze : null);
-  
-  // Debug analysis hook states
-  useEffect(() => {
-    if (__DEV__) {
-      console.log('🔧 [Modal] Analysis hook status:', {
-        timestamp: new Date().toLocaleTimeString(),
-        educationalAnalysis: { 
-          hasAnalysis: !!educationalAnalysis, 
-          loading: educationalAnalysisLoading, 
-          error: educationalAnalysisError 
-        }
-      });
-    }
-  }, [educationalAnalysis, educationalAnalysisLoading, educationalAnalysisError]);
-  
-  // Pasar el ANÁLISIS CRUDO al chat
+  const { 
+    analysis: educationalAnalysis, 
+    loading: educationalAnalysisLoading, 
+    error: educationalAnalysisError, 
+    reAnalyze: reAnalyzeEducational 
+  } = useEducationalBriefAnalysis(shouldAnalyze ? briefToAnalyze : null);
+
+  // Chat hook
   const { 
     messages, 
     currentQuestion,
@@ -108,7 +97,6 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     progress,
   } = useStructuredChat(workingBrief, handleBriefUpdate);
 
-  // Función para manejar actualizaciones del brief
   function handleBriefUpdate(updatedBrief: any) {
     const timestamp = new Date().toLocaleTimeString();
     if (__DEV__) {
@@ -117,42 +105,28 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         previousFieldCount: workingBrief ? Object.keys(workingBrief).length : 0,
         newFieldCount: updatedBrief ? Object.keys(updatedBrief).length : 0,
         briefChanged: updatedBrief !== workingBrief,
-        sampleFields: {
-          projectTitle: updatedBrief?.projectTitle,
-          briefSummary: updatedBrief?.briefSummary?.substring(0, 50) + '...',
-          targetAudience: updatedBrief?.targetAudience
-        }
       });
     }
     
-    // Prevenir actualizaciones si el brief es el mismo para evitar bucles
     if (updatedBrief && updatedBrief !== workingBrief) {
-      // ACTUALIZACIÓN INMEDIATA sin demoras
       setWorkingBrief(updatedBrief);
       setIsUpdatingBrief(true);
       
-      // Verificar inmediatamente que el brief tiene contenido
-      const hasContent = Object.keys(updatedBrief).some(key => {
-        const value = updatedBrief[key];
-        return value && (typeof value === 'string' ? value.trim() : true);
-      });
+      // Animate update
+      Animated.sequence([
+        Animated.timing(fadeAnim, {
+          toValue: 0.7,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
       
-      if (__DEV__) {
-        console.log(`✅ [${timestamp}] Modal SINCRONIZADO:`, {
-          hasContent,
-          fieldCount: Object.keys(updatedBrief).length,
-          briefUpdated: true
-        });
-      }
-      
-      // Feedback visual mínimo
-      setTimeout(() => {
-        setIsUpdatingBrief(false);
-      }, 1000);
-    } else {
-      if (__DEV__) {
-        console.error(`❌ [${timestamp}] Modal recibió brief NULO - esto es un error crítico`);
-      }
+      setTimeout(() => setIsUpdatingBrief(false), 1500);
     }
   }
 
@@ -163,40 +137,55 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     }
     
     setCurrentStep('structured-improvement');
-    // Asegurarse de que workingBrief tenga el brief actual
+    
     if (brief && Object.keys(brief).length > 0) {
       setWorkingBrief(brief);
       if (__DEV__) {
         console.log('✅ workingBrief actualizado con brief actual');
       }
-    } else {
-      if (__DEV__) {
-        console.warn('⚠️ El brief está vacío o no definido');
-      }
     }
+    
     setImprovementsApplied(false);
     
-    // Inicializar el chat estructurado
+    // Animate transition
+    Animated.spring(slideAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 8,
+    }).start();
+    
     setTimeout(() => {
       initializeChat();
-    }, 100);
-  }, [brief, initializeChat]);
+    }, 300);
+  }, [brief, initializeChat, slideAnim]);
 
   const handleBackToAnalysis = useCallback(() => {
-    setCurrentStep('analysis');
-  }, []);
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 8,
+    }).start(() => {
+      setCurrentStep('analysis');
+    });
+  }, [slideAnim]);
 
   const handleCloseModal = useCallback(() => {
-    // Auto-save improvements if they exist
     if (workingBrief && workingBrief !== brief) {
       onBriefImproved(workingBrief);
     }
     
+    // Reset state
     setCurrentStep('analysis');
     setWorkingBrief(brief);
+    setViewMode(isTablet ? 'side-by-side' : 'chat-focus');
+    slideAnim.setValue(0);
+    fadeAnim.setValue(1);
     clearChat();
+    setShowSuccessMessage(false);
     onClose();
-  }, [brief, clearChat, onClose, workingBrief, onBriefImproved]);
+  }, [brief, clearChat, onClose, workingBrief, onBriefImproved, slideAnim, fadeAnim]);
 
   const handleApplyImprovements = useCallback(() => {
     if (__DEV__) {
@@ -209,42 +198,16 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     }
     
     if (workingBrief) {
-      // Mostrar feedback visual INMEDIATAMENTE
       setImprovementsApplied(true);
       setIsUpdatingBrief(true);
+      setShowSuccessMessage(true);
       
-      // Verificar integridad antes de aplicar
-      const camposCriticos = ['projectTitle', 'briefSummary', 'businessChallenge', 'strategicObjectives'];
-      const camposPresentes = camposCriticos.filter(campo => {
-        const valor = workingBrief[campo];
-        return valor !== undefined && valor !== null && 
-               (Array.isArray(valor) ? valor.length > 0 : 
-                typeof valor === 'object' ? Object.keys(valor).length > 0 : 
-                typeof valor === 'string' ? valor.trim().length > 0 : true);
-      });
-      
-      if (__DEV__) {
-        console.log('🚀 APLICANDO MEJORAS - Verificación previa:', {
-          totalCampos: Object.keys(workingBrief).length,
-          camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
-          businessChallenge: workingBrief.businessChallenge ? '✅' : '❌',
-          targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅' : '❌',
-          bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅' : '❌',
-          timestamp: new Date().toLocaleTimeString()
-        });
-      }
-      
-      // Crear brief consolidado con mejoras aplicadas
       const consolidatedBrief = {
-        ...brief, // Brief original como base
-        ...workingBrief, // Aplicar todas las mejoras
-        
-        // Asegurar que los campos críticos estén presentes
+        ...brief,
+        ...workingBrief,
         briefSummary: workingBrief.briefSummary || brief?.briefSummary || '',
         updatedAt: new Date().toISOString(),
         improvedAt: new Date().toISOString(),
-        
-        // Metadata de mejoras con contador de iteraciones
         improvementMetadata: {
           originalBriefFields: brief ? Object.keys(brief).length : 0,
           improvedBriefFields: Object.keys(workingBrief).length,
@@ -252,7 +215,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
           structuredImprovementApplied: true,
           improvementIterations: (brief?.improvementMetadata?.improvementIterations || 0) + 1,
           previousScores: brief?.improvementMetadata?.previousScores || [],
-          currentScore: null // Se actualizará después del análisis
+          currentScore: null
         }
       };
       
@@ -265,32 +228,16 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         });
       }
       
-      // Aplicar las mejoras consolidadas
       onBriefImproved(consolidatedBrief);
-      if (__DEV__) {
-        console.log('✅ Brief consolidado aplicado correctamente');
-      }
       
-      // El re-análisis se disparará automáticamente cuando workingBrief cambie
-      if (__DEV__) {
-        console.log('✅ Brief mejorado aplicado - el análisis se actualizará automáticamente');
-      }
-      
-      // Mantener el feedback visual por más tiempo
       setTimeout(() => {
         setIsUpdatingBrief(false);
-      }, 2000);
+        setShowSuccessMessage(false);
+      }, 3000);
       
       setTimeout(() => {
         setImprovementsApplied(false);
-      }, 4000);
-      
-      // NO cerrar el modal automáticamente - mantener la vista abierta
-      // handleCloseModal();
-    } else {
-      if (__DEV__) {
-        console.warn('⚠️ No hay workingBrief para aplicar');
-      }
+      }, 5000);
     }
   }, [workingBrief, onBriefImproved, brief]);
 
@@ -303,6 +250,14 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
     }
     setWorkingBrief(updatedBrief);
   }, []);
+
+  const toggleViewMode = () => {
+    if (isTablet) {
+      setViewMode(viewMode === 'side-by-side' ? 'chat-focus' : 'side-by-side');
+    } else {
+      setViewMode(viewMode === 'chat-focus' ? 'brief-focus' : 'chat-focus');
+    }
+  };
 
   // Effect para logging cuando el modal se abre/cierra
   useEffect(() => {
@@ -331,166 +286,303 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
+        {/* Modern Header */}
+        <View style={styles.modernHeader}>
+          <View style={styles.headerTop}>
             {currentStep === 'structured-improvement' && (
               <Pressable 
-                style={styles.backButton} 
+                style={styles.modernBackButton} 
                 onPress={handleBackToAnalysis}
               >
-                <Text style={styles.backButtonText}>← Análisis</Text>
+                <Text style={styles.backIcon}>←</Text>
+                <Text style={styles.backText}>Análisis</Text>
               </Pressable>
             )}
             
-            <Text style={styles.headerTitle}>
-              {currentStep === 'analysis' ? '📊 Análisis del Brief' : '🔄 Mejora Estructurada'}
-            </Text>
+            <View style={styles.headerCenter}>
+              <Text style={styles.modernTitle}>
+                {currentStep === 'analysis' ? 'Análisis del Brief' : 'Mejora Estructurada'}
+              </Text>
+              <Text style={styles.modernSubtitle}>
+                {currentStep === 'analysis' 
+                  ? 'Revisa las recomendaciones y áreas de mejora'
+                  : 'Optimiza tu brief con ayuda de IA'
+                }
+              </Text>
+            </View>
             
             <Pressable 
-              style={styles.closeButton} 
+              style={styles.modernCloseButton} 
               onPress={handleCloseModal}
             >
-              <Text style={styles.closeButtonText}>✕</Text>
+              <Text style={styles.closeIcon}>✕</Text>
             </Pressable>
           </View>
           
-          {/* Indicador de paso */}
-          <View style={styles.stepIndicator}>
-            <View style={[
-              styles.stepDot, 
-              currentStep === 'analysis' ? styles.stepDotActive : styles.stepDotInactive
-            ]} />
-            <View style={styles.stepLine} />
-            <View style={[
-              styles.stepDot, 
-              currentStep === 'structured-improvement' ? styles.stepDotActive : styles.stepDotInactive
-            ]} />
+          {/* Progress Indicator */}
+          <View style={styles.progressContainer}>
+            <View style={styles.progressTrack}>
+              <Animated.View 
+                style={[
+                  styles.progressBar,
+                  {
+                    width: slideAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['50%', '100%'],
+                    }),
+                  },
+                ]}
+              />
+            </View>
+            <View style={styles.progressLabels}>
+              <Text style={[
+                styles.progressLabel,
+                currentStep === 'analysis' && styles.progressLabelActive
+              ]}>
+                Análisis
+              </Text>
+              <Text style={[
+                styles.progressLabel,
+                currentStep === 'structured-improvement' && styles.progressLabelActive
+              ]}>
+                Mejora
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Contenido principal */}
-        <View style={styles.content}>
-          {currentStep === 'analysis' ? (
-            <EducationalBriefAnalysis
-              analysis={educationalAnalysis}
-              loading={educationalAnalysisLoading}
-              error={educationalAnalysisError}
-              onStartImprovement={handleStartStructuredImprovement}
-              onReAnalyze={reAnalyzeEducational}
-              brief={brief}
-            />
-          ) : (
-            <View style={styles.sideBySideContainer}>
-              {/* Panel izquierdo: Chat estructurado */}
-              <View style={styles.chatPanel}>
-                <View style={[styles.panelHeader, styles.chatPanelHeader]}>
-                  <View style={styles.panelTitleContainer}>
-                    <View style={styles.panelIndicator} />
-                    <Text style={styles.panelTitle}>💬 Chat Estructurado</Text>
-                  </View>
-                  <Text style={styles.panelSubtitle}>
-                    Responde las preguntas una por una
-                  </Text>
-                </View>
-                <StructuredChatInterface
-                  messages={messages}
-                  currentQuestion={currentQuestion}
-                  isTyping={isTyping}
-                  sendMessage={sendMessage}
-                  isConnected={isConnected}
-                  error={chatError}
-                  progress={progress}
-                />
-              </View>
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <Animated.View style={[styles.successBanner, { opacity: fadeAnim }]}>
+            <Text style={styles.successText}>✅ Brief mejorado exitosamente</Text>
+          </Animated.View>
+        )}
 
-              {/* Panel derecho: Brief editable */}
-              <View style={styles.briefPanel}>
-                <View style={[styles.panelHeader, styles.briefPanelHeader]}>
-                  <View style={styles.panelTitleContainer}>
-                    <View style={[styles.panelIndicator, styles.briefPanelIndicator]} />
-                    <Text style={styles.panelTitle}>📝 Brief en Tiempo Real</Text>
-                  </View>
-                  <Text style={styles.panelSubtitle}>
-                    Se actualiza automáticamente
-                  </Text>
+        {/* Main Content */}
+        <View style={styles.modernContent}>
+          {currentStep === 'analysis' ? (
+            <ScrollView 
+              style={styles.analysisContainer}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.analysisContent}
+            >
+              <EducationalBriefAnalysis
+                analysis={educationalAnalysis}
+                loading={educationalAnalysisLoading}
+                error={educationalAnalysisError}
+                onStartImprovement={handleStartStructuredImprovement}
+                onReAnalyze={reAnalyzeEducational}
+                brief={brief}
+              />
+            </ScrollView>
+          ) : (
+            <View style={styles.improvementContainer}>
+              {/* View Mode Toggle for Mobile */}
+              {!isTablet && (
+                <View style={styles.mobileToggle}>
+                  <Pressable
+                    style={[
+                      styles.toggleButton,
+                      viewMode === 'chat-focus' && styles.toggleButtonActive
+                    ]}
+                    onPress={() => setViewMode('chat-focus')}
+                  >
+                    <Text style={[
+                      styles.toggleText,
+                      viewMode === 'chat-focus' && styles.toggleTextActive
+                    ]}>
+                      💬 Chat
+                    </Text>
+                  </Pressable>
+                  
+                  <Pressable
+                    style={[
+                      styles.toggleButton,
+                      viewMode === 'brief-focus' && styles.toggleButtonActive
+                    ]}
+                    onPress={() => setViewMode('brief-focus')}
+                  >
+                    <Text style={[
+                      styles.toggleText,
+                      viewMode === 'brief-focus' && styles.toggleTextActive
+                    ]}>
+                      📝 Brief
+                    </Text>
+                  </Pressable>
                 </View>
-                <EditableBriefView
-                  brief={workingBrief}
-                  onBriefChange={handleManualBriefChange}
-                  isUpdating={isUpdatingBrief}
-                />
+              )}
+
+              {/* Tablet Toggle */}
+              {isTablet && (
+                <View style={styles.tabletToggle}>
+                  <Pressable
+                    style={styles.viewToggleButton}
+                    onPress={toggleViewMode}
+                  >
+                    <Text style={styles.viewToggleText}>
+                      {viewMode === 'side-by-side' ? '🔍 Enfocar Chat' : '👁️ Vista Completa'}
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              {/* Content Based on View Mode */}
+              <View style={styles.contentArea}>
+                {viewMode === 'chat-focus' && (
+                  <View style={styles.singlePanel}>
+                    <View style={styles.modernPanelHeader}>
+                      <View style={styles.panelHeaderContent}>
+                        <Text style={styles.modernPanelTitle}>💬 Chat Estructurado</Text>
+                        <Text style={styles.modernPanelSubtitle}>
+                          Responde las preguntas para mejorar tu brief
+                        </Text>
+                      </View>
+                      {progress && (
+                        <View style={styles.progressBadge}>
+                          <Text style={styles.progressBadgeText}>{Math.round(progress * 100)}%</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.chatContainer}>
+                      <StructuredChatInterface
+                        messages={messages}
+                        currentQuestion={currentQuestion}
+                        isTyping={isTyping}
+                        sendMessage={sendMessage}
+                        isConnected={isConnected}
+                        error={chatError}
+                        progress={progress}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                {viewMode === 'brief-focus' && (
+                  <View style={styles.singlePanel}>
+                    <Animated.View style={[
+                      styles.modernPanelHeader,
+                      { opacity: isUpdatingBrief ? fadeAnim : 1 }
+                    ]}>
+                      <View style={styles.panelHeaderContent}>
+                        <Text style={styles.modernPanelTitle}>📝 Brief en Tiempo Real</Text>
+                        <Text style={styles.modernPanelSubtitle}>
+                          {isUpdatingBrief ? 'Actualizando...' : 'Se actualiza automáticamente'}
+                        </Text>
+                      </View>
+                      {isUpdatingBrief && (
+                        <View style={styles.updateIndicator}>
+                          <Text style={styles.updateIndicatorText}>🔄</Text>
+                        </View>
+                      )}
+                    </Animated.View>
+                    <View style={styles.briefContainer}>
+                      <EditableBriefView
+                        brief={workingBrief}
+                        onBriefChange={handleManualBriefChange}
+                        isUpdating={isUpdatingBrief}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                {viewMode === 'side-by-side' && (
+                  <View style={styles.sideBySideLayout}>
+                    {/* Chat Panel */}
+                    <View style={styles.leftPanel}>
+                      <View style={styles.modernPanelHeader}>
+                        <View style={styles.panelHeaderContent}>
+                          <Text style={styles.modernPanelTitle}>💬 Chat</Text>
+                          <Text style={styles.modernPanelSubtitle}>
+                            Preguntas estructuradas
+                          </Text>
+                        </View>
+                        {progress && (
+                          <View style={styles.progressBadge}>
+                            <Text style={styles.progressBadgeText}>{Math.round(progress * 100)}%</Text>
+                          </View>
+                        )}
+                      </View>
+                      <View style={styles.panelContent}>
+                        <StructuredChatInterface
+                          messages={messages}
+                          currentQuestion={currentQuestion}
+                          isTyping={isTyping}
+                          sendMessage={sendMessage}
+                          isConnected={isConnected}
+                          error={chatError}
+                          progress={progress}
+                        />
+                      </View>
+                    </View>
+
+                    {/* Brief Panel */}
+                    <View style={styles.rightPanel}>
+                      <Animated.View style={[
+                        styles.modernPanelHeader,
+                        { opacity: isUpdatingBrief ? fadeAnim : 1 }
+                      ]}>
+                        <View style={styles.panelHeaderContent}>
+                          <Text style={styles.modernPanelTitle}>📝 Brief</Text>
+                          <Text style={styles.modernPanelSubtitle}>
+                            {isUpdatingBrief ? 'Actualizando...' : 'En tiempo real'}
+                          </Text>
+                        </View>
+                        {isUpdatingBrief && (
+                          <View style={styles.updateIndicator}>
+                            <Text style={styles.updateIndicatorText}>🔄</Text>
+                          </View>
+                        )}
+                      </Animated.View>
+                      <View style={styles.panelContent}>
+                        <EditableBriefView
+                          brief={workingBrief}
+                          onBriefChange={handleManualBriefChange}
+                          isUpdating={isUpdatingBrief}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                )}
               </View>
             </View>
           )}
         </View>
 
-        {/* Footer para la vista estructurada */}
+        {/* Modern Footer */}
         {currentStep === 'structured-improvement' && (
-          <View style={styles.structuredFooter}>
-            <View style={styles.footerInfo}>
-              <Text style={styles.footerText}>
-                {isUpdatingBrief ? '🔄 Actualizando brief...' : '💡 El brief se actualiza automáticamente con tus respuestas'}
-              </Text>
-              <Text style={styles.footerSubtext}>
-                {improvementsApplied ? '✅ ¡Mejoras guardadas correctamente!' : 'También puedes editarlo manualmente en el panel derecho'}
-              </Text>
+          <View style={styles.modernFooter}>
+            <View style={styles.footerContent}>
+              <View style={styles.footerInfo}>
+                <Text style={styles.footerMainText}>
+                  {improvementsApplied ? '✅ Mejoras aplicadas correctamente' : 
+                   isUpdatingBrief ? '🔄 Actualizando brief...' : 
+                   '💡 El brief se actualiza automáticamente'}
+                </Text>
+                {!improvementsApplied && !isUpdatingBrief && (
+                  <Text style={styles.footerSecondaryText}>
+                    También puedes editarlo manualmente
+                  </Text>
+                )}
+              </View>
+              
               <Pressable 
-                style={styles.debugButton}
-                onPress={() => {
-                  if (__DEV__) {
-                    console.log('🔧 FORZANDO SINCRONIZACIÓN MANUAL...');
-                    if (workingBrief) {
-                      setIsUpdatingBrief(true);
-                      
-                      // Verificar integridad del brief actual
-                      const camposCriticos = ['projectTitle', 'briefSummary', 'businessChallenge', 'strategicObjectives', 'targetAudience', 'creativeStrategy'];
-                      const camposPresentes = camposCriticos.filter(campo => {
-                        const valor = workingBrief[campo];
-                        return valor !== undefined && valor !== null && 
-                               (Array.isArray(valor) ? valor.length > 0 : 
-                                typeof valor === 'object' ? Object.keys(valor).length > 0 : 
-                                typeof valor === 'string' ? valor.trim().length > 0 : true);
-                      });
-                      
-                      console.log('🔄 ESTADO ACTUAL DEL BRIEF:', {
-                        totalCampos: Object.keys(workingBrief).length,
-                        camposCriticosPresentes: `${camposPresentes.length}/${camposCriticos.length}`,
-                        businessChallenge: workingBrief.businessChallenge ? '✅ Presente' : '❌ Falta',
-                        targetAudiencePrimary: workingBrief.targetAudience?.primary ? '✅ Presente' : '❌ Falta',
-                        targetAudienceSecondary: workingBrief.targetAudience?.secondary ? '✅ Presente' : '❌ Falta',
-                        bigIdea: workingBrief.creativeStrategy?.bigIdea ? '✅ Presente' : '❌ Falta',
-                        briefCompleto: workingBrief
-                      });
-                      
-                      setTimeout(() => setIsUpdatingBrief(false), 1000);
-                    }
-                  }
-                }}
+                style={[
+                  styles.modernApplyButton,
+                  improvementsApplied && styles.modernApplyButtonSuccess,
+                  (workingBrief && workingBrief !== brief) && styles.modernApplyButtonHasChanges
+                ]} 
+                onPress={handleApplyImprovements}
               >
-                <Text style={styles.debugButtonText}>🔧 Debug Sync</Text>
+                <Text style={styles.modernApplyButtonText}>
+                  {improvementsApplied 
+                    ? '✅ ¡Aplicado!' 
+                    : (workingBrief && workingBrief !== brief) 
+                      ? '🚀 Aplicar Mejoras' 
+                      : '📋 Guardar Brief'
+                  }
+                </Text>
               </Pressable>
             </View>
-            <Pressable 
-              style={[
-                styles.applyButton,
-                improvementsApplied && styles.applyButtonSuccess,
-                (workingBrief && workingBrief !== brief) && styles.applyButtonHasChanges
-              ]} 
-              onPress={handleApplyImprovements}
-            >
-              <Text style={[
-                styles.applyButtonText,
-                improvementsApplied && styles.applyButtonTextSuccess
-              ]}>
-                {improvementsApplied 
-                  ? '✅ ¡Mejoras Aplicadas!' 
-                  : (workingBrief && workingBrief !== brief) 
-                    ? '🚀 Aplicar Mejoras (•)' 
-                    : '🚀 Aplicar Mejoras'
-                }
-              </Text>
-            </Pressable>
           </View>
         )}
       </KeyboardAvoidingView>
@@ -501,8 +593,348 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#F8FAFC',
   },
+  
+  // Modern Header
+  modernHeader: {
+    backgroundColor: '#FFFFFF',
+    paddingTop: Platform.OS === 'ios' ? 44 : 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  modernBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 16,
+  },
+  backIcon: {
+    fontSize: 16,
+    color: '#374151',
+    marginRight: 4,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  modernTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  modernSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  modernCloseButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  closeIcon: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '600',
+  },
+  
+  // Progress
+  progressContainer: {
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+  },
+  progressTrack: {
+    height: 4,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#10B981',
+    borderRadius: 2,
+  },
+  progressLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  progressLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9CA3AF',
+  },
+  progressLabelActive: {
+    color: '#10B981',
+  },
+  
+  // Success Banner
+  successBanner: {
+    backgroundColor: '#ECFDF5',
+    borderLeftWidth: 4,
+    borderLeftColor: '#10B981',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#D1FAE5',
+  },
+  successText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#047857',
+  },
+  
+  // Content
+  modernContent: {
+    flex: 1,
+  },
+  analysisContainer: {
+    flex: 1,
+  },
+  analysisContent: {
+    padding: 24,
+  },
+  improvementContainer: {
+    flex: 1,
+  },
+  
+  // Mobile Toggle
+  mobileToggle: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    borderRadius: 8,
+    padding: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  toggleButtonActive: {
+    backgroundColor: '#111827',
+  },
+  toggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  toggleTextActive: {
+    color: '#FFFFFF',
+  },
+  
+  // Tablet Toggle
+  tabletToggle: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  viewToggleButton: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  viewToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  
+  // Content Area
+  contentArea: {
+    flex: 1,
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  
+  // Single Panel
+  singlePanel: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  
+  // Side by Side Layout
+  sideBySideLayout: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 16,
+  },
+  leftPanel: {
+    flex: 0.6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  rightPanel: {
+    flex: 0.4,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  
+  // Panel Headers
+  modernPanelHeader: {
+    backgroundColor: '#F9FAFB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  panelHeaderContent: {
+    flex: 1,
+  },
+  modernPanelTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  modernPanelSubtitle: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  progressBadge: {
+    backgroundColor: '#DBEAFE',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  progressBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1E40AF',
+  },
+  updateIndicator: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  updateIndicatorText: {
+    fontSize: 16,
+  },
+  
+  // Panel Content
+  panelContent: {
+    flex: 1,
+  },
+  chatContainer: {
+    flex: 1,
+  },
+  briefContainer: {
+    flex: 1,
+  },
+  
+  // Modern Footer
+  modernFooter: {
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  footerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    gap: 20,
+  },
+  footerInfo: {
+    flex: 1,
+  },
+  footerMainText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  footerSecondaryText: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  modernApplyButton: {
+    backgroundColor: '#111827',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  modernApplyButtonSuccess: {
+    backgroundColor: '#10B981',
+  },
+  modernApplyButtonHasChanges: {
+    backgroundColor: '#F59E0B',
+  },
+  modernApplyButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  
+  // Legacy compatibility (mantenemos algunos estilos antiguos por si son referenciados)
   header: {
     backgroundColor: '#000000',
     paddingTop: Platform.OS === 'ios' ? 44 : 20,
@@ -510,232 +942,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 215, 0, 0.3)',
   },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  backButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#FFD700',
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  backButtonText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 0,
-    backgroundColor: '#000000',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 12,
-  },
-  closeButtonText: {
-    fontSize: 20,
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  stepIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-  },
-  stepDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  stepDotActive: {
-    backgroundColor: '#FFD700',
-  },
-  stepDotInactive: {
-    backgroundColor: '#333333',
-  },
-  stepLine: {
-    flex: 1,
-    height: 4,
-    backgroundColor: '#333333',
-    marginHorizontal: 16,
-  },
   content: {
     flex: 1,
-  },
-  sideBySideContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    minHeight: 0,
-  },
-  chatPanel: {
-    flex: 0.55,
-    backgroundColor: '#111111',
-    borderRightWidth: 3,
-    borderRightColor: '#FFD700',
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  briefPanel: {
-    flex: 0.45,
-    backgroundColor: '#000000',
-    minHeight: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
-    shadowColor: '#000000',
-    shadowOffset: { width: -2, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  panelHeader: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: '#000000',
-    borderBottomWidth: 2,
-    borderBottomColor: '#FFD700',
-    position: 'relative',
-  },
-  panelTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#FFD700',
-    marginBottom: 6,
-    letterSpacing: 0.5,
-  },
-  panelSubtitle: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    fontWeight: '400',
-    letterSpacing: 0.5,
-    opacity: 0.8,
-  },
-  panelTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  panelIndicator: {
-    width: 4,
-    height: 24,
-    backgroundColor: '#FFD700',
-    marginRight: 12,
-    borderRadius: 0,
-  },
-  chatPanelHeader: {
-    backgroundColor: '#111111',
-  },
-  briefPanelHeader: {
-    backgroundColor: '#1a1a1a',
-  },
-  briefPanelIndicator: {
-    backgroundColor: '#FFD700',
-    opacity: 0.8,
-  },
-  structuredFooter: {
-    backgroundColor: '#000000',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 215, 0, 0.3)',
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  footerInfo: {
-    flex: 1,
-    marginRight: 20,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#FFFFFF',
-    fontWeight: '400',
-    marginBottom: 6,
-    letterSpacing: 0.5,
-    lineHeight: 20,
-  },
-  footerSubtext: {
-    fontSize: 12,
-    color: '#FFD700',
-    fontWeight: '400',
-    letterSpacing: 0.5,
-    lineHeight: 18,
-    opacity: 0.8,
-  },
-  applyButton: {
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 28,
-    paddingVertical: 18,
-    borderRadius: 0,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  applyButtonText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  applyButtonSuccess: {
-    backgroundColor: '#FFD700',
-    borderColor: '#FFFFFF',
-  },
-  applyButtonHasChanges: {
-    backgroundColor: '#FFD700',
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-    borderWidth: 2,
-  },
-  applyButtonTextSuccess: {
-    color: '#000000',
-  },
-  successIndicator: {
-    backgroundColor: '#d1fae5',
-    borderBottomColor: '#10b981',
-  },
-  successText: {
-    color: '#065f46',
-    fontWeight: '600',
-  },
-  debugButton: {
-    backgroundColor: '#000000',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 0,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.5)',
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  debugButtonText: {
-    color: '#FFD700',
-    fontSize: 10,
-    fontWeight: '500',
-    letterSpacing: 0.5,
-    opacity: 0.8,
   },
 });
 

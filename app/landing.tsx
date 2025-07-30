@@ -31,7 +31,7 @@ export default function LandingPage() {
       instagram: 'https://instagram.com/briefboy._',
       linkedin: 'https://linkedin.com/company/briefboy',
       twitter: 'https://twitter.com/Brief_Boy_',
-      youtube: 'https://youtube.com/@zoho-briefboy-domain-verification'
+      youtube: 'https://www.youtube.com/@Brief-Boy'
     };
 
     const url = urls[platform];

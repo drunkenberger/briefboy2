@@ -22,7 +22,8 @@
       "Bash(grep:*)",
       "Bash(del nul)",
       "Bash(npm run lint:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
