@@ -199,8 +199,11 @@ export const updateProfile = async (userId: string, updates: Partial<Profile>) =
   return data;
 };
 
-// Beta code utilities for you to create codes
+// Beta code utilities - NOTE: These functions now require service role access
+// You'll need to create codes directly in Supabase SQL Editor or use service role key
 export const createBetaCode = async (code: string, maxUses = 1, expiresAt?: Date) => {
+  // WARNING: This function now requires service role permissions
+  // Consider creating codes directly in Supabase SQL Editor instead
   const { data, error } = await supabase
     .from('beta_codes')
     .insert({

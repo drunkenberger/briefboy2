@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Modal } from 'react-native';
+import { Brief } from '../utils/fileExporter';
+
+type ExportFormat = 'txt' | 'md' | 'html' | 'json' | 'all';
 
 interface ExportDropdownProps {
-  briefToShow: any;
-  handleExportBrief: (brief: any, format: 'txt' | 'md' | 'html' | 'json' | 'all') => void;
+  briefToShow: Brief;
+  handleExportBrief: (brief: Brief, format: ExportFormat) => void;
+}
+
+interface ExportOption {
+  label: string;
+  format: ExportFormat;
+  icon: string;
 }
 
 const ExportDropdown: React.FC<ExportDropdownProps> = ({ briefToShow, handleExportBrief }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const exportOptions = [
+  const exportOptions: ExportOption[] = [
     { label: 'Texto Plano (.txt)', format: 'txt', icon: '📄' },
     { label: 'Markdown (.md)', format: 'md', icon: '📝' },
     { label: 'HTML (.html)', format: 'html', icon: '🌐' },
@@ -44,7 +53,7 @@ const ExportDropdown: React.FC<ExportDropdownProps> = ({ briefToShow, handleExpo
                 key={option.format}
                 style={styles.dropdownOption}
                 onPress={() => {
-                  handleExportBrief(briefToShow, option.format as any);
+                  handleExportBrief(briefToShow, option.format);
                   setShowDropdown(false);
                 }}
               >

@@ -83,13 +83,26 @@ export function useSupabaseAuth(): AuthState & AuthActions {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('🔄 Auth state changed:', event, session?.user?.email);
+        console.log('🔍 Auth event details:', {
+          event,
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          emailConfirmed: session?.user?.email_confirmed_at,
+          mounted
+        });
         
-        if (!mounted) return;
+        if (!mounted) {
+          console.log('⚠️ Component unmounted, ignoring auth state change');
+          return;
+        }
 
         if (event === 'SIGNED_IN' && session?.user) {
+          console.log('✅ Processing SIGNED_IN event...');
           // Get user profile
           const profile = await getProfile(session.user.id);
+          console.log('👤 User profile loaded:', !!profile);
           
           setState({
             user: session.user,
@@ -98,7 +111,9 @@ export function useSupabaseAuth(): AuthState & AuthActions {
             loading: false,
             isAuthenticated: true,
           });
+          console.log('🎉 User successfully authenticated and state updated');
         } else if (event === 'SIGNED_OUT') {
+          console.log('👋 Processing SIGNED_OUT event...');
           setState({
             user: null,
             profile: null,
@@ -107,11 +122,14 @@ export function useSupabaseAuth(): AuthState & AuthActions {
             isAuthenticated: false,
           });
         } else if (event === 'TOKEN_REFRESHED' && session) {
+          console.log('🔄 Processing TOKEN_REFRESHED event...');
           setState(prev => ({
             ...prev,
             session,
             user: session.user,
           }));
+        } else {
+          console.log('❓ Unhandled auth event or missing data');
         }
       }
     );
@@ -174,21 +192,36 @@ export function useSupabaseAuth(): AuthState & AuthActions {
 
   const handleSignIn = async (email: string, password: string) => {
     try {
+      console.log('🔐 useSupabaseAuth handleSignIn called with:', { email, passwordLength: password.length });
       setState(prev => ({ ...prev, loading: true }));
 
+      console.log('🚀 Calling Supabase signIn...');
       const { data, error } = await signIn(email, password);
+      console.log('📊 Supabase signIn response:', { 
+        hasUser: !!data.user, 
+        hasSession: !!data.session, 
+        error: error?.message 
+      });
       
       if (error) {
+        console.error('❌ Supabase signIn error:', error);
         throw error;
       }
 
       if (data.user && data.session) {
         // The auth state change listener will handle updating the state
-        console.log('Sign in successful for:', data.user.email);
+        console.log('✅ Sign in successful for:', data.user.email);
+        console.log('🔑 Session details:', {
+          userId: data.user.id,
+          emailConfirmed: data.user.email_confirmed_at,
+          sessionExpiry: data.session.expires_at
+        });
+      } else {
+        console.log('⚠️ Sign in returned data but missing user or session');
       }
     } catch (error: any) {
       setState(prev => ({ ...prev, loading: false }));
-      console.error('Sign in error:', error);
+      console.error('❌ Sign in error in hook:', error);
       
       let errorMessage = 'Error al iniciar sesión';
       

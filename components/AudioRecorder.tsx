@@ -1,6 +1,9 @@
 import { Audio } from 'expo-av';
 import React, { useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View, Image } from 'react-native';
+
+// Import custom emoji
+const lightBulbEmoji = require('../assets/emoji/Light_Bulb_Emoji.png');
 
 interface AudioRecorderProps {
   onAudioRecorded?: (uri: string | null) => void;
@@ -204,7 +207,10 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
         )}
 
         <View style={styles.instructionsContainer}>
-          <Text style={styles.instructionsTitle}>💡 Consejos:</Text>
+          <View style={styles.instructionsTitleContainer}>
+            <Image source={lightBulbEmoji} style={styles.instructionsIconImage} />
+            <Text style={styles.instructionsTitle}>Consejos:</Text>
+          </View>
           <Text style={styles.instructionsText}>• Tiempo máximo de grabación: 8 minutos</Text>
           <Text style={styles.instructionsText}>• Para análisis más largos, sube texto o archivo manualmente</Text>
           <Text style={styles.instructionsText}>• Habla claro y con volumen normal</Text>
@@ -365,11 +371,21 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: 32,
   },
+  instructionsTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  instructionsIconImage: {
+    width: 20,
+    height: 20,
+    marginRight: 8,
+    resizeMode: 'contain',
+  },
   instructionsTitle: {
     fontSize: 18,
     fontWeight: '900',
     color: '#FFD700',
-    marginBottom: 12,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },

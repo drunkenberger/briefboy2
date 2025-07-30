@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
 import { BriefAnalysisResult, getScoreColor, getScoreEmoji, getStatusText } from '../hooks/useBriefAnalysis';
 import BriefAnalysisDebug from './BriefAnalysisDebug';
+
+// Import custom emojis
+const documentEmoji = require('../assets/emoji/Document_Emoji.png');
+const lightningBoltEmoji = require('../assets/emoji/Lightning_Bolt_Emoji.png');
+const lightBulbEmoji = require('../assets/emoji/Light_Bulb_Emoji.png');
 
 interface BriefAnalysisDisplayProps {
   analysis: BriefAnalysisResult | null;
@@ -102,7 +107,7 @@ const BriefAnalysisDisplay: React.FC<BriefAnalysisDisplayProps> = ({
         <ScoreCard
           title="Completitud"
           score={analysis.completenessScore}
-          icon="📋"
+          iconImage={documentEmoji}
         />
         <ScoreCard
           title="Calidad"
@@ -117,7 +122,7 @@ const BriefAnalysisDisplay: React.FC<BriefAnalysisDisplayProps> = ({
         <ScoreCard
           title="Listos para Uso"
           score={analysis.readinessScore}
-          icon="🚀"
+          iconImage={lightningBoltEmoji}
         />
       </View>
 
@@ -147,7 +152,7 @@ const BriefAnalysisDisplay: React.FC<BriefAnalysisDisplayProps> = ({
       )}
 
       {/* Recomendaciones */}
-      <Section title="Recomendaciones" icon="💡" color="#FFD700">
+      <Section title="Recomendaciones" iconImage={lightBulbEmoji} color="#FFD700">
         {analysis.recommendations.map((recommendation, index) => (
           <BulletPoint key={index} text={recommendation} color="#FFD700" />
         ))}
@@ -196,7 +201,10 @@ const BriefAnalysisDisplay: React.FC<BriefAnalysisDisplayProps> = ({
           style={[styles.actionButton, styles.primaryButton]}
           onPress={onStartImprovement}
         >
-          <Text style={styles.primaryButtonText}>🚀 Iniciar Mejoras</Text>
+          <View style={styles.buttonContent}>
+            <Image source={lightningBoltEmoji} style={styles.buttonIconImage} />
+            <Text style={styles.primaryButtonText}>Iniciar Mejoras</Text>
+          </View>
         </Pressable>
         
         <Pressable

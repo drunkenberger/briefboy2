@@ -1,7 +1,10 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import BrutalistNavHeader from '../components/BrutalistNavHeader';
+
+// Import custom emoji
+const lightningBoltEmoji = require('../assets/emoji/Lightning_Bolt_Emoji.png');
 
 export default function AboutScreen() {
   const router = useRouter();
@@ -61,7 +64,7 @@ export default function AboutScreen() {
                 <Text style={styles.skillText}>DESARROLLO</Text>
               </View>
               <View style={styles.skillItem}>
-                <Text style={styles.skillEmoji}>🚀</Text>
+                <Image source={lightningBoltEmoji} style={styles.skillEmojiImage} />
                 <Text style={styles.skillText}>PRODUCTO</Text>
               </View>
             </View>
@@ -91,7 +94,7 @@ export default function AboutScreen() {
         {/* Mission Statement */}
         <View style={styles.missionSection}>
           <View style={styles.missionBox}>
-            <Text style={styles.missionIcon}>⚡</Text>
+            <Image source={lightningBoltEmoji} style={styles.missionIconImage} />
             <Text style={styles.missionTitle}>NUESTRA MISIÓN</Text>
             <Text style={styles.missionText}>
               COMBATIR LAS MALAS CAMPAÑAS{'\n'}
@@ -283,6 +286,12 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginBottom: 8,
   },
+  skillEmojiImage: {
+    width: 32,
+    height: 32,
+    marginBottom: 8,
+    resizeMode: 'contain',
+  },
   skillText: {
     fontSize: 12,
     fontWeight: '900',
@@ -354,6 +363,12 @@ const styles = StyleSheet.create({
   missionIcon: {
     fontSize: 64,
     marginBottom: 16,
+  },
+  missionIconImage: {
+    width: 64,
+    height: 64,
+    marginBottom: 16,
+    resizeMode: 'contain',
   },
   missionTitle: {
     fontSize: 24,

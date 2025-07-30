@@ -58,14 +58,25 @@ const AuthFlow: React.FC<AuthFlowProps> = ({ onCancel }) => {
   };
 
   const handleSignIn = async () => {
+    console.log('🔐 handleSignIn called');
+    console.log('📝 Sign in form data:', {
+      email: formData.email,
+      hasPassword: !!formData.password,
+      passwordLength: formData.password.length,
+      loading
+    });
+
     if (!formData.email.trim() || !formData.password.trim()) {
       Alert.alert('Campos requeridos', 'Por favor completa todos los campos.');
       return;
     }
 
     try {
+      console.log('🚀 Calling signIn from AuthFlow...');
       await signIn(formData.email.trim(), formData.password);
+      console.log('✅ signIn completed successfully');
     } catch (error) {
+      console.error('❌ SignIn error in AuthFlow:', error);
       // Error is handled in the hook
     }
   };

@@ -9,6 +9,14 @@ import ZohoSalesIQWidget from '../components/ZohoSalesIQWidget';
 import PageSenseTracker from '../components/PageSenseTracker';
 import { InstagramIcon, LinkedInIcon, TwitterIcon, YouTubeIcon } from '../components/SocialIcons';
 
+// Import custom emojis
+const steamFaceEmoji = require('../assets/emoji/Steam_Face_Emoji.png');
+const memoEmoji = require('../assets/emoji/Memo_Emoji.png');
+const alarmClockEmoji = require('../assets/emoji/Alarm_Clock_Emoji.png');
+const lightningBoltEmoji = require('../assets/emoji/Lightning_Bolt_Emoji.png');
+const brainEmoji = require('../assets/emoji/Brain_Emoji.png');
+const documentEmoji = require('../assets/emoji/Document_Emoji.png');
+
 const { width } = Dimensions.get('window');
 
 export default function LandingPage() {
@@ -20,10 +28,10 @@ export default function LandingPage() {
 
   const openSocialMedia = (platform: string) => {
     const urls: { [key: string]: string } = {
-      instagram: 'https://instagram.com/briefboy',
+      instagram: 'https://instagram.com/briefboy._',
       linkedin: 'https://linkedin.com/company/briefboy',
-      twitter: 'https://twitter.com/briefboy_ai',
-      youtube: 'https://youtube.com/@BriefBoyChannel'
+      twitter: 'https://twitter.com/Brief_Boy_',
+      youtube: 'https://youtube.com/@zoho-briefboy-domain-verification'
     };
 
     const url = urls[platform];
@@ -79,15 +87,15 @@ export default function LandingPage() {
             <Text style={styles.problemTitle}>¿CANSADO DE BRIEFS MEDIOCRES?</Text>
             <View style={styles.problemGrid}>
               <View style={styles.problemCard}>
-                <Text style={styles.problemIcon}>😤</Text>
+                <Image source={steamFaceEmoji} style={styles.problemIconImage} />
                 <Text style={styles.problemText}>Horas perdidas estructurando información</Text>
               </View>
               <View style={styles.problemCard}>
-                <Text style={styles.problemIcon}>📝</Text>
+                <Image source={memoEmoji} style={styles.problemIconImage} />
                 <Text style={styles.problemText}>Briefs inconsistentes y poco profesionales</Text>
               </View>
               <View style={styles.problemCard}>
-                <Text style={styles.problemIcon}>⏰</Text>
+                <Image source={alarmClockEmoji} style={styles.problemIconImage} />
                 <Text style={styles.problemText}>Deadlines perdidos por procesos lentos</Text>
               </View>
             </View>
@@ -104,7 +112,7 @@ export default function LandingPage() {
             <View style={styles.benefitsGrid}>
               <View style={styles.benefitCard}>
                 <View style={styles.benefitIcon}>
-                  <Text style={styles.benefitIconText}>⚡</Text>
+                  <Image source={lightningBoltEmoji} style={styles.benefitIconImage} />
                 </View>
                 <Text style={styles.benefitTitle}>VELOCIDAD BRUTAL</Text>
                 <Text style={styles.benefitText}>
@@ -114,7 +122,7 @@ export default function LandingPage() {
               </View>
               <View style={styles.benefitCard}>
                 <View style={styles.benefitIcon}>
-                  <Text style={styles.benefitIconText}>🧠</Text>
+                  <Image source={brainEmoji} style={styles.benefitIconImage} />
                 </View>
                 <Text style={styles.benefitTitle}>IA AVANZADA</Text>
                 <Text style={styles.benefitText}>
@@ -124,7 +132,7 @@ export default function LandingPage() {
               </View>
               <View style={styles.benefitCard}>
                 <View style={styles.benefitIcon}>
-                  <Text style={styles.benefitIconText}>📄</Text>
+                  <Image source={documentEmoji} style={styles.benefitIconImage} />
                 </View>
                 <Text style={styles.benefitTitle}>FORMATO PRO</Text>
                 <Text style={styles.benefitText}>
@@ -453,6 +461,12 @@ const styles = StyleSheet.create({
     fontSize: 48,
     marginBottom: 20,
   },
+  problemIconImage: {
+    width: 48,
+    height: 48,
+    marginBottom: 20,
+    resizeMode: 'contain',
+  },
   problemText: {
     fontSize: 16,
     color: '#FFFFFF',
@@ -508,6 +522,11 @@ const styles = StyleSheet.create({
   },
   benefitIconText: {
     fontSize: 40,
+  },
+  benefitIconImage: {
+    width: 50,
+    height: 50,
+    resizeMode: 'contain',
   },
   benefitTitle: {
     fontSize: 24,

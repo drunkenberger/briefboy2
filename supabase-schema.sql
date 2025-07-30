@@ -48,9 +48,9 @@ CREATE POLICY "Enable profile creation during signup" ON profiles
 CREATE POLICY "Anyone can validate beta codes" ON beta_codes 
   FOR SELECT USING (is_active = true);
 
--- Only authenticated users can create beta codes (for your admin use)
-CREATE POLICY "Authenticated users can create beta codes" ON beta_codes 
-  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- Only service role can create beta codes (restrict admin access)
+CREATE POLICY "Service role can create beta codes" ON beta_codes 
+  FOR INSERT TO service_role;
 
 -- 6. Create function to automatically create profile after user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
