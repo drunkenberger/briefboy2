@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { Theme } from '../constants/Theme';
 
 interface ModernBriefDisplayProps {
   brief: any;
@@ -259,24 +260,20 @@ const ChannelCard: React.FC<{ channel: any }> = ({ channel }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Theme.colors.background,
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 32,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    backgroundColor: Theme.colors.surface,
+    padding: Theme.spacing.container.large,
+    marginBottom: Theme.spacing.lg,
+    ...Theme.shadows.sm,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 12,
-    lineHeight: 38,
+    fontSize: Theme.typography.fontSize['4xl'],
+    fontWeight: Theme.typography.fontWeight.extrabold,
+    color: Theme.colors.text,
+    marginBottom: Theme.spacing.md,
+    lineHeight: Theme.typography.fontSize['4xl'] * Theme.typography.lineHeight.tight,
   },
   improvementBadge: {
     backgroundColor: '#ECFDF5',
@@ -294,10 +291,10 @@ const styles = StyleSheet.create({
     color: '#047857',
   },
   summary: {
-    fontSize: 18,
-    color: '#4B5563',
-    lineHeight: 26,
-    fontWeight: '500',
+    fontSize: Theme.typography.fontSize.lg,
+    color: Theme.colors.textSecondary,
+    lineHeight: Theme.typography.fontSize.lg * Theme.typography.lineHeight.normal,
+    fontWeight: Theme.typography.fontWeight.medium,
   },
   section: {
     backgroundColor: '#FFFFFF',
@@ -414,39 +411,36 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   primaryButton: {
-    backgroundColor: '#111827',
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: Theme.colors.primary,
+    borderRadius: Theme.borderRadius.lg,
+    paddingVertical: Theme.spacing.lg,
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: Theme.spacing.lg,
+    ...Theme.shadows.lg,
   },
   primaryButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontSize: Theme.typography.fontSize.base,
+    fontWeight: Theme.typography.fontWeight.bold,
+    color: Theme.colors.textInverse,
   },
   secondaryActions: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   secondaryButton: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingVertical: 14,
+    backgroundColor: Theme.colors.surface,
+    borderRadius: Theme.borderRadius.lg,
+    paddingVertical: Theme.spacing.sm + 6,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Theme.colors.border,
+    marginHorizontal: Theme.spacing.xs,
   },
   secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+    fontSize: Theme.typography.fontSize.sm,
+    fontWeight: Theme.typography.fontWeight.semibold,
+    color: Theme.colors.primaryLight,
   },
   bottomSpacer: {
     height: 40,

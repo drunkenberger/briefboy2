@@ -12,7 +12,7 @@ import {
   Animated
 } from 'react-native';
 import EducationalBriefAnalysis from './EducationalBriefAnalysis';
-import StructuredChatInterface from './StructuredChatInterface';
+import ImprovedStructuredChatInterface from './ImprovedStructuredChatInterface';
 import EditableBriefView from './EditableBriefView';
 import { useEducationalBriefAnalysis } from '../hooks/useEducationalBriefAnalysis';
 import { useStructuredChat } from '../hooks/useStructuredChat';
@@ -444,7 +444,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
                       )}
                     </View>
                     <View style={styles.chatContainer}>
-                      <StructuredChatInterface
+                      <ImprovedStructuredChatInterface
                         messages={messages}
                         currentQuestion={currentQuestion}
                         isTyping={isTyping}
@@ -503,7 +503,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
                         )}
                       </View>
                       <View style={styles.panelContent}>
-                        <StructuredChatInterface
+                        <ImprovedStructuredChatInterface
                           messages={messages}
                           currentQuestion={currentQuestion}
                           isTyping={isTyping}
@@ -777,8 +777,9 @@ const styles = StyleSheet.create({
   // Content Area
   contentArea: {
     flex: 1,
-    marginHorizontal: 16,
+    marginHorizontal: isTablet ? 20 : 16,
     marginBottom: 16,
+    backgroundColor: '#F8FAFC',
   },
   
   // Single Panel
@@ -798,10 +799,10 @@ const styles = StyleSheet.create({
   sideBySideLayout: {
     flex: 1,
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
   leftPanel: {
-    flex: 0.6,
+    flex: isTablet ? 0.65 : 0.7, // More space for chat
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     shadowColor: '#000',
@@ -810,9 +811,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
+    minWidth: isTablet ? 400 : 280, // Minimum width for readability
   },
   rightPanel: {
-    flex: 0.4,
+    flex: isTablet ? 0.35 : 0.3, // Less space for brief view
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     shadowColor: '#000',
@@ -821,6 +823,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
+    minWidth: 250,
   },
   
   // Panel Headers

@@ -16,6 +16,7 @@ import { useBriefStorage } from '../hooks/useBriefStorage';
 
 // Import utilities
 import { checkApiKeysOnStartup } from '../utils/apiKeyValidator';
+import { Theme } from '../constants/Theme';
 
 const SimplifiedMainScreen: React.FC = () => {
   const workflow = useBriefWorkflow();
@@ -159,32 +160,28 @@ const SimplifiedMainScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: Theme.colors.background,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: Theme.spacing['2xl'],
+    paddingVertical: Theme.spacing.xl,
+    backgroundColor: Theme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+    borderBottomColor: Theme.colors.border,
+    ...Theme.shadows.sm,
   },
   appTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
+    fontSize: Theme.typography.fontSize['3xl'],
+    fontWeight: Theme.typography.fontWeight.extrabold,
+    color: Theme.colors.text,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: Theme.spacing.xs,
   },
   appSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: Theme.typography.fontSize.sm,
+    color: Theme.colors.textTertiary,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: Theme.typography.fontWeight.medium,
     letterSpacing: 0.5,
   },
   content: {

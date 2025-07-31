@@ -10,11 +10,13 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Haptics from 'expo-haptics';
 import { useFileProcessor } from '../hooks/useFileProcessor';
+import { Theme } from '../constants/Theme';
 
 interface UnifiedInputProps {
   onContentReady: (content: string, type: 'audio' | 'text' | 'file', audioUri?: string) => void;
@@ -50,6 +52,11 @@ const UnifiedInput: React.FC<UnifiedInputProps> = ({ onContentReady, isProcessin
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const recordPulse = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const cardAnimations = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]).current;
 
   useEffect(() => {
     // Slide in animation when mode changes
@@ -60,21 +67,35 @@ const UnifiedInput: React.FC<UnifiedInputProps> = ({ onContentReady, isProcessin
         tension: 50,
         friction: 8,
       }).start();
+    } else {
+      // Stagger animation for cards
+      Animated.stagger(100, [
+        ...cardAnimations.map(anim =>
+          Animated.spring(anim, {
+            toValue: 1,
+            useNativeDriver: true,
+            tension: 50,
+            friction: 8,
+          })
+        ),
+      ]).start();
     }
-  }, [mode, slideAnim]);
+  }, [mode, slideAnim, cardAnimations]);
 
   const animatePress = (callback: () => void) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 100,
+      Animated.spring(scaleAnim, {
+        toValue: 0.92,
         useNativeDriver: true,
+        speed: 50,
+        bounciness: 10,
       }),
-      Animated.timing(scaleAnim, {
+      Animated.spring(scaleAnim, {
         toValue: 1,
-        duration: 100,
         useNativeDriver: true,
+        speed: 20,
+        bounciness: 5,
       }),
     ]).start(callback);
   };
@@ -222,7 +243,16 @@ const UnifiedInput: React.FC<UnifiedInputProps> = ({ onContentReady, isProcessin
           <Text style={styles.subtitle}>Elige el método que prefieras</Text>
 
           <View style={styles.optionsGrid}>
-            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <Animated.View style={{ 
+              transform: [
+                { scale: scaleAnim },
+                { translateY: cardAnimations[0].interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [50, 0],
+                })},
+              ],
+              opacity: cardAnimations[0],
+            }}>
               <Pressable
                 style={styles.optionCard}
                 onPress={() => animatePress(() => setMode('audio'))}
@@ -237,7 +267,16 @@ const UnifiedInput: React.FC<UnifiedInputProps> = ({ onContentReady, isProcessin
               </Pressable>
             </Animated.View>
 
-            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <Animated.View style={{ 
+              transform: [
+                { scale: scaleAnim },
+                { translateY: cardAnimations[1].interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [50, 0],
+                })},
+              ],
+              opacity: cardAnimations[1],
+            }}>
               <Pressable
                 style={styles.optionCard}
                 onPress={() => animatePress(() => setMode('text'))}
@@ -252,7 +291,16 @@ const UnifiedInput: React.FC<UnifiedInputProps> = ({ onContentReady, isProcessin
               </Pressable>
             </Animated.View>
 
-            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <Animated.View style={{ 
+              transform: [
+                { scale: scaleAnim },
+                { translateY: cardAnimations[2].interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [50, 0],
+                })},
+              ],
+              opacity: cardAnimations[2],
+            }}>
               <Pressable
                 style={styles.optionCard}
                 onPress={() => animatePress(() => setMode('file'))}
@@ -471,70 +519,67 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 40,
+    padding: Theme.spacing['4xl'],
   },
   processingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#6B7280',
-    fontWeight: '600',
+    marginTop: Theme.spacing.lg,
+    fontSize: Theme.typography.fontSize.base,
+    color: Theme.colors.textTertiary,
+    fontWeight: Theme.typography.fontWeight.semibold,
   },
   selectionContainer: {
     flex: 1,
-    padding: 24,
+    padding: Theme.spacing['2xl'],
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
+    fontSize: Theme.typography.fontSize['3xl'],
+    fontWeight: Theme.typography.fontWeight.extrabold,
+    color: Theme.colors.text,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Theme.spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: Theme.typography.fontSize.base,
+    color: Theme.colors.textTertiary,
     textAlign: 'center',
-    marginBottom: 40,
-    fontWeight: '500',
+    marginBottom: Theme.screenSize.isSmall ? Theme.spacing['2xl'] : Theme.spacing['4xl'],
+    fontWeight: Theme.typography.fontWeight.medium,
+    paddingHorizontal: Theme.spacing.lg,
   },
   optionsGrid: {
     gap: 16,
   },
   optionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: Theme.colors.surface,
+    borderRadius: Theme.borderRadius.xl,
+    padding: Theme.screenSize.isSmall ? Theme.spacing.xl : Theme.spacing['2xl'],
+    marginBottom: Theme.spacing.lg,
+    ...Theme.shadows.md,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: Theme.colors.borderLight,
   },
   optionIcon: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: '#F9FAFB',
+    borderRadius: Theme.borderRadius.full,
+    backgroundColor: Theme.colors.surfaceLight,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Theme.spacing.lg,
   },
   optionEmoji: {
     fontSize: 28,
   },
   optionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 4,
+    fontSize: Theme.typography.fontSize.lg,
+    fontWeight: Theme.typography.fontWeight.bold,
+    color: Theme.colors.text,
+    marginBottom: Theme.spacing.xs,
   },
   optionDescription: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
+    fontSize: Theme.typography.fontSize.sm,
+    color: Theme.colors.textTertiary,
+    lineHeight: Theme.typography.fontSize.sm * Theme.typography.lineHeight.normal,
   },
   inputContainer: {
     flex: 1,
@@ -571,20 +616,16 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   recordButtonInner: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#EF4444',
+    width: Theme.screenSize.isSmall ? 100 : 120,
+    height: Theme.screenSize.isSmall ? 100 : 120,
+    borderRadius: Theme.borderRadius.full,
+    backgroundColor: Theme.colors.recordRed,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#EF4444',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    ...Theme.shadows.colored(Theme.colors.recordRed),
   },
   recordingActive: {
-    backgroundColor: '#111827',
+    backgroundColor: Theme.colors.primary,
   },
   recordIcon: {
     fontSize: 40,
