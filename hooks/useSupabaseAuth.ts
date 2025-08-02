@@ -30,12 +30,16 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
   
   const [initializing, setInitializing] = useState(true); // Separate state for initial auth check
 
-  // Debug logging
+  // Debug logging (always enabled for production debugging)
   useEffect(() => {
-    if (__DEV__) {
-      console.log('🔑 useSupabaseAuth: Hook initialized');
-      console.log('🔑 Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
-      console.log('🔑 Supabase Key exists:', !!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+    console.log('🔑 useSupabaseAuth: Hook initialized');
+    console.log('🔑 Environment:', __DEV__ ? 'Development' : 'Production');
+    console.log('🔑 Supabase URL exists:', !!process.env.EXPO_PUBLIC_SUPABASE_URL);
+    console.log('🔑 Supabase Key exists:', !!process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY);
+    
+    // Show first few characters of URL for debugging (safe)
+    if (process.env.EXPO_PUBLIC_SUPABASE_URL) {
+      console.log('🔑 Supabase URL preview:', process.env.EXPO_PUBLIC_SUPABASE_URL.substring(0, 20) + '...');
     }
   }, []);
 
@@ -46,6 +50,23 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
     const getInitialSession = async () => {
       try {
         console.log('🔑 Getting initial session...');
+        
+        // Check if Supabase is properly configured
+        if (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+          console.error('🚨 Supabase not configured - cannot authenticate');
+          if (mounted) {
+            setState({
+              user: null,
+              profile: null,
+              session: null,
+              loading: false,
+              isAuthenticated: false,
+            });
+            setInitializing(false);
+          }
+          return;
+        }
+        
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -127,18 +148,43 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
 
         if (event === 'SIGNED_IN' && session?.user) {
           console.log('✅ Processing SIGNED_IN event...');
-          // Get user profile
-          const profile = await getProfile(session.user.id);
-          console.log('👤 User profile loaded:', !!profile);
           
-          setState({
-            user: session.user,
-            profile,
-            session,
-            loading: false,
-            isAuthenticated: true,
+          // Check if we already have this user to prevent duplicate processing
+          setState(prev => {
+            if (prev.isAuthenticated && prev.user?.id === session.user.id) {
+              console.log('⚠️ User already authenticated, skipping duplicate SIGNED_IN processing');
+              return prev;
+            }
+            
+            console.log('🔄 Updating state for new SIGNED_IN event');
+            return {
+              user: session.user,
+              profile: prev.profile, // Keep existing profile for now
+              session,
+              loading: false,
+              isAuthenticated: true,
+            };
           });
-          setInitializing(false); // Make sure to mark as not initializing
+          
+          // Load user profile if we don't have it
+          setState(prev => {
+            if (!prev.profile && session.user) {
+              getProfile(session.user.id)
+                .then(profile => {
+                  console.log('👤 User profile loaded:', !!profile);
+                  setState(current => ({
+                    ...current,
+                    profile
+                  }));
+                })
+                .catch(error => {
+                  console.warn('⚠️ Failed to fetch profile:', error);
+                });
+            }
+            return prev;
+          });
+          
+          setInitializing(false);
           console.log('🎉 User successfully authenticated and state updated');
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 Processing SIGNED_OUT event...');
@@ -222,6 +268,24 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
   const handleSignIn = async (email: string, password: string) => {
     try {
       console.log('🔐 useSupabaseAuth handleSignIn called with:', { email, passwordLength: password.length });
+      
+      // Check if Supabase is configured
+      if (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+        console.error('🚨 Cannot sign in - Supabase not configured');
+        Alert.alert(
+          'Error de Configuración',
+          'La aplicación no está configurada correctamente. Contacta al administrador.',
+          [{ text: 'Entendido' }]
+        );
+        return;
+      }
+      
+      // Check if user is already authenticated to prevent loops
+      if (state.isAuthenticated && state.user?.email === email) {
+        console.log('⚠️ User already authenticated with same email, skipping sign in');
+        return;
+      }
+      
       setState(prev => ({ ...prev, loading: true }));
 
       console.log('🚀 Calling Supabase signIn...');
@@ -234,11 +298,11 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
       
       if (error) {
         console.error('❌ Supabase signIn error:', error);
+        setState(prev => ({ ...prev, loading: false }));
         throw error;
       }
 
       if (data.user && data.session) {
-        // The auth state change listener will handle updating the state
         console.log('✅ Sign in successful for:', data.user.email);
         console.log('🔑 Session details:', {
           userId: data.user.id,
@@ -246,23 +310,12 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
           sessionExpiry: data.session.expires_at
         });
         
-        // Force state update if auth state change listener doesn't trigger
-        setTimeout(async () => {
-          console.log('🔄 Checking if state was updated after sign in...');
-          if (!state.isAuthenticated && data.user) {
-            console.log('⚠️ State not updated by listener, forcing update...');
-            const profile = await getProfile(data.user.id);
-            setState({
-              user: data.user,
-              profile,
-              session: data.session,
-              loading: false,
-              isAuthenticated: true,
-            });
-          }
-        }, 1000);
+        // The auth state change listener will handle updating the state
+        // Remove the setTimeout workaround that could cause loops
+        setState(prev => ({ ...prev, loading: false }));
       } else {
         console.log('⚠️ Sign in returned data but missing user or session');
+        setState(prev => ({ ...prev, loading: false }));
       }
     } catch (error: any) {
       setState(prev => ({ ...prev, loading: false }));

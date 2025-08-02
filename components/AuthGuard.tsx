@@ -41,13 +41,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       setHasCheckedAuth(true);
     }
     
-    // Fallback timeout to prevent infinite loading
+    // Fallback timeout to prevent infinite loading - reduced timeout for better UX
     const timer = setTimeout(() => {
       if (!hasCheckedAuth) {
         console.warn('⚠️ Auth check timeout - forcing completion');
         setHasCheckedAuth(true);
       }
-    }, 5000); // 5 second timeout
+    }, 3000); // 3 second timeout (reduced from 5)
     
     return () => clearTimeout(timer);
   }, [initializing, isAuthenticated, user, hasCheckedAuth]);
@@ -63,9 +63,27 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // Show loading screen during initial auth check
   if (initializing || !hasCheckedAuth) {
+    console.log('🔄 AuthGuard showing loading screen:', { 
+      initializing, 
+      hasCheckedAuth, 
+      isAuthenticated, 
+      hasUser: !!user 
+    });
+    
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Verificando autenticación...</Text>
+        <Text style={styles.loadingSubtext}>
+          Debug: init={String(initializing)}, checked={String(hasCheckedAuth)}, auth={String(isAuthenticated)}
+        </Text>
+        
+        {/* Debug link for production troubleshooting */}
+        <Pressable 
+          style={styles.debugButton}
+          onPress={() => router.push('/debug')}
+        >
+          <Text style={styles.debugButtonText}>🐛 Debug Info</Text>
+        </Pressable>
       </View>
     );
   }
@@ -165,6 +183,20 @@ const styles = StyleSheet.create({
   debugText: {
     color: '#FFD700',
     fontSize: 12,
+    fontWeight: '600',
+  },
+  debugButton: {
+    backgroundColor: '#333333',
+    borderWidth: 1,
+    borderColor: '#FFD700',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginTop: 20,
+    alignSelf: 'center',
+  },
+  debugButtonText: {
+    color: '#FFD700',
+    fontSize: 14,
     fontWeight: '600',
   },
 });

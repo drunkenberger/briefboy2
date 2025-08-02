@@ -5,20 +5,23 @@ import { Platform } from 'react-native';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
-if (__DEV__) {
-  console.log('🔧 Supabase config check:');
-  console.log('URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
-  console.log('Key:', supabaseAnonKey ? '✅ Set' : '❌ Missing');
-}
+// Always log configuration check for debugging
+console.log('🔧 Supabase config check:');
+console.log('Environment:', __DEV__ ? 'Development' : 'Production');
+console.log('URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+console.log('Key:', supabaseAnonKey ? '✅ Set' : '❌ Missing');
 
 if (!supabaseUrl || !supabaseAnonKey) {
   const error = 'Missing Supabase environment variables. Check your .env file contains EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY';
   console.error('❌', error);
-  // In development, allow app to run without Supabase
+  
+  // In development, allow app to run without Supabase but warn
   if (__DEV__) {
     console.warn('⚠️ Running in DEV mode without Supabase configuration');
   } else {
-    throw new Error(error);
+    // In production, log the error but don't crash - use dummy client instead
+    console.error('🚨 PRODUCTION: Missing Supabase config, using dummy client');
+    console.error('🚨 This will prevent authentication from working properly');
   }
 }
 
