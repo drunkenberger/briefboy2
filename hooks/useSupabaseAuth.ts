@@ -60,8 +60,13 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
 
         if (session?.user && mounted) {
           console.log('🔑 Found existing session for:', session.user.email);
-          // Get user profile
-          const profile = await getProfile(session.user.id);
+          // Get user profile (with error handling)
+          let profile = null;
+          try {
+            profile = await getProfile(session.user.id);
+          } catch (error) {
+            console.warn('⚠️ Failed to fetch profile, continuing without it:', error);
+          }
           
           setState({
             user: session.user,
@@ -117,6 +122,7 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
             loading: false,
             isAuthenticated: true,
           });
+          setInitializing(false); // Make sure to mark as not initializing
           console.log('🎉 User successfully authenticated and state updated');
         } else if (event === 'SIGNED_OUT') {
           console.log('👋 Processing SIGNED_OUT event...');

@@ -10,7 +10,7 @@ interface AuthGuardProps {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
   const { user, profile, loading, initializing, isAuthenticated, signOut } = useSupabaseAuth();
-  const [timeoutReached, setTimeoutReached] = useState(false);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -34,47 +34,39 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   };
 
-  // Implement proper timeout for auth loading
+  // Mark auth as checked once initialization is complete
   useEffect(() => {
-    if (initializing) {
-      const timer = setTimeout(() => {
-        console.log('⚠️ Auth loading timeout reached after 3 seconds');
-        setTimeoutReached(true);
-      }, 3000);
-      
-      return () => clearTimeout(timer);
+    if (!initializing) {
+      console.log('✅ Auth initialization complete:', { isAuthenticated, hasUser: !!user });
+      setHasCheckedAuth(true);
     }
-  }, [initializing]);
+  }, [initializing, isAuthenticated, user]);
 
-  // Navigate to auth screen when not authenticated
+  // Navigate based on auth state after check is complete
   useEffect(() => {
-    // Only redirect to auth if we're truly not authenticated after initialization
-    if (!initializing && !loading && !isAuthenticated) {
-      console.log('🔐 AuthGuard: Not authenticated, redirecting to auth screen');
-      console.log('📊 Auth state:', { initializing, isAuthenticated, hasUser: !!user, loading });
+    if (hasCheckedAuth && !isAuthenticated) {
+      console.log('🔐 AuthGuard: Not authenticated after check, redirecting to auth screen');
+      console.log('📊 Auth state:', { hasCheckedAuth, isAuthenticated, hasUser: !!user });
       router.replace('/auth');
     }
-  }, [initializing, isAuthenticated, loading, router]);
+  }, [hasCheckedAuth, isAuthenticated, router]);
 
-  // Show loading screen only during initial auth check and if not timed out
-  if (initializing && !timeoutReached) {
+  // Show loading screen during initial auth check
+  if (initializing || !hasCheckedAuth) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Cargando...</Text>
-        <Text style={styles.loadingSubtext}>Si esto toma mucho tiempo, hay un problema de conexión</Text>
+        <Text style={styles.loadingText}>Verificando autenticación...</Text>
       </View>
     );
   }
 
-  // Always require authentication - no dev mode bypass
+  // If not authenticated after check, show redirect message
   if (!isAuthenticated) {
-    // Debug info
-    console.log('🔐 AuthGuard check:', {
+    console.log('🔐 AuthGuard: User not authenticated:', {
       isAuthenticated,
       hasUser: !!user,
       hasProfile: !!profile,
-      loading,
-      timeoutReached
+      hasCheckedAuth
     });
     
     return (
