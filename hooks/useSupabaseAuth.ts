@@ -24,9 +24,11 @@ export function useSupabaseAuth(): AuthState & AuthActions {
     user: null,
     profile: null,
     session: null,
-    loading: true,
+    loading: false, // This will only be true during actual auth actions (login/signup)
     isAuthenticated: false,
   });
+  
+  const [initializing, setInitializing] = useState(true); // Separate state for initial auth check
 
   // Debug logging
   useEffect(() => {
@@ -51,7 +53,7 @@ export function useSupabaseAuth(): AuthState & AuthActions {
         if (error) {
           console.error('❌ Error getting session:', error);
           if (mounted) {
-            setState(prev => ({ ...prev, loading: false }));
+            setInitializing(false);
           }
           return;
         }
@@ -67,13 +69,15 @@ export function useSupabaseAuth(): AuthState & AuthActions {
             loading: false,
             isAuthenticated: true,
           });
-        } else if (mounted) {
-          setState(prev => ({ ...prev, loading: false }));
+        }
+        
+        if (mounted) {
+          setInitializing(false);
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
         if (mounted) {
-          setState(prev => ({ ...prev, loading: false }));
+          setInitializing(false);
         }
       }
     };
@@ -121,6 +125,7 @@ export function useSupabaseAuth(): AuthState & AuthActions {
             loading: false,
             isAuthenticated: false,
           });
+          setInitializing(false);
         } else if (event === 'TOKEN_REFRESHED' && session) {
           console.log('🔄 Processing TOKEN_REFRESHED event...');
           setState(prev => ({
@@ -309,6 +314,7 @@ export function useSupabaseAuth(): AuthState & AuthActions {
 
   return {
     ...state,
+    loading: initializing ? true : state.loading, // Use initializing for initial load, state.loading for auth actions
     signUp: handleSignUp,
     signIn: handleSignIn,
     signOut: handleSignOut,

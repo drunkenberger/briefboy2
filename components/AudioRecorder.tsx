@@ -1,6 +1,7 @@
 import { Audio } from 'expo-av';
 import React, { useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View, Image } from 'react-native';
+import { combineStyles } from '../utils/styleUtils';
 
 // Import custom emoji
 const lightBulbEmoji = require('../assets/emoji/Light_Bulb_Emoji.png');
@@ -154,10 +155,10 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
         <Text style={styles.subtitle}>Graba tu reunión o notas para generar un brief profesional</Text>
 
         <View style={styles.recordingArea}>
-          <Animated.View style={[styles.recordButton, { transform: [{ scale: pulseAnimation }] }]}>
+          <Animated.View style={combineStyles(styles.recordButton, { transform: [{ scale: pulseAnimation }] })}>
             <Pressable
               onPress={isRecording ? stopRecording : startRecording}
-              style={[styles.recordButtonInner, isRecording ? styles.recordingActive : styles.recordingInactive]}
+              style={combineStyles(styles.recordButtonInner, isRecording ? styles.recordingActive : styles.recordingInactive)}
             >
               <Text style={styles.recordButtonIcon}>
                 {isRecording ? '⏹️' : '🎙️'}

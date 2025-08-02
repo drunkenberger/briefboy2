@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { UnifiedBrief, getBriefData } from '../types/briefTypes';
+import { combineStyles } from '../utils/styleUtils';
 
 interface BriefResultProps {
   brief: UnifiedBrief | null;
@@ -86,7 +87,7 @@ const BriefResult: React.FC<BriefResultProps> = ({ brief, loading, error, iaSugg
       <Text style={styles.sectionLabel}>Mensajes Clave</Text>
       {renderValue(brief.keyMessages, 'keymsg-')}
       {brief.callToAction ? (
-        <Text style={[styles.listItem, { fontStyle: 'italic', color: '#FFD700' }]}>Llamado a la acción: {brief.callToAction}</Text>
+        <Text style={combineStyles(styles.listItem, styles.callToActionText)}>Llamado a la acción: {brief.callToAction}</Text>
       ) : null}
       <Text style={styles.sectionLabel}>Canales</Text>
       {brief.channelsAndTactics?.channels ? renderValue(brief.channelsAndTactics.channels, 'channels-') : null}
@@ -286,6 +287,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
+  },
+  callToActionText: {
+    fontStyle: 'italic',
+    color: '#FFD700',
   },
 });
 

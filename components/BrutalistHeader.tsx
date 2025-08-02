@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { useRouter, usePathname, Link } from 'expo-router';
+import { combineStyles } from '../utils/styleUtils';
 
 interface BrutalistHeaderProps {
   showBackButton?: boolean;
@@ -45,18 +46,18 @@ export default function BrutalistHeader({ showBackButton = false }: BrutalistHea
             </Pressable>
           )}
           <Link href="/(tabs)/" asChild>
-            <Pressable style={[styles.navItem, (pathname === '/(tabs)' || pathname === '/(tabs)/index') && styles.activeNavItem]}>
-              <Text style={[styles.navText, (pathname === '/(tabs)' || pathname === '/(tabs)/index') && styles.activeNavText]}>APP</Text>
+            <Pressable style={combineStyles(styles.navItem, (pathname === '/(tabs)' || pathname === '/(tabs)/index') && styles.activeNavItem)}>
+              <Text style={combineStyles(styles.navText, (pathname === '/(tabs)' || pathname === '/(tabs)/index') && styles.activeNavText)}>APP</Text>
             </Pressable>
           </Link>
           <Link href="/(tabs)/briefs" asChild>
-            <Pressable style={[styles.navItem, pathname === '/(tabs)/briefs' && styles.activeNavItem]}>
-              <Text style={[styles.navText, pathname === '/(tabs)/briefs' && styles.activeNavText]}>BRIEFS</Text>
+            <Pressable style={combineStyles(styles.navItem, pathname === '/(tabs)/briefs' && styles.activeNavItem)}>
+              <Text style={combineStyles(styles.navText, pathname === '/(tabs)/briefs' && styles.activeNavText)}>BRIEFS</Text>
             </Pressable>
           </Link>
           <Link href="/(tabs)/profile" asChild>
-            <Pressable style={[styles.navItem, pathname === '/(tabs)/profile' && styles.activeNavItem]}>
-              <Text style={[styles.navText, pathname === '/(tabs)/profile' && styles.activeNavText]}>PERFIL</Text>
+            <Pressable style={combineStyles(styles.navItem, pathname === '/(tabs)/profile' && styles.activeNavItem)}>
+              <Text style={combineStyles(styles.navText, pathname === '/(tabs)/profile' && styles.activeNavText)}>PERFIL</Text>
             </Pressable>
           </Link>
         </View>

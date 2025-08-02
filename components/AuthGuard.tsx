@@ -47,8 +47,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
   }, [loading]);
 
-  // Show loading screen only if not timed out
-  if (loading && !timeoutReached) {
+  // Show loading screen only during initial auth check and if not timed out
+  if (loading && !timeoutReached && !isAuthenticated) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Cargando...</Text>

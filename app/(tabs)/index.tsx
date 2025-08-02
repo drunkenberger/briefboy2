@@ -628,7 +628,7 @@ const AudioToTextScreen: React.FC = () => {
               </Pressable>
               
               <Pressable
-                style={[styles.finalBriefButton, { marginLeft: 8 }]}
+                style={styles.finalBriefButtonWithMargin}
                 onPress={async () => {
                   if (__DEV__) {
                     console.log('📢 SHARE BUTTON PRESSED!');
@@ -653,7 +653,7 @@ const AudioToTextScreen: React.FC = () => {
               </Pressable>
               
               <Pressable
-                style={[styles.finalBriefButton, { marginLeft: 8 }]}
+                style={styles.finalBriefButtonWithMargin}
                 onPress={async () => {
                   if (__DEV__) {
                     console.log('📋 COPY BUTTON PRESSED!');
@@ -1236,6 +1236,16 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  finalBriefButtonWithMargin: {
+    flex: 1,
+    backgroundColor: '#FFD700',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    marginLeft: 8,
   },
 });
 

@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Animated
 } from 'react-native';
+import { combineStyles } from '../utils/styleUtils';
 import EducationalBriefAnalysis from './EducationalBriefAnalysis';
 import ImprovedStructuredChatInterface from './ImprovedStructuredChatInterface';
 import EditableBriefView from './EditableBriefView';
@@ -315,7 +316,7 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
 
         {/* Success Message */}
         {showSuccessMessage && (
-          <Animated.View style={[styles.successBanner, { opacity: fadeAnim }]}>
+          <Animated.View style={combineStyles(styles.successBanner, { opacity: fadeAnim })}>
             <Text style={styles.successText}>✅ Brief mejorado exitosamente</Text>
           </Animated.View>
         )}
