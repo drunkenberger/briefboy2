@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
@@ -11,6 +11,7 @@ interface AuthGuardProps {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
   const { user, profile, loading, isAuthenticated, signOut } = useSupabaseAuth();
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -34,15 +35,40 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   };
 
-  if (loading) {
+  // Implement proper timeout for auth loading
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        console.log('⚠️ Auth loading timeout reached after 3 seconds');
+        setTimeoutReached(true);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
+  // Show loading screen only if not timed out
+  if (loading && !timeoutReached) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Cargando...</Text>
+        <Text style={styles.loadingSubtext}>Si esto toma mucho tiempo, hay un problema de conexión</Text>
       </View>
     );
   }
 
+  // Always require authentication - no dev mode bypass
+
   if (!isAuthenticated) {
+    // Debug info
+    console.log('🔐 AuthGuard check:', {
+      isAuthenticated,
+      hasUser: !!user,
+      hasProfile: !!profile,
+      loading,
+      timeoutReached
+    });
+    
     return (
       <AuthFlow onCancel={() => router.push('/landing')} />
     );
@@ -82,6 +108,14 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '600',
+    marginBottom: 10,
+  },
+  loadingSubtext: {
+    color: '#FFD700',
+    fontSize: 14,
+    fontWeight: '400',
+    textAlign: 'center',
+    paddingHorizontal: 40,
   },
   authenticatedContainer: {
     flex: 1,

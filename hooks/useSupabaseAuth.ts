@@ -216,6 +216,22 @@ export function useSupabaseAuth(): AuthState & AuthActions {
           emailConfirmed: data.user.email_confirmed_at,
           sessionExpiry: data.session.expires_at
         });
+        
+        // Force state update if auth state change listener doesn't trigger
+        setTimeout(async () => {
+          console.log('🔄 Checking if state was updated after sign in...');
+          if (!state.isAuthenticated && data.user) {
+            console.log('⚠️ State not updated by listener, forcing update...');
+            const profile = await getProfile(data.user.id);
+            setState({
+              user: data.user,
+              profile,
+              session: data.session,
+              loading: false,
+              isAuthenticated: true,
+            });
+          }
+        }, 1000);
       } else {
         console.log('⚠️ Sign in returned data but missing user or session');
       }

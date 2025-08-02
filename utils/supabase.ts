@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
@@ -14,7 +14,12 @@ if (__DEV__) {
 if (!supabaseUrl || !supabaseAnonKey) {
   const error = 'Missing Supabase environment variables. Check your .env file contains EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY';
   console.error('❌', error);
-  throw new Error(error);
+  // In development, allow app to run without Supabase
+  if (__DEV__) {
+    console.warn('⚠️ Running in DEV mode without Supabase configuration');
+  } else {
+    throw new Error(error);
+  }
 }
 
 // Custom storage adapter for React Native
@@ -51,14 +56,168 @@ const customStorageAdapter = {
   },
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: customStorageAdapter,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// Create a type-safe dummy client for development without proper configuration
+const createDummyClient = (): SupabaseClient => {
+  const supabaseError = new Error('Supabase not configured - missing environment variables');
+  
+  // Create a chainable query builder pattern that matches Supabase's API
+  const createQueryBuilder = () => {
+    const builder = {
+      select: (columns?: string) => builder,
+      eq: (column: string, value: any) => builder,
+      neq: (column: string, value: any) => builder,
+      gt: (column: string, value: any) => builder,
+      gte: (column: string, value: any) => builder,
+      lt: (column: string, value: any) => builder,
+      lte: (column: string, value: any) => builder,
+      like: (column: string, pattern: string) => builder,
+      ilike: (column: string, pattern: string) => builder,
+      is: (column: string, value: any) => builder,
+      in: (column: string, values: any[]) => builder,
+      contains: (column: string, value: any) => builder,
+      containedBy: (column: string, value: any) => builder,
+      rangeGt: (column: string, range: string) => builder,
+      rangeGte: (column: string, range: string) => builder,
+      rangeLt: (column: string, range: string) => builder,
+      rangeLte: (column: string, range: string) => builder,
+      rangeAdjacent: (column: string, range: string) => builder,
+      overlaps: (column: string, value: any) => builder,
+      textSearch: (column: string, query: string) => builder,
+      match: (query: Record<string, any>) => builder,
+      not: (column: string, operator: string, value: any) => builder,
+      or: (filters: string) => builder,
+      filter: (column: string, operator: string, value: any) => builder,
+      order: (column: string, options?: { ascending?: boolean; nullsFirst?: boolean }) => builder,
+      limit: (count: number) => builder,
+      range: (from: number, to: number) => builder,
+      abortSignal: (signal: AbortSignal) => builder,
+      single: () => Promise.resolve({ data: null, error: supabaseError }),
+      maybeSingle: () => Promise.resolve({ data: null, error: supabaseError }),
+      csv: () => Promise.resolve({ data: '', error: supabaseError }),
+      geojson: () => Promise.resolve({ data: null, error: supabaseError }),
+      explain: () => Promise.resolve({ data: null, error: supabaseError }),
+      rollback: () => builder,
+      returns: () => builder,
+      then: (resolve?: any, reject?: any) => Promise.resolve({ data: [], error: supabaseError }).then(resolve, reject),
+    };
+    return builder;
+  };
+
+  const createModifyBuilder = () => {
+    const builder = {
+      eq: (column: string, value: any) => builder,
+      neq: (column: string, value: any) => builder,
+      gt: (column: string, value: any) => builder,
+      gte: (column: string, value: any) => builder,
+      lt: (column: string, value: any) => builder,
+      lte: (column: string, value: any) => builder,
+      like: (column: string, pattern: string) => builder,
+      ilike: (column: string, pattern: string) => builder,
+      is: (column: string, value: any) => builder,
+      in: (column: string, values: any[]) => builder,
+      contains: (column: string, value: any) => builder,
+      containedBy: (column: string, value: any) => builder,
+      rangeGt: (column: string, range: string) => builder,
+      rangeGte: (column: string, range: string) => builder,
+      rangeLt: (column: string, range: string) => builder,
+      rangeLte: (column: string, range: string) => builder,
+      rangeAdjacent: (column: string, range: string) => builder,
+      overlaps: (column: string, value: any) => builder,
+      textSearch: (column: string, query: string) => builder,
+      match: (query: Record<string, any>) => builder,
+      not: (column: string, operator: string, value: any) => builder,
+      or: (filters: string) => builder,
+      filter: (column: string, operator: string, value: any) => builder,
+      select: (columns?: string) => createQueryBuilder(),
+      then: (resolve?: any, reject?: any) => Promise.resolve({ data: null, error: supabaseError }).then(resolve, reject),
+    };
+    return builder;
+  };
+
+  return {
+    auth: {
+      getUser: async () => ({ data: { user: null }, error: null }),
+      getSession: async () => ({ data: { session: null }, error: null }),
+      signOut: async () => ({ error: null }),
+      signUp: async () => ({ data: { user: null, session: null }, error: supabaseError }),
+      signInWithPassword: async () => ({ data: { user: null, session: null }, error: supabaseError }),
+      signInWithOtp: async () => ({ data: { user: null, session: null }, error: supabaseError }),
+      signInWithOAuth: async () => ({ data: { provider: null, url: null }, error: supabaseError }),
+      resetPasswordForEmail: async () => ({ data: {}, error: supabaseError }),
+      updateUser: async () => ({ data: { user: null }, error: supabaseError }),
+      setSession: async () => ({ data: { user: null, session: null }, error: supabaseError }),
+      refreshSession: async () => ({ data: { user: null, session: null }, error: supabaseError }),
+      resend: async () => ({ data: {}, error: supabaseError }),
+      onAuthStateChange: () => ({
+        data: { subscription: { unsubscribe: () => {} } },
+        error: null,
+      }),
+      startAutoRefresh: () => {},
+      stopAutoRefresh: () => {},
+    },
+    from: (table: string) => ({
+      select: (columns?: string) => createQueryBuilder(),
+      insert: (values: any) => createModifyBuilder(),
+      upsert: (values: any) => createModifyBuilder(),
+      update: (values: any) => createModifyBuilder(),
+      delete: () => createModifyBuilder(),
+    }),
+    rpc: (fn: string, args?: any) => createQueryBuilder(),
+    schema: (schema: string) => createDummyClient(),
+    channel: (name: string) => ({
+      on: (type: string, filter: any, callback: any) => ({
+        subscribe: (callback?: any) => ({ unsubscribe: () => {} }),
+      }),
+      subscribe: (callback?: any) => ({ unsubscribe: () => {} }),
+      unsubscribe: () => Promise.resolve({ error: null }),
+      send: (payload: any) => Promise.resolve({ error: null }),
+    }),
+    removeChannel: () => Promise.resolve({ error: null }),
+    removeAllChannels: () => Promise.resolve({ error: null }),
+    getChannels: () => [],
+    storage: {
+      from: (bucketId: string) => ({
+        upload: async () => ({ data: null, error: supabaseError }),
+        download: async () => ({ data: null, error: supabaseError }),
+        list: async () => ({ data: [], error: supabaseError }),
+        update: async () => ({ data: null, error: supabaseError }),
+        move: async () => ({ data: null, error: supabaseError }),
+        copy: async () => ({ data: null, error: supabaseError }),
+        remove: async () => ({ data: [], error: supabaseError }),
+        createSignedUrl: async () => ({ data: null, error: supabaseError }),
+        createSignedUrls: async () => ({ data: [], error: supabaseError }),
+        getPublicUrl: () => ({ data: { publicUrl: '' } }),
+      }),
+      listBuckets: async () => ({ data: [], error: supabaseError }),
+      getBucket: async () => ({ data: null, error: supabaseError }),
+      createBucket: async () => ({ data: null, error: supabaseError }),
+      updateBucket: async () => ({ data: null, error: supabaseError }),
+      emptyBucket: async () => ({ data: null, error: supabaseError }),
+      deleteBucket: async () => ({ data: null, error: supabaseError }),
+    },
+    functions: {
+      invoke: async () => ({ data: null, error: supabaseError }),
+    },
+    realtime: {
+      connect: () => {},
+      disconnect: () => {},
+      getChannels: () => [],
+      removeChannel: () => Promise.resolve({ error: null }),
+      removeAllChannels: () => Promise.resolve({ error: null }),
+    },
+  } as SupabaseClient;
+};
+
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: customStorageAdapter,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
+    })
+  : createDummyClient();
 
 // Database Types
 export interface Profile {

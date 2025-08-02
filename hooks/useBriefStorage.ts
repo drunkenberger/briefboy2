@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { normalizeBrief, validateBrief, completeBrief, generateBriefTitle } from '../utils/briefValidation';
+import { BriefData } from '../types/brief';
 
 export interface SavedBrief {
   id: string;
@@ -8,7 +9,7 @@ export interface SavedBrief {
   createdAt: string;
   updatedAt: string;
   transcription: string;
-  brief: any;
+  brief: BriefData;
   audioUri?: string;
 }
 
@@ -191,11 +192,20 @@ export function useBriefStorage() {
 
   const deleteBrief = async (id: string) => {
     try {
+      console.log('🗑️ useBriefStorage: Attempting to delete brief with id:', id);
+      console.log('🗑️ useBriefStorage: Current savedBriefs count:', savedBriefs.length);
+      console.log('🗑️ useBriefStorage: Current savedBriefs ids:', savedBriefs.map(b => b.id));
+      
       const updated = savedBriefs.filter(brief => brief.id !== id);
+      console.log('🗑️ useBriefStorage: After filtering, count:', updated.length);
+      
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      console.log('🗑️ useBriefStorage: Saved to AsyncStorage successfully');
+      
       setSavedBriefs(updated);
+      console.log('🗑️ useBriefStorage: State updated successfully');
     } catch (error) {
-      console.error('Error deleting brief:', error);
+      console.error('🗑️ useBriefStorage: Error deleting brief:', error);
       throw error;
     }
   };
@@ -206,10 +216,16 @@ export function useBriefStorage() {
 
   const clearAllBriefs = async () => {
     try {
+      console.log('🗑️ useBriefStorage: Clearing all briefs...');
+      console.log('🗑️ useBriefStorage: Current count before clear:', savedBriefs.length);
+      
       await AsyncStorage.removeItem(STORAGE_KEY);
+      console.log('🗑️ useBriefStorage: Removed from AsyncStorage successfully');
+      
       setSavedBriefs([]);
+      console.log('🗑️ useBriefStorage: State cleared successfully');
     } catch (error) {
-      console.error('Error clearing all briefs:', error);
+      console.error('🗑️ useBriefStorage: Error clearing all briefs:', error);
       throw error;
     }
   };

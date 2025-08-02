@@ -191,6 +191,35 @@ Encuentra una pregunta alternativa que NO sea duplicada.`
     return null;
   }, [createNewAbortController]);
 
+  // Función para crear análisis rápido del brief para mensaje de bienvenida
+  const analyzeBriefQuickly = useCallback((brief: any) => {
+    const title = brief.projectTitle || 'tu proyecto';
+    const hasObjectives = brief.strategicObjectives && brief.strategicObjectives.length > 0;
+    const hasAudience = brief.targetAudience?.primary && brief.targetAudience.primary.length > 20;
+    const hasChannels = brief.channelStrategy?.recommendedMix && brief.channelStrategy.recommendedMix.length > 0;
+    
+    const completedAreas = [hasObjectives, hasAudience, hasChannels].filter(Boolean).length;
+    const totalAreas = 3;
+    
+    let summary = '';
+    if (completedAreas === totalAreas) {
+      summary = 'Veo que tienes una base sólida con objetivos, audiencia y canales definidos.';
+    } else if (completedAreas >= 2) {
+      summary = 'Tu brief tiene buenas bases, pero podemos fortalecerlo aún más.';
+    } else if (completedAreas === 1) {
+      summary = 'Hay algunas secciones desarrolladas, pero necesitamos profundizar más.';
+    } else {
+      summary = 'Perfecto, tenemos un buen punto de partida para desarrollar juntos.';
+    }
+    
+    return {
+      title,
+      summary,
+      completedAreas,
+      totalAreas
+    };
+  }, []);
+
   const determineNextQuestion = useCallback(async (brief: any, history: string[]): Promise<StructuredQuestion | null> => {
     console.log('🤖 Determinando la siguiente mejor pregunta...');
     console.log('📝 Historial de preguntas:', history);
@@ -206,36 +235,60 @@ Encuentra una pregunta alternativa que NO sea duplicada.`
     const apiKey = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) throw new Error("OpenAI API key no encontrada.");
 
-    const systemPrompt = `Eres un Director de Estrategia de Marketing de clase mundial. Tu objetivo es determinar la SIGUIENTE MEJOR PREGUNTA para hacerle a un usuario para mejorar un brief de marketing. Debes ser dinámico y basar tu decisión en el estado ACTUAL del brief y las preguntas YA HECHAS.
+    const systemPrompt = `Eres un Director de Estrategia de Marketing de clase mundial con 20+ años de experiencia. Tu objetivo es hacer preguntas ESTRATÉGICAS y RELEVANTES para mejorar un brief de marketing.
 
-CONTEXTO:
-- El usuario está en un chat interactivo para mejorar su brief.
-- Tu trabajo es actuar como un consultor inteligente, no como un bot que sigue un script.
-- Debes analizar el brief que se te proporciona y el historial de preguntas para decidir qué preguntar a continuación.
+CONTEXTO CRÍTICO:
+- El usuario ya tiene un brief con contenido. Tu trabajo es MEJORARLO, no llenarlo desde cero.
+- Debes analizar PROFUNDAMENTE el contenido existente antes de hacer cualquier pregunta.
+- NO hagas preguntas sobre campos que ya tienen información completa y bien desarrollada.
 
-REGLAS CRÍTICAS:
-1. NO REPETIR: NUNCA hagas una pregunta sobre un tema que ya esté en el historial. Si ya preguntaste sobre KPIs, métricas, objetivos o cualquier otro tema, NO lo vuelvas a preguntar.
-2. VERIFICAR CONTENIDO EXISTENTE: ANTES de sugerir una pregunta, verifica si ese campo ya tiene contenido sustancial en el brief. 
-   - Si channelStrategy.recommendedMix ya tiene canales definidos con allocation y rationale, NO preguntes sobre canales.
-   - Si los objetivos estratégicos ya están definidos con métricas específicas, NO preguntes sobre objetivos.
-   - Si la audiencia ya está bien segmentada con insights, NO preguntes sobre audiencia.
-3. BUSCAR VACÍOS REALES: Tu prioridad es encontrar campos que estén REALMENTE VACÍOS o SUPERFICIALES en el brief.
-4. SER CONTEXTUAL: La pregunta debe basarse en la información existente y faltante en el brief.
-5. PRIORIZAR: Enfócate en los vacíos más críticos primero (ej. objetivos, audiencia) antes de pasar a detalles menores.
-6. SER CONVERSACIONAL: Formula la pregunta de una manera natural y consultiva, reconociendo lo que ya existe.
-7. UNA SOLA PREGUNTA: Devuelve solo UNA pregunta, la más importante para el momento actual.
-8. CAMPO CORRECTO: El campo "field" debe corresponder exactamente al campo del brief que se va a actualizar y debe estar VACÍO o INCOMPLETO.
-9. ANÁLISIS PROFUNDO: Analiza el contenido real del brief, no solo si los campos existen. Por ejemplo:
-   - channelStrategy.recommendedMix con 4 canales definidos = NO preguntar sobre canales
-   - strategicObjectives con 3 objetivos SMART = NO preguntar sobre objetivos
-   - targetAudience con segmentación e insights = NO preguntar sobre audiencia
+PROCESO DE ANÁLISIS OBLIGATORIO:
+1. Lee TODO el brief cuidadosamente
+2. Identifica qué secciones tienen contenido COMPLETO vs SUPERFICIAL
+3. Busca GAPS ESTRATÉGICOS, no solo campos vacíos
+4. Considera el CONTEXTO del proyecto antes de preguntar
 
-Si hay campos vacíos o con contenido superficial, DEBES hacer una pregunta sobre uno de ellos. Solo devuelve null si:
-1. No hay campos vacíos o con contenido insuficiente
-2. Ya se han hecho todas las preguntas relevantes
-3. El brief está realmente completo y bien desarrollado con información sustancial en todas las secciones
+REGLAS INQUEBRANTABLES:
+1. ANÁLISIS PROFUNDO PRIMERO: Antes de sugerir cualquier pregunta, debes:
+   - Verificar si el campo tiene contenido sustancial (más de 2-3 palabras genéricas)
+   - Evaluar la CALIDAD del contenido, no solo su existencia
+   - Identificar si el contenido es específico y accionable o genérico
 
-FORMATO DE SALIDA: Responde ÚNICAMENTE con un objeto JSON que contenga la siguiente pregunta, o null si no hay más.
+2. NO PREGUNTES SOBRE:
+   - Campos que ya tienen 3+ elementos detallados (ej: 3 objetivos SMART completos)
+   - Secciones con información específica y medible
+   - Áreas donde el brief ya muestra profundidad estratégica
+   
+3. SÍ PREGUNTA SOBRE:
+   - Campos con contenido GENÉRICO o VAGO (ej: "aumentar ventas" sin métricas)
+   - Secciones con gaps estratégicos evidentes
+   - Áreas donde falta especificidad o medibilidad
+   - Conexiones faltantes entre diferentes secciones del brief
+
+4. ESTILO DE PREGUNTAS:
+   - Reconoce lo que YA EXISTE: "Veo que mencionas X..."
+   - Sé ESPECÍFICO: No "¿Cuáles son tus métricas?" sino "¿Qué incremento porcentual esperas en..."
+   - Conecta con el contexto: Relaciona tu pregunta con información existente en el brief
+
+5. PRIORIZACIÓN:
+   - Primero: Gaps en objetivos estratégicos MEDIBLES
+   - Segundo: Definición clara de audiencia y sus pain points
+   - Tercero: Métricas de éxito específicas
+   - Cuarto: Estrategia creativa diferenciada
+   - Último: Detalles de implementación
+
+EJEMPLOS DE ANÁLISIS:
+- Si strategicObjectives tiene ["Aumentar ventas", "Mejorar imagen", "Captar clientes"]
+  → PREGUNTA porque son genéricos, faltan métricas y plazos
+  
+- Si strategicObjectives tiene ["Incrementar ventas online 25% en Q4 2024", "Mejorar NPS de 7.2 a 8.5 en 6 meses"]
+  → NO PREGUNTES, ya son específicos y medibles
+
+- Si targetAudience.primary dice "Millennials urbanos"
+  → PREGUNTA para profundizar en comportamientos, pain points específicos
+  
+- Si targetAudience.primary tiene descripción detallada con demografía, psicografía y comportamientos
+  → NO PREGUNTES, ya está completo
 
 {
   "nextQuestion": {
@@ -252,80 +305,205 @@ O si no hay más preguntas:
   "nextQuestion": null
 }`;
 
-    // Identificar campos vacíos o incompletos con análisis más inteligente
-    const emptyFields: string[] = [];
-    const fieldsWithContent: { [key: string]: string } = {};
-    
-    const checkField = (obj: any, path: string = '') => {
-      Object.keys(obj).forEach(key => {
-        const fullPath = path ? `${path}.${key}` : key;
-        const value = obj[key];
-        
-        // Verificación más inteligente para arrays
-        if (Array.isArray(value)) {
-          if (value.length === 0) {
-            emptyFields.push(fullPath);
-          } else {
-            // Para arrays como channelStrategy.recommendedMix, verificar si tienen contenido real
-            const hasSubstantialContent = value.some(item => {
-              if (typeof item === 'object') {
-                // Si es un objeto (como canales), verificar que tenga propiedades con contenido
-                return Object.values(item).some(v => v && String(v).trim().length > 0);
-              }
-              return item && String(item).trim().length > 0;
-            });
-            
-            if (hasSubstantialContent) {
-              fieldsWithContent[fullPath] = `Array con ${value.length} elementos con contenido`;
-            } else {
-              emptyFields.push(fullPath);
-            }
-          }
-        } else if (value === null || value === undefined || value === '' || 
-                  (typeof value === 'string' && value.trim() === '')) {
-          emptyFields.push(fullPath);
-        } else if (typeof value === 'object' && !Array.isArray(value)) {
-          // Verificar si el objeto tiene al menos alguna propiedad con contenido
-          const hasContent = Object.values(value).some(v => 
-            v !== null && v !== undefined && 
-            (typeof v !== 'string' || v.trim() !== '') &&
-            (!Array.isArray(v) || v.length > 0)
-          );
-          
-          if (!hasContent) {
-            emptyFields.push(fullPath);
-          } else {
-            checkField(value, fullPath);
-          }
-        } else if (typeof value === 'string' && value.trim().length > 0) {
-          fieldsWithContent[fullPath] = value.substring(0, 50) + (value.length > 50 ? '...' : '');
+    // Análisis inteligente del brief - identifica GAPS ESTRATÉGICOS, no solo campos vacíos
+    const analyzeContentQuality = (value: any, fieldPath: string): { isStrong: boolean, reason: string } => {
+      if (!value || value === null || value === undefined || value === '') {
+        return { isStrong: false, reason: 'Campo completamente vacío' };
+      }
+      
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          return { isStrong: false, reason: 'Array vacío' };
         }
-      });
+        
+        // Análisis específico por tipo de campo
+        if (fieldPath === 'strategicObjectives') {
+          const hasSmartObjectives = value.some(obj => 
+            typeof obj === 'string' && 
+            obj.length > 40 && 
+            /\d+/.test(obj) && // Contiene números
+            (/mes|año|trimestre|%|día|semana|Q[1-4]/i.test(obj)) // Contiene tiempo
+          );
+          return { 
+            isStrong: hasSmartObjectives && value.length >= 2, 
+            reason: hasSmartObjectives ? `${value.length} objetivos SMART con métricas` : `${value.length} objetivos genéricos sin métricas específicas` 
+          };
+        }
+        
+        if (fieldPath === 'channelStrategy.recommendedMix') {
+          const hasDetailedChannels = value.some(channel => 
+            channel && typeof channel === 'object' &&
+            channel.allocation && channel.rationale &&
+            String(channel.allocation).length > 5 && 
+            String(channel.rationale).length > 30
+          );
+          return {
+            isStrong: hasDetailedChannels && value.length >= 3,
+            reason: hasDetailedChannels ? `${value.length} canales con estrategia detallada` : `${value.length} canales sin justificación estratégica completa`
+          };
+        }
+        
+        if (fieldPath.includes('insights') || fieldPath === 'successMetrics.primary') {
+          const hasQualityItems = value.filter(item => 
+            typeof item === 'string' && item.length > 25
+          ).length;
+          return {
+            isStrong: hasQualityItems >= 2,
+            reason: `${hasQualityItems}/${value.length} elementos con profundidad suficiente`
+          };
+        }
+        
+        // Para otros arrays
+        const substantialItems = value.filter(item => {
+          if (typeof item === 'string') return item.trim().length > 20;
+          if (typeof item === 'object') {
+            return Object.values(item).some(v => v && String(v).length > 15);
+          }
+          return true;
+        }).length;
+        
+        return {
+          isStrong: substantialItems >= Math.min(2, value.length),
+          reason: `${substantialItems}/${value.length} elementos con contenido sustancial`
+        };
+      }
+      
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        
+        // Detectar contenido genérico o muy corto
+        const genericKeywords = ['por definir', 'tbd', 'n/a', 'na', 'pendiente', 'aumentar', 'mejorar', 'optimizar'];
+        const isGeneric = genericKeywords.some(keyword => 
+          trimmed.toLowerCase().includes(keyword.toLowerCase())
+        ) || trimmed.length < 20;
+        
+        // Análisis específico por campo
+        if (fieldPath === 'targetAudience.primary') {
+          const hasDetailedSegmentation = trimmed.length > 80 && 
+            /edad|años|ingresos|comportamiento|necesidad|problema|dolor|motivación/i.test(trimmed);
+          return {
+            isStrong: hasDetailedSegmentation,
+            reason: hasDetailedSegmentation ? 
+              'Audiencia bien segmentada con demografía y psicografía' : 
+              'Audiencia muy general, falta segmentación detallada'
+          };
+        }
+        
+        if (fieldPath === 'brandPositioning') {
+          const hasUniquePositioning = trimmed.length > 60 && 
+            /diferencia|único|competencia|ventaja|posición|distint/i.test(trimmed);
+          return {
+            isStrong: hasUniquePositioning,
+            reason: hasUniquePositioning ? 
+              'Posicionamiento diferenciado y específico' : 
+              'Posicionamiento genérico, falta diferenciación clara'
+          };
+        }
+        
+        if (fieldPath === 'creativeStrategy.bigIdea') {
+          const hasCreativeDepth = trimmed.length > 50 && 
+            !/^(por definir|creativo|campaña|publicidad)$/i.test(trimmed);
+          return {
+            isStrong: hasCreativeDepth,
+            reason: hasCreativeDepth ? 
+              'Big Idea creativa bien definida' : 
+              'Big Idea muy genérica o superficial'
+          };
+        }
+        
+        return {
+          isStrong: !isGeneric && trimmed.length > 30,
+          reason: isGeneric ? 
+            'Contenido genérico que necesita especificidad' : 
+            `Contenido específico (${trimmed.length} caracteres)`
+        };
+      }
+      
+      if (typeof value === 'object') {
+        const filledProps = Object.entries(value).filter(([k, v]) => 
+          v !== null && v !== undefined && v !== '' && 
+          (typeof v !== 'string' || v.trim() !== '')
+        ).length;
+        
+        const totalProps = Object.keys(value).length;
+        return {
+          isStrong: filledProps >= Math.ceil(totalProps * 0.7), // 70% de propiedades llenas
+          reason: `${filledProps}/${totalProps} propiedades con contenido`
+        };
+      }
+      
+      return { isStrong: true, reason: 'Valor presente y válido' };
     };
     
-    checkField(brief);
+    // Campos críticos para analizar
+    const criticalFields = [
+      'strategicObjectives',
+      'targetAudience.primary', 
+      'targetAudience.insights',
+      'brandPositioning',
+      'creativeStrategy.bigIdea',
+      'creativeStrategy.messageHierarchy',
+      'channelStrategy.recommendedMix',
+      'successMetrics.primary',
+      'budgetConsiderations.estimatedRange',
+      'businessChallenge'
+    ];
     
-    console.log('📋 Campos vacíos detectados:', emptyFields);
-    console.log('✅ Campos con contenido:', Object.keys(fieldsWithContent).length, 'campos');
+    const fieldAnalysis: Record<string, { isStrong: boolean, reason: string }> = {};
+    const weakFields: string[] = [];
+    const strongFields: string[] = [];
     
-    const userPrompt = `BRIEF ACTUAL:
-${JSON.stringify(brief, null, 2)}
+    // Función para acceder a campos anidados
+    const getNestedValue = (obj: any, path: string) => {
+      return path.split('.').reduce((current, key) => {
+        return current && typeof current === 'object' ? current[key] : undefined;
+      }, obj);
+    };
+    
+    // Analizar cada campo crítico
+    criticalFields.forEach(fieldPath => {
+      const fieldValue = getNestedValue(brief, fieldPath);
+      const analysis = analyzeContentQuality(fieldValue, fieldPath);
+      fieldAnalysis[fieldPath] = analysis;
+      
+      if (analysis.isStrong) {
+        strongFields.push(fieldPath);
+      } else {
+        weakFields.push(fieldPath);
+      }
+    });
+    
+    console.log('🎯 Análisis de calidad del brief:');
+    console.log('💪 Campos fuertes:', strongFields.length, strongFields);
+    console.log('⚠️ Campos débiles:', weakFields.length, weakFields);
+    console.log('📊 Detalles:', fieldAnalysis);
+    
+    const userPrompt = `PROYECTO: "${brief.projectTitle || 'Brief sin título'}"
 
-CAMPOS VACÍOS O INCOMPLETOS:
-${emptyFields.length > 0 ? emptyFields.map(f => `- ${f}`).join('\n') : 'Ninguno'}
+ANÁLISIS DE CALIDAD DEL BRIEF:
 
-CAMPOS QUE YA TIENEN CONTENIDO SUSTANCIAL (NO PREGUNTAR SOBRE ESTOS):
-${Object.entries(fieldsWithContent).slice(0, 10).map(([field, preview]) => `- ${field}: ${preview}`).join('\n')}
-${Object.keys(fieldsWithContent).length > 10 ? `... y ${Object.keys(fieldsWithContent).length - 10} campos más con contenido` : ''}
+🔴 CAMPOS DÉBILES que necesitan mejora (priorizar estas preguntas):
+${weakFields.length > 0 ? 
+  weakFields.map(field => `- ${field}: ${fieldAnalysis[field].reason}`).join('\n') : 
+  'Ningún campo débil detectado'}
 
-PREGUNTAS YA HECHAS (HISTORIAL):
-${history.length > 0 ? history.map(q => `- ${q}`).join('\n') : 'Ninguna pregunta hecha aún'}
+🟢 CAMPOS FUERTES que ya están bien desarrollados (NO preguntar sobre estos):
+${strongFields.length > 0 ? 
+  strongFields.map(field => `- ${field}: ${fieldAnalysis[field].reason}`).join('\n') : 
+  'Ningún campo fuerte detectado'}
 
-Basado en el brief actual, los campos vacíos y el historial, ¿cuál es la siguiente pregunta más valiosa y estratégica que debo hacer? 
-IMPORTANTE: 
-- Enfócate SOLO en los campos que están VACÍOS o INCOMPLETOS
-- NO preguntes sobre campos que ya tienen contenido sustancial
-- Si channelStrategy.recommendedMix ya tiene canales definidos, NO preguntes sobre canales`;
+📚 HISTORIAL DE PREGUNTAS YA HECHAS (NO repetir temas):
+${history.length > 0 ? history.map((q, i) => `${i + 1}. ${q}`).join('\n') : 'Esta es la primera pregunta'}
+
+🎯 INSTRUCCIONES ESPECÍFICAS:
+- SOLO pregunta sobre los campos DÉBILES listados arriba
+- Reconoce el contenido existente: "Veo que ya tienes definido X, pero..."
+- Haz preguntas específicas y contextuales al proyecto
+- Busca profundizar en GAPS ESTRATÉGICOS, no llenar campos vacíos
+- Si no hay campos débiles o todas las preguntas relevantes fueron hechas, devuelve null
+
+BRIEF COMPLETO PARA CONTEXTO:
+${JSON.stringify(brief, null, 2)}`;
 
     try {
       const abortController = createNewAbortController();
@@ -443,40 +621,51 @@ Refina y enriquece esta respuesta.`;
     setQuestionHistory([]);
     setCurrentQuestion(null);
 
+    // Analizar el brief para crear mensaje contextual
+    const briefAnalysis = analyzeBriefQuickly(workingBrief);
+    
     const welcomeMessage: ChatMessage = {
       id: `assistant-${Date.now()}`,
       role: 'assistant',
-      content: "¡Hola! He analizado tu brief. Empecemos a mejorarlo juntos. Haré preguntas una por una para refinar cada sección. ¿Listo?",
+      content: `¡Hola! Soy tu asesor estratégico de marketing. 📋
+
+He revisado tu brief sobre "${briefAnalysis.title}". ${briefAnalysis.summary}
+
+Voy a hacerte preguntas específicas y estratégicas para identificar oportunidades de mejora y fortalecer las áreas más críticas. Trabajemos juntos para llevarlo al siguiente nivel. 
+
+¿Comenzamos? 🚀`,
       timestamp: Date.now(),
     };
     setMessages([welcomeMessage]);
 
-    const nextQuestion = await determineNextQuestion(workingBrief, []);
-    if (nextQuestion) {
-      setCurrentQuestion(nextQuestion);
-      setQuestionHistory(prev => [...prev, nextQuestion.question]);
-      const firstQuestionMessage: ChatMessage = {
-        id: `assistant-${Date.now() + 1}`,
-        role: 'assistant',
-        content: nextQuestion.question,
-        timestamp: Date.now(),
-        questionId: nextQuestion.id,
-        briefField: nextQuestion.field,
-      };
-      setMessages(prev => [...prev, firstQuestionMessage]);
-    } else {
-      // No hay preguntas, el brief ya es excelente
-      const noQuestionsMessage: ChatMessage = {
-        id: `assistant-${Date.now() + 1}`,
-        role: 'assistant',
-        content: "🎉 ¡Excelente! Tu brief está muy completo. No he encontrado áreas críticas que requieran mejoras inmediatas.",
-        timestamp: Date.now(),
-      };
-      setMessages(prev => [...prev, noQuestionsMessage]);
-    }
-
-    setIsTyping(false);
-  }, [workingBrief, determineNextQuestion]);
+    // Añadir delay para mejor experiencia de usuario
+    setTimeout(async () => {
+      const nextQuestion = await determineNextQuestion(workingBrief, []);
+      if (nextQuestion) {
+        setCurrentQuestion(nextQuestion);
+        setQuestionHistory(prev => [...prev, nextQuestion.question]);
+        const firstQuestionMessage: ChatMessage = {
+          id: `assistant-${Date.now() + 1}`,
+          role: 'assistant',
+          content: nextQuestion.question,
+          timestamp: Date.now(),
+          questionId: nextQuestion.id,
+          briefField: nextQuestion.field,
+        };
+        setMessages(prev => [...prev, firstQuestionMessage]);
+      } else {
+        // No hay preguntas, el brief ya es excelente
+        const noQuestionsMessage: ChatMessage = {
+          id: `assistant-${Date.now() + 1}`,
+          role: 'assistant',
+          content: "🎉 ¡Impresionante! Tu brief está muy bien desarrollado. He analizado las áreas críticas y no encuentro gaps estratégicos significativos que requieran atención inmediata. ¡Buen trabajo!",
+          timestamp: Date.now(),
+        };
+        setMessages(prev => [...prev, noQuestionsMessage]);
+      }
+      setIsTyping(false);
+    }, 1500);
+  }, [workingBrief, determineNextQuestion, analyzeBriefQuickly]);
 
   const sendMessage = useCallback(async (messageContent: string) => {
     if (!messageContent.trim() || isTyping || !currentQuestion) return;
