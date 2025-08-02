@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
-import AuthFlow from './AuthFlow';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -47,8 +46,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }
   }, [loading]);
 
+  // Navigate to auth screen when not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      console.log('🔐 AuthGuard: Not authenticated, redirecting to auth screen');
+      router.replace('/auth');
+    }
+  }, [loading, isAuthenticated, router]);
+
   // Show loading screen only during initial auth check and if not timed out
-  if (loading && !timeoutReached && !isAuthenticated) {
+  if (loading && !timeoutReached) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Cargando...</Text>
@@ -58,7 +65,6 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   }
 
   // Always require authentication - no dev mode bypass
-
   if (!isAuthenticated) {
     // Debug info
     console.log('🔐 AuthGuard check:', {
@@ -70,7 +76,9 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     });
     
     return (
-      <AuthFlow onCancel={() => router.push('/landing')} />
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Redirigiendo al login...</Text>
+      </View>
     );
   }
 
