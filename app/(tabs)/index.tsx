@@ -10,9 +10,10 @@ import BriefValidationAlert from '../../components/BriefValidationAlert';
 import FileUploadButton from '../../components/FileUploadButton';
 import FinalBriefEditorModal from '../../components/FinalBriefEditorModal';
 import ExportDropdown from '../../components/ExportDropdown';
-import { useBriefGeneration } from '../../hooks/useBriefGeneration';
+import { useBriefGenerationWithTokens } from '../../hooks/useBriefGenerationWithTokens';
 import { useBriefStorage } from '../../hooks/useBriefStorage';
-import { useWhisperTranscription } from '../../hooks/useWhisperTranscription';
+import { useIntegratedBriefStorage } from '../../hooks/useIntegratedBriefStorage';
+import { useWhisperTranscriptionWithTokens } from '../../hooks/useWhisperTranscriptionWithTokens';
 import { useContentParser } from '../../hooks/useContentParser';
 import { checkApiKeysOnStartup } from '../../utils/apiKeyValidator';
 import { FileExporter, Brief } from '../../utils/fileExporter';
@@ -33,7 +34,7 @@ const AudioToTextScreen: React.FC = () => {
   const [enableContentParser, setEnableContentParser] = useState(false); // usar brief generation por defecto
 
   // Hook de transcripción automática (solo si hay audio)
-  const { transcription: autoTranscription, loading, error } = useWhisperTranscription(
+  const { transcription: autoTranscription, loading, error, tokensUsed: transcriptionTokens, estimatedCost: transcriptionCost } = useWhisperTranscriptionWithTokens(
     audioUri,
     !!audioUri
   );
@@ -63,7 +64,7 @@ const AudioToTextScreen: React.FC = () => {
   const { parsedBrief, loading: loadingParser, error: errorParser } = useContentParser(transcription, shouldParseContent);
   
   // Hook para generar brief con mejoras (flujo anterior)
-  const { brief: generatedBrief, loading: loadingGeneration, error: errorGeneration } = useBriefGeneration(transcription, shouldGenerateBrief);
+  const { brief: generatedBrief, loading: loadingGeneration, error: errorGeneration, tokensUsed: generationTokens, tokensBreakdown, estimatedCost: generationCost } = useBriefGenerationWithTokens(transcription, shouldGenerateBrief);
   
   // Usar el brief parseado o generado según el modo
   const brief = enableContentParser ? parsedBrief : generatedBrief;
@@ -87,8 +88,20 @@ const AudioToTextScreen: React.FC = () => {
     }
   }, [brief, improvedBrief, loadingBrief, errorBrief, shouldGenerateBrief]);
 
-  // Hook de almacenamiento
+  // Hook de almacenamiento (legacy para compatibilidad)
   const { saveBrief, updateBrief, clearOldBriefs, getStorageInfo } = useBriefStorage();
+  
+  // Hook integrado de almacenamiento (Supabase + Local)
+  const { 
+    autoSaveBrief, 
+    saveNewBrief, 
+    updateExistingBrief,
+    supabaseLoading,
+    supabaseError,
+    allBriefs,
+    totalBriefs,
+    clearErrors
+  } = useIntegratedBriefStorage();
 
   // Verificar API keys en desarrollo
   useEffect(() => {
@@ -235,32 +248,105 @@ const AudioToTextScreen: React.FC = () => {
     if (brief && transcription && !loadingBrief && !errorBrief && !currentBriefId) {
       const timer = setTimeout(async () => {
         try {
-          const title = brief.projectTitle || `Brief ${new Date().toLocaleDateString()}`;
-          const briefId = await saveBrief(title, transcription, brief, audioUri || undefined);
+          // Usar el nuevo hook integrado para auto-guardado con tokens
+          const totalTokens = (transcriptionTokens || 0) + (generationTokens || 0);
+          const totalCost = (transcriptionCost || 0) + (generationCost || 0);
+          
+          // Safely merge token breakdowns with conflict detection and resolution
+          const combinedTokensBreakdown = (() => {
+            const merged = { ...tokensBreakdown };
+            const transcriptionKey = 'whisper_transcription';
+            const totalKey = 'total';
+            
+            // Handle whisper transcription tokens
+            if (transcriptionTokens && transcriptionTokens > 0) {
+              if (merged[transcriptionKey] !== undefined) {
+                // Key conflict detected - check if values are different
+                if (merged[transcriptionKey] !== transcriptionTokens) {
+                  console.warn(`Token key conflict: '${transcriptionKey}' exists with value ${merged[transcriptionKey]}, adding transcription tokens ${transcriptionTokens} as 'whisper_transcription_tokens'`);
+                  merged['whisper_transcription_tokens'] = transcriptionTokens;
+                } else {
+                  // Same value, keep existing
+                  console.log(`Token key '${transcriptionKey}' already exists with same value, keeping existing`);
+                }
+              } else {
+                // No conflict, add normally
+                merged[transcriptionKey] = transcriptionTokens;
+              }
+            }
+            
+            // Handle total tokens
+            if (merged[totalKey] !== undefined) {
+              if (merged[totalKey] !== totalTokens) {
+                console.warn(`Token key conflict: '${totalKey}' exists with value ${merged[totalKey]}, updating to combined total ${totalTokens}, keeping original as 'generation_total'`);
+                merged['generation_total'] = merged[totalKey];
+                merged[totalKey] = totalTokens;
+              } else {
+                // Same value, keep existing
+                console.log(`Token key '${totalKey}' already exists with same value, keeping existing`);
+              }
+            } else {
+              // No conflict, add normally
+              merged[totalKey] = totalTokens;
+            }
+            
+            return merged;
+          })();
+          
+          const briefId = await autoSaveBrief(
+            brief, 
+            transcription, 
+            audioUri || undefined,
+            totalTokens,
+            combinedTokensBreakdown,
+            totalCost
+          );
           setCurrentBriefId(briefId);
           if (__DEV__) {
-            console.log('Brief guardado automáticamente:', briefId);
+            console.log('Brief guardado automáticamente (integrado):', briefId);
           }
         } catch (error) {
           console.error('Error auto-saving brief:', error);
+          
+          // Fallback al método local si falla
+          try {
+            const title = brief.projectTitle || `Brief ${new Date().toLocaleDateString()}`;
+            const fallbackId = await saveBrief(title, transcription, brief, audioUri || undefined);
+            setCurrentBriefId(fallbackId);
+            if (__DEV__) {
+              console.log('Brief guardado con fallback local:', fallbackId);
+            }
+          } catch (fallbackError) {
+            console.error('Error en fallback local:', fallbackError);
+          }
         }
       }, 1000); // Debounce 1 segundo
 
       return () => clearTimeout(timer);
     }
-  }, [brief, transcription, loadingBrief, errorBrief, audioUri, saveBrief, currentBriefId]);
+  }, [brief, transcription, loadingBrief, errorBrief, audioUri, autoSaveBrief, saveBrief, currentBriefId]);
 
   // Update saved brief with debouncing
   useEffect(() => {
     if (improvedBrief && currentBriefId) {
       const timer = setTimeout(async () => {
         try {
-          await updateBrief(currentBriefId, {
-            brief: improvedBrief,
+          // Usar el nuevo hook integrado para actualizaciones
+          const success = await updateExistingBrief(currentBriefId, {
+            brief_data: improvedBrief,
             title: improvedBrief.projectTitle || `Brief ${new Date().toLocaleDateString()}`,
           });
+          
+          if (!success) {
+            // Fallback al método local
+            await updateBrief(currentBriefId, {
+              brief: improvedBrief,
+              title: improvedBrief.projectTitle || `Brief ${new Date().toLocaleDateString()}`,
+            });
+          }
+          
           if (__DEV__) {
-            console.log('Brief actualizado automáticamente:', currentBriefId);
+            console.log('Brief actualizado automáticamente:', currentBriefId, success ? '(integrado)' : '(local)');
           }
         } catch (error) {
           console.error('Error updating saved brief:', error);
@@ -269,7 +355,7 @@ const AudioToTextScreen: React.FC = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [improvedBrief, currentBriefId, updateBrief]);
+  }, [improvedBrief, currentBriefId, updateExistingBrief, updateBrief]);
 
   const handleManualSave = () => {
     if (briefToShow) {
@@ -283,10 +369,21 @@ const AudioToTextScreen: React.FC = () => {
             onPress: async () => {
               try {
                 const title = briefToShow.projectTitle || `Brief ${new Date().toLocaleDateString()}`;
-                const briefId = await saveBrief(title, transcription || '', briefToShow, audioUri || undefined);
-                Alert.alert('✅ Guardado', `Brief "${title}" guardado exitosamente`);
-                if (!currentBriefId) {
-                  setCurrentBriefId(briefId);
+                // Usar el nuevo hook integrado para guardado manual
+                const briefId = await saveNewBrief(title, transcription || '', briefToShow, audioUri || undefined);
+                
+                if (briefId) {
+                  Alert.alert('✅ Guardado', `Brief "${title}" guardado exitosamente`);
+                  if (!currentBriefId) {
+                    setCurrentBriefId(briefId);
+                  }
+                } else {
+                  // Fallback al método local
+                  const fallbackId = await saveBrief(title, transcription || '', briefToShow, audioUri || undefined);
+                  Alert.alert('✅ Guardado', `Brief "${title}" guardado exitosamente (local)`);
+                  if (!currentBriefId) {
+                    setCurrentBriefId(fallbackId);
+                  }
                 }
               } catch (saveError) {
                 console.error('Error saving brief:', saveError);

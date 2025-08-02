@@ -286,68 +286,30 @@ const StructuredBriefImprovementModal: React.FC<StructuredBriefImprovementModalP
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Modern Header */}
-        <View style={styles.modernHeader}>
-          <View style={styles.headerTop}>
+        {/* Compact Header */}
+        <View style={styles.compactHeader}>
+          <View style={styles.compactHeaderContent}>
             {currentStep === 'structured-improvement' && (
               <Pressable 
-                style={styles.modernBackButton} 
+                style={styles.compactBackButton} 
                 onPress={handleBackToAnalysis}
               >
                 <Text style={styles.backIcon}>←</Text>
-                <Text style={styles.backText}>Análisis</Text>
               </Pressable>
             )}
             
-            <View style={styles.headerCenter}>
-              <Text style={styles.modernTitle}>
-                {currentStep === 'analysis' ? 'Análisis del Brief' : 'Mejora Estructurada'}
-              </Text>
-              <Text style={styles.modernSubtitle}>
-                {currentStep === 'analysis' 
-                  ? 'Revisa las recomendaciones y áreas de mejora'
-                  : 'Optimiza tu brief con ayuda de IA'
-                }
+            <View style={styles.compactHeaderCenter}>
+              <Text style={styles.compactTitle}>
+                {currentStep === 'analysis' ? 'Análisis' : 'Mejora del Brief'}
               </Text>
             </View>
             
             <Pressable 
-              style={styles.modernCloseButton} 
+              style={styles.compactCloseButton} 
               onPress={handleCloseModal}
             >
               <Text style={styles.closeIcon}>✕</Text>
             </Pressable>
-          </View>
-          
-          {/* Progress Indicator */}
-          <View style={styles.progressContainer}>
-            <View style={styles.progressTrack}>
-              <Animated.View 
-                style={[
-                  styles.progressBar,
-                  {
-                    width: slideAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['50%', '100%'],
-                    }),
-                  },
-                ]}
-              />
-            </View>
-            <View style={styles.progressLabels}>
-              <Text style={[
-                styles.progressLabel,
-                currentStep === 'analysis' && styles.progressLabelActive
-              ]}>
-                Análisis
-              </Text>
-              <Text style={[
-                styles.progressLabel,
-                currentStep === 'structured-improvement' && styles.progressLabelActive
-              ]}>
-                Mejora
-              </Text>
-            </View>
           </View>
         </View>
 
@@ -596,15 +558,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   
-  // Modern Header
-  modernHeader: {
+  // Ultra Compact Header
+  compactHeader: {
     backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'ios' ? 44 : 20,
+    paddingTop: Platform.OS === 'ios' ? 44 : 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  compactHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    minHeight: 40,
+  },
+  compactBackButton: {
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    marginRight: 8,
+  },
+  compactHeaderCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  compactTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  compactCloseButton: {
+    padding: 4,
+    marginLeft: 8,
   },
   headerTop: {
     flexDirection: 'row',
@@ -721,33 +708,28 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   
-  // Mobile Toggle
+  // Mobile Toggle - Ultra Compact
   mobileToggle: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
-    borderRadius: 8,
-    padding: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    backgroundColor: '#F9FAFB',
+    marginHorizontal: 8,
+    marginTop: 4,
+    marginBottom: 4,
+    borderRadius: 4,
+    padding: 2,
   },
   toggleButton: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 3,
     alignItems: 'center',
   },
   toggleButtonActive: {
     backgroundColor: '#111827',
   },
   toggleText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
     color: '#6B7280',
   },
@@ -755,30 +737,30 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   
-  // Tablet Toggle
+  // Tablet Toggle - Minimal
   tabletToggle: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 4,
   },
   viewToggleButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
+    backgroundColor: '#F9FAFB',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
   viewToggleText: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '600',
     color: '#374151',
   },
   
-  // Content Area
+  // Content Area - Maximized
   contentArea: {
     flex: 1,
-    marginHorizontal: isTablet ? 20 : 16,
-    marginBottom: 16,
+    marginHorizontal: isTablet ? 12 : 8,
+    marginBottom: 8,
     backgroundColor: '#F8FAFC',
   },
   
@@ -826,13 +808,13 @@ const styles = StyleSheet.create({
     minWidth: 250,
   },
   
-  // Panel Headers
+  // Panel Headers - Minimal
   modernPanelHeader: {
     backgroundColor: '#F9FAFB',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -841,13 +823,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modernPanelTitle: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 2,
   },
   modernPanelSubtitle: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#6B7280',
     fontWeight: '500',
   },
@@ -883,23 +864,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   
-  // Modern Footer
+  // Modern Footer - Compact
   modernFooter: {
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
   },
   footerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    gap: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 16,
   },
   footerInfo: {
     flex: 1,

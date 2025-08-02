@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { UnifiedBrief, getBriefData } from '../types/briefTypes';
 
 interface ProfessionalBriefDisplayProps {
-  brief: any | null;
+  brief: UnifiedBrief | null;
   loading: boolean;
   error: string | null;
 }
@@ -11,6 +12,12 @@ interface ProfessionalBriefDisplayProps {
  * Componente profesional para mostrar briefs de marketing con diseño limpio y estructurado
  */
 const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ brief, loading, error }) => {
+  
+  // Helper function to safely access brief data
+  const briefData = useMemo(() => {
+    if (!brief) return null;
+    return getBriefData(brief);
+  }, [brief]);
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -45,10 +52,12 @@ const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ bri
   const memoizedData = useMemo(() => {
     if (!brief) return null;
     
+    const briefData = getBriefData(brief);
+    
     return {
-      title: brief.title || brief.projectTitle || 'Marketing Brief',
-      summary: brief.summary || brief.briefSummary || '',
-      objectives: brief.objectives || brief.strategicObjectives || []
+      title: brief.title || briefData?.projectTitle || 'Marketing Brief',
+      summary: briefData?.summary || briefData?.briefSummary || '',
+      objectives: briefData?.objectives || briefData?.strategicObjectives || []
     };
   }, [brief]);
 
@@ -80,8 +89,8 @@ const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ bri
           segment: 'Audiencia Primaria',
           demographics: brief.targetAudience.primary,
           psychographics: brief.targetAudience.psychographics || '',
-          needs: brief.targetAudience.insights ? brief.targetAudience.insights.join(', ') : '',
-          mediaHabits: brief.targetAudience.mediaHabits || []
+          needs: brief.targetAudience.insights && Array.isArray(brief.targetAudience.insights) ? brief.targetAudience.insights.join(', ') : '',
+          mediaHabits: Array.isArray(brief.targetAudience.mediaHabits) ? brief.targetAudience.mediaHabits : []
         });
       }
       
@@ -197,21 +206,21 @@ const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ bri
               {audience.demographics && (
                 <View style={styles.audienceField}>
                   <Text style={styles.audienceFieldLabel}>📊 Demografía:</Text>
-                  <Text style={styles.audienceFieldValue}>{audience.demographics}</Text>
+                  <Text style={styles.audienceFieldValue}>{String(audience.demographics)}</Text>
                 </View>
               )}
               
               {audience.psychographics && (
                 <View style={styles.audienceField}>
                   <Text style={styles.audienceFieldLabel}>🧠 Psicografía:</Text>
-                  <Text style={styles.audienceFieldValue}>{audience.psychographics}</Text>
+                  <Text style={styles.audienceFieldValue}>{String(audience.psychographics)}</Text>
                 </View>
               )}
               
               {audience.needs && (
                 <View style={styles.audienceField}>
                   <Text style={styles.audienceFieldLabel}>💡 Necesidades:</Text>
-                  <Text style={styles.audienceFieldValue}>{audience.needs}</Text>
+                  <Text style={styles.audienceFieldValue}>{String(audience.needs)}</Text>
                 </View>
               )}
               
@@ -220,7 +229,7 @@ const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ bri
                   <Text style={styles.audienceFieldLabel}>📱 Hábitos de Media:</Text>
                   <View style={styles.mediaHabitsList}>
                     {audience.mediaHabits.map((habit: string, habitIndex: number) => (
-                      <Text key={habitIndex} style={styles.mediaHabit}>• {habit}</Text>
+                      <Text key={habitIndex} style={styles.mediaHabit}>• {String(habit)}</Text>
                     ))}
                   </View>
                 </View>
@@ -274,10 +283,14 @@ const ProfessionalBriefDisplay: React.FC<ProfessionalBriefDisplayProps> = ({ bri
             <SubSection title="Mix de Canales Recomendado">
               {getChannels().map((channel: any, index: number) => (
                 <View key={index} style={styles.channelCard}>
-                  <Text style={styles.channelName}>{channel.name || channel.channel || 'Canal'}</Text>
-                  <Text style={styles.channelRationale}>{channel.strategy || channel.rationale || ''}</Text>
+                  <Text style={styles.channelName}>
+                    {String(channel.name || channel.channel || 'Canal')}
+                  </Text>
+                  <Text style={styles.channelRationale}>
+                    {String(channel.strategy || channel.rationale || '')}
+                  </Text>
                   {channel.allocation && (
-                    <Text style={styles.channelAllocation}>Asignación: {channel.allocation}</Text>
+                    <Text style={styles.channelAllocation}>Asignación: {String(channel.allocation)}</Text>
                   )}
                   {channel.kpis && Array.isArray(channel.kpis) && channel.kpis.length > 0 && (
                     <Text style={styles.channelKpis}>KPIs: {channel.kpis.join(', ')}</Text>
@@ -545,7 +558,7 @@ const SubSection: React.FC<{ title: string; children: React.ReactNode }> = ({ ti
   </View>
 );
 
-const BulletList: React.FC<{ items?: string[] }> = ({ items }) => {
+const BulletList: React.FC<{ items?: (string | any)[] }> = ({ items }) => {
   if (!items || items.length === 0) return null;
   
   return (
@@ -553,7 +566,9 @@ const BulletList: React.FC<{ items?: string[] }> = ({ items }) => {
       {items.map((item, index) => (
         <View key={index} style={styles.bulletItem}>
           <Text style={styles.bullet}>•</Text>
-          <Text style={styles.bulletText}>{item}</Text>
+          <Text style={styles.bulletText}>
+            {typeof item === 'string' ? item : String(item)}
+          </Text>
         </View>
       ))}
     </View>

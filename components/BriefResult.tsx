@@ -1,8 +1,9 @@
 import React from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { UnifiedBrief, getBriefData } from '../types/briefTypes';
 
 interface BriefResultProps {
-  brief: any | null;
+  brief: UnifiedBrief | null;
   loading: boolean;
   error: string | null;
   iaSuggestions?: string | null;
@@ -53,19 +54,22 @@ const BriefResult: React.FC<BriefResultProps> = ({ brief, loading, error, iaSugg
   if (!brief) {
     return <Text style={styles.status}>No hay brief generado.</Text>;
   }
+  
+  const briefData = getBriefData(brief);
+  
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
       <Text style={styles.title}>{brief.title}</Text>
       <Text style={styles.sectionLabel}>Resumen</Text>
-      {renderValue(brief.summary, 'summary-')}
+      {renderValue(briefData?.summary, 'summary-')}
       <Text style={styles.sectionLabel}>Objetivos</Text>
-      {renderValue(brief.objectives, 'objectives-')}
+      {renderValue(briefData?.objectives, 'objectives-')}
       <Text style={styles.sectionLabel}>Problema/Oportunidad</Text>
-      {renderValue(brief.problemStatement, 'problem-')}
+      {renderValue(briefData?.problemStatement, 'problem-')}
       <Text style={styles.sectionLabel}>Audiencia Objetivo</Text>
-      {renderValue(brief.targetAudience, 'audience-')}
+      {renderValue(briefData?.targetAudience, 'audience-')}
       <Text style={styles.sectionLabel}>Métricas de Éxito</Text>
-      {renderValue(brief.successMetrics, 'metrics-')}
+      {renderValue(briefData?.successMetrics, 'metrics-')}
       <Text style={styles.sectionLabel}>Requerimientos</Text>
       {brief.requirements && (
         <View style={styles.requirements}>

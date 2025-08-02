@@ -20,33 +20,43 @@ import { router } from 'expo-router';
  */
 const ProfileScreen: React.FC = () => {
   const { user, signOut } = useSupabaseAuth();
-  const { allBriefs, supabaseBriefs, localBriefs, totalBriefs } = useIntegratedBriefStorage();
+  const { allBriefs, supabaseBriefs, localBriefs, totalBriefs, supabaseLoading } = useIntegratedBriefStorage();
   const { getStorageInfo } = useBriefStorage();
   
   const [storageInfo, setStorageInfo] = useState({ size: 0, count: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [componentMounted, setComponentMounted] = useState(false);
   
   // Animations
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(-50)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 8,
-      }),
-    ]).start();
+    // Delay mounting to prevent blocking the UI thread
+    const timer = setTimeout(() => {
+      setComponentMounted(true);
+      
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 50,
+          friction: 8,
+        }),
+      ]).start();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
+    if (!componentMounted) return;
+    
     const loadStorageInfo = async () => {
       try {
         const info = await getStorageInfo();
@@ -59,7 +69,7 @@ const ProfileScreen: React.FC = () => {
     };
     
     loadStorageInfo();
-  }, [getStorageInfo]);
+  }, [getStorageInfo, componentMounted]);
 
   // Check user premium status
   const isPremiumUser = React.useMemo(() => {
@@ -74,57 +84,43 @@ const ProfileScreen: React.FC = () => {
     return false;
   }, [user]);
 
-  // Calculate statistics
+  // Calculate statistics with optimized performance
   const stats = React.useMemo(() => {
+    // Early return if no data
+    if (!allBriefs || allBriefs.length === 0) {
+      return {
+        total: 0,
+        weekly: 0,
+        monthly: 0,
+        cloud: 0,
+        local: 0,
+        storageUsedMB: '0',
+        avgBriefSize: 0,
+      };
+    }
+
     const now = new Date();
     const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thisMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     
-    // Helper function to safely parse dates from brief objects
-    const safeParseBriefDate = (brief: any): Date | null => {
+    // Process dates only once per brief
+    let weeklyCount = 0;
+    let monthlyCount = 0;
+    
+    for (const brief of allBriefs) {
       try {
         const dateString = 'created_at' in brief ? brief.created_at : brief.createdAt;
+        if (!dateString) continue;
         
-        // Check if date string exists and is not null/undefined
-        if (!dateString) {
-          console.warn('Brief missing date field:', brief.id || 'unknown');
-          return null;
-        }
-        
-        // Create date object and validate it
         const date = new Date(dateString);
+        if (isNaN(date.getTime())) continue;
         
-        // Check if the date is valid (not NaN)
-        if (isNaN(date.getTime())) {
-          console.warn('Invalid date format in brief:', dateString, brief.id || 'unknown');
-          return null;
-        }
-        
-        // Additional sanity check: ensure date is reasonable (not in far future/past)
-        const minDate = new Date('2020-01-01');
-        const maxDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
-        
-        if (date < minDate || date > maxDate) {
-          console.warn('Date out of reasonable range in brief:', dateString, brief.id || 'unknown');
-          return null;
-        }
-        
-        return date;
-      } catch (error) {
-        console.warn('Error parsing date from brief:', error, brief.id || 'unknown');
-        return null;
+        if (date >= thisWeek) weeklyCount++;
+        if (date >= thisMonth) monthlyCount++;
+      } catch {
+        // Skip invalid dates silently
       }
-    };
-    
-    const weeklyBriefs = allBriefs.filter(brief => {
-      const date = safeParseBriefDate(brief);
-      return date && date >= thisWeek;
-    });
-    
-    const monthlyBriefs = allBriefs.filter(brief => {
-      const date = safeParseBriefDate(brief);
-      return date && date >= thisMonth;
-    });
+    }
 
     // Calculate storage usage
     const storageUsedMB = (storageInfo.size / 1024 / 1024).toFixed(2);
@@ -132,14 +128,14 @@ const ProfileScreen: React.FC = () => {
 
     return {
       total: totalBriefs,
-      weekly: weeklyBriefs.length,
-      monthly: monthlyBriefs.length,
+      weekly: weeklyCount,
+      monthly: monthlyCount,
       cloud: supabaseBriefs?.length || 0,
       local: localBriefs?.length || 0,
       storageUsedMB,
       avgBriefSize,
     };
-  }, [allBriefs, totalBriefs, supabaseBriefs, localBriefs, storageInfo]);
+  }, [allBriefs?.length, totalBriefs, supabaseBriefs?.length, localBriefs?.length, storageInfo.size]);
 
   const handleSignOut = () => {
     Alert.alert(
@@ -181,6 +177,19 @@ const ProfileScreen: React.FC = () => {
       {subtitle && <Text style={styles.statSubtitle}>{subtitle}</Text>}
     </Animated.View>
   );
+
+  // Show loading state while data is being fetched
+  if (!componentMounted || isLoading || supabaseLoading) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFD700" />
+          <Text style={styles.loadingText}>Cargando perfil...</Text>
+        </View>
+      </View>
+    );
+  }
 
   if (!user) {
     return (
@@ -358,6 +367,18 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingBottom: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+  },
+  loadingText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginTop: 16,
+    fontWeight: '600',
   },
 
   // Header

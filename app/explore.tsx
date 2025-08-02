@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import BriefsTestComponent from '../components/BriefsTestComponent';
 
 export default function ExploreScreen() {
   const router = useRouter();
+  const [showTestComponent, setShowTestComponent] = useState(false);
 
   // Font scale is automatically handled by React Native system font settings
+
+  if (showTestComponent) {
+    return <BriefsTestComponent onBack={() => setShowTestComponent(false)} />;
+  }
 
   return (
     <View style={styles.container}>
@@ -31,6 +37,14 @@ export default function ExploreScreen() {
         </View>
 
         <View style={styles.sectionContainer}>
+          {/* Test Component Button */}
+          <Pressable 
+            style={styles.testButton}
+            onPress={() => setShowTestComponent(true)}
+          >
+            <Text style={styles.testButtonText}>🧪 PROBAR SUPABASE BRIEFS</Text>
+          </Pressable>
+
           <View 
             style={styles.featureCard}
             accessible={true}
@@ -219,6 +233,21 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     gap: 20,
+  },
+  testButton: {
+    backgroundColor: '#FFD700',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  testButtonText: {
+    color: '#000000',
+    fontSize: 18,
+    fontWeight: '900',
+    letterSpacing: 1,
   },
   featureCard: {
     backgroundColor: '#000000',

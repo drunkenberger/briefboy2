@@ -1,10 +1,21 @@
 import React from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SavedBrief } from '../hooks/useBriefStorage';
+import { DatabaseBrief } from '../types/brief';
+import TokenUsageDisplay from './TokenUsageDisplay';
+
+// Union type to handle both local and Supabase briefs
+type BriefItem = DatabaseBrief | {
+  id: string;
+  title: string;
+  transcription: string;
+  brief: any;
+  createdAt: string;
+  audioUri?: string;
+};
 
 interface SavedBriefsListProps {
-  briefs: SavedBrief[];
-  onSelectBrief: (brief: SavedBrief) => void;
+  briefs: BriefItem[];
+  onSelectBrief: (brief: BriefItem) => void;
   onDeleteBrief: (id: string) => void;
 }
 
@@ -16,7 +27,9 @@ const SavedBriefsList: React.FC<SavedBriefsListProps> = ({
   onSelectBrief, 
   onDeleteBrief 
 }) => {
-  const formatDate = (dateString: string) => {
+  const formatDate = (brief: BriefItem) => {
+    // Handle both local briefs (createdAt) and Supabase briefs (created_at)
+    const dateString = 'created_at' in brief ? brief.created_at : brief.createdAt;
     const date = new Date(dateString);
     return date.toLocaleDateString('es-ES', {
       day: '2-digit',
@@ -27,37 +40,66 @@ const SavedBriefsList: React.FC<SavedBriefsListProps> = ({
     });
   };
 
-  const renderBriefItem = ({ item }: { item: SavedBrief }) => (
-    <Pressable
-      style={styles.briefCard}
-      onPress={() => onSelectBrief(item)}
-    >
-      <View style={styles.briefHeader}>
-        <Text style={styles.briefTitle} numberOfLines={2}>
-          {item.title}
+  const renderBriefItem = ({ item }: { item: BriefItem }) => {
+    // Handle both brief structures
+    const briefData = 'brief_data' in item ? item.brief_data : item.brief;
+    const transcription = item.transcription || '';
+    
+    return (
+      <Pressable
+        style={styles.briefCard}
+        onPress={() => onSelectBrief(item)}
+      >
+        <View style={styles.briefHeader}>
+          <Text style={styles.briefTitle} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.briefDate}>
+            {formatDate(item)}
+          </Text>
+        </View>
+        
+        <Text style={styles.briefPreview} numberOfLines={3}>
+          {transcription}
         </Text>
-        <Text style={styles.briefDate}>
-          {formatDate(item.createdAt)}
-        </Text>
-      </View>
-      
-      <Text style={styles.briefPreview} numberOfLines={3}>
-        {item.transcription}
-      </Text>
-      
-      <View style={styles.briefFooter}>
-        <Text style={styles.briefMeta}>
-          {item.brief?.projectTitle || 'Sin título'}
-        </Text>
-        <Pressable
-          style={styles.deleteButton}
-          onPress={() => onDeleteBrief(item.id)}
-        >
-          <Text style={styles.deleteButtonText}>🗑️</Text>
-        </Pressable>
-      </View>
-    </Pressable>
-  );
+        
+        {/* Token Usage Display for Supabase briefs */}
+        {'tokens_used' in item && item.tokens_used > 0 && (
+          <TokenUsageDisplay
+            tokensUsed={item.tokens_used}
+            tokensBreakdown={item.tokens_breakdown}
+            estimatedCost={item.estimated_cost}
+            compact={true}
+            style={styles.tokenUsage}
+          />
+        )}
+        
+        <View style={styles.briefFooter}>
+          <Text style={styles.briefMeta}>
+            {briefData?.projectTitle || briefData?.title || 'Sin título'}
+          </Text>
+          <Pressable
+            style={styles.deleteButton}
+            onPress={(e) => {
+              if (__DEV__) {
+                console.log('🗑️ SavedBriefsList: Delete button pressed for brief:', item.id);
+              }
+              e.stopPropagation();
+              if (__DEV__) {
+                console.log('🗑️ SavedBriefsList: Calling onDeleteBrief with id:', item.id);
+              }
+              onDeleteBrief(item.id);
+              if (__DEV__) {
+                console.log('🗑️ SavedBriefsList: onDeleteBrief called');
+              }
+            }}
+          >
+            <Text style={styles.deleteButtonText}>🗑️</Text>
+          </Pressable>
+        </View>
+      </Pressable>
+    );
+  };
 
   if (briefs.length === 0) {
     return (
@@ -81,22 +123,16 @@ const SavedBriefsList: React.FC<SavedBriefsListProps> = ({
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>📊 Briefs Guardados</Text>
-        <Text style={styles.headerSubtitle}>
-          {briefs.length} brief{briefs.length !== 1 ? 's' : ''} guardado{briefs.length !== 1 ? 's' : ''}
-        </Text>
-      </View>
-      
-      <FlatList
-        data={briefs}
-        renderItem={renderBriefItem}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.list}
-      />
-    </View>
+    <FlatList
+      data={briefs}
+      renderItem={renderBriefItem}
+      keyExtractor={(item) => `brief-${item.id}`}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.list}
+      style={styles.container}
+      extraData={briefs.length} // Force re-render when count changes
+      removeClippedSubviews={false} // Ensure all items are rendered
+    />
   );
 };
 
@@ -105,29 +141,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  header: {
-    padding: 24,
-    backgroundColor: '#000000',
-    borderBottomWidth: 4,
-    borderBottomColor: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    marginBottom: 8,
-    letterSpacing: -1,
-    textTransform: 'uppercase',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#FFD700',
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
   list: {
     padding: 20,
+    flexGrow: 1,
   },
   briefCard: {
     backgroundColor: '#000000',
@@ -164,6 +180,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 16,
     opacity: 0.9,
+  },
+  tokenUsage: {
+    marginBottom: 16,
+    alignSelf: 'flex-start',
   },
   briefFooter: {
     flexDirection: 'row',

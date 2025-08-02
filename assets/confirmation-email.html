@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmación de cuenta – Brief Boy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin:0;
+      padding:0;
+      background: transparent;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      min-height:100vh;
+    }
+    .email-container {
+      font-family:sans-serif;
+      color:#fff;
+      position: relative;
+      display: inline-block;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .header-top, .footer-bg {
+      display:block;
+      width:100%;
+      height:auto;
+      position: relative;
+      z-index: 2;
+    }
+    .left-side, .right-side {
+      position:absolute;
+      top:0;
+      bottom:0;
+      height:100%;
+      width:auto;
+      display:block;
+      z-index:0;
+      pointer-events:none;
+      object-fit:cover;
+    }
+    .left-side { left:0; }
+    .right-side { right:0; }
+
+    .card {
+      background:#000;
+      padding:24px;
+      border-radius:14px;
+      position: relative;
+      z-index:1;
+      margin:0px 10px 0px 10px;
+    }
+
+    .lines-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:14px;
+    }
+    .lines-header img.lines {
+      display:block;
+      width:auto;
+      height:auto;
+      max-width: calc(85% - 70px);
+    }
+    .lines-header img.happy {
+      display:block;
+      width:56px;
+      height:auto;
+    }
+
+    .btn-custom {
+      display:inline-block;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      text-decoration: none;
+      background: linear-gradient(to top, #FFD800, #FFEB3B);
+      border-radius: 50px;
+      border: 2px solid #C4A600;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-custom::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to top, rgba(150,255,150,0.3), rgba(255,255,255,0));
+      border-radius: 50px;
+      pointer-events: none;
+    }
+
+    p { text-align:left; margin:0 0 12px 0; }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <img src="https://res.cloudinary.com/dtufr2kvv/image/upload/v1753937201/arriba3_k18q4u.png" class="header-top" alt="Encabezado Brief Boy">
+    <img src="https://res.cloudinary.com/dtufr2kvv/image/upload/v1753935127/izquierda_2_xwxkha.png" class="left-side" alt="Lateral Izquierdo">
+    <img src="https://res.cloudinary.com/dtufr2kvv/image/upload/v1753936319/derecha_2_uwh9uj.png" class="right-side" alt="Lateral Derecho">
+    <div class="card">
+      <div class="lines-header">
+        <img src="https://res.cloudinary.com/dtufr2kvv/image/upload/v1753923432/Lineas_n5xow6.png" class="lines" alt="Líneas decorativas">
+        <img src="https://res.cloudinary.com/dtufr2kvv/image/upload/v1753921585/happy_johxny.jpg" class="happy" alt="Emoji feliz">
+      </div>
+      <p style="font-size:20px;">Hola,</p>
+      <p style="font-size:18px; line-height:1.45;"><strong>Este mailing tiene un brief bien claro:</strong><br><strong>hacer que des click al botón de confirmar.</strong></p>
+      <div style="margin:24px 0; text-align:center;">
+        <a href="%confirm_url%" class="btn-custom">BOTÓN DE CONFIRMAR</a>
+      </div>
+      <p style="font-size:14px; color:#CFCFCF; line-height:1.5;">Este enlace caducará en menos de lo que canta un gallo. <br>Si no te registraste, pues deberías.</p>
+      <p style="font-size:16px; line-height:1.55;">¿Necesitas ayuda? Visita
+        <a href="https://www.brief-boy.com/landing?src=email_chat" target="_blank" style="color:#FFD800; text-decoration:underline;">nuestro soporte.</a>
+      </p>
+      <p style="font-size:13px; color:#CFCFCF; font-style:italic;">P.D. Sabemos que nadie lee estos mails.
+        <img src="https://res.cloudinary.com/dtufr2kvv/image/upload/v1753921637/Sleeping_Emoji_do3m8x.png" alt="Emoji dormido" style="width:20px; height:auto; vertical-align:middle;">
+      </p>
+    </div>
+    <img src="https://res.cloudinary.com/dtufr2kvv/image/upload/v1753925759/abajo_v2_sigkl2.png" class="footer-bg" alt="Pie decorativo">
+  </div>
+</body>
+</html>
+
+
+
