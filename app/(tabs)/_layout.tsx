@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -12,15 +12,31 @@ export default function TabLayout() {
   return (
     <AuthGuard>
       <View style={{ flex: 1 }}>
-        <BrutalistHeader showBackButton={true} />
-        <Stack
+        <BrutalistHeader showBackButton={false} />
+        <Tabs
           screenOptions={{
             headerShown: false,
+            tabBarStyle: { display: 'none' }, // Hide default tab bar since we use custom header
           }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="history" />
-          <Stack.Screen name="explore" />
-        </Stack>
+          <Tabs.Screen 
+            name="index" 
+            options={{
+              title: 'App',
+            }} 
+          />
+          <Tabs.Screen 
+            name="briefs" 
+            options={{
+              title: 'Briefs',
+            }} 
+          />
+          <Tabs.Screen 
+            name="profile" 
+            options={{
+              title: 'Profile',
+            }} 
+          />
+        </Tabs>
         <BrutalistFooter />
         <ZohoSalesIQWidget />
         <PageSenseTracker />

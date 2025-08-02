@@ -21,11 +21,20 @@ export default function BrutalistHeader({ showBackButton = false }: BrutalistHea
               <Text style={styles.navText}>← VOLVER</Text>
             </Pressable>
           )}
-          <Pressable onPress={() => router.push('/(tabs)')} style={styles.navItem}>
+          <Pressable onPress={() => router.push('/(tabs)/')} style={styles.navItem}>
             <Text style={styles.navText}>APP</Text>
           </Pressable>
-          <Pressable onPress={() => router.push('/(tabs)/history')} style={styles.navItem}>
-            <Text style={styles.navText}>HISTORIAL</Text>
+          <Pressable onPress={() => {
+            console.log('🧭 Navigating to briefs...');
+            router.push('/(tabs)/briefs');
+          }} style={styles.navItem}>
+            <Text style={styles.navText}>BRIEFS</Text>
+          </Pressable>
+          <Pressable onPress={() => {
+            console.log('🧭 Navigating to profile...');
+            router.push('/(tabs)/profile');
+          }} style={styles.navItem}>
+            <Text style={styles.navText}>PERFIL</Text>
           </Pressable>
         </View>
       </View>
