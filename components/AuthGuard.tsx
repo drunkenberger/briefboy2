@@ -34,13 +34,23 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   };
 
-  // Mark auth as checked once initialization is complete
+  // Mark auth as checked once initialization is complete or after timeout
   useEffect(() => {
     if (!initializing) {
       console.log('✅ Auth initialization complete:', { isAuthenticated, hasUser: !!user });
       setHasCheckedAuth(true);
     }
-  }, [initializing, isAuthenticated, user]);
+    
+    // Fallback timeout to prevent infinite loading
+    const timer = setTimeout(() => {
+      if (!hasCheckedAuth) {
+        console.warn('⚠️ Auth check timeout - forcing completion');
+        setHasCheckedAuth(true);
+      }
+    }, 5000); // 5 second timeout
+    
+    return () => clearTimeout(timer);
+  }, [initializing, isAuthenticated, user, hasCheckedAuth]);
 
   // Navigate based on auth state after check is complete
   useEffect(() => {

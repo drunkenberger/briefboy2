@@ -45,14 +45,13 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
     // Get initial session
     const getInitialSession = async () => {
       try {
-        if (__DEV__) {
-          console.log('🔑 Getting initial session...');
-        }
+        console.log('🔑 Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('❌ Error getting session:', error);
           if (mounted) {
+            setState(prev => ({ ...prev, loading: false, isAuthenticated: false }));
             setInitializing(false);
           }
           return;
@@ -76,6 +75,16 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
             isAuthenticated: true,
           });
           console.log('✅ Auth state updated with existing session');
+        } else if (mounted) {
+          // No session found
+          console.log('📭 No existing session found');
+          setState({
+            user: null,
+            profile: null,
+            session: null,
+            loading: false,
+            isAuthenticated: false,
+          });
         }
         
         if (mounted) {
@@ -84,6 +93,13 @@ export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boo
       } catch (error) {
         console.error('Error in getInitialSession:', error);
         if (mounted) {
+          setState({
+            user: null,
+            profile: null,
+            session: null,
+            loading: false,
+            isAuthenticated: false,
+          });
           setInitializing(false);
         }
       }
