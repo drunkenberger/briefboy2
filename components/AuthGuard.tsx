@@ -9,7 +9,7 @@ interface AuthGuardProps {
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const router = useRouter();
-  const { user, profile, loading, isAuthenticated, signOut } = useSupabaseAuth();
+  const { user, profile, loading, initializing, isAuthenticated, signOut } = useSupabaseAuth();
   const [timeoutReached, setTimeoutReached] = useState(false);
 
   const handleLogout = async () => {
@@ -36,7 +36,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
 
   // Implement proper timeout for auth loading
   useEffect(() => {
-    if (loading) {
+    if (initializing) {
       const timer = setTimeout(() => {
         console.log('⚠️ Auth loading timeout reached after 3 seconds');
         setTimeoutReached(true);
@@ -44,18 +44,20 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       
       return () => clearTimeout(timer);
     }
-  }, [loading]);
+  }, [initializing]);
 
   // Navigate to auth screen when not authenticated
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    // Only redirect to auth if we're truly not authenticated after initialization
+    if (!initializing && !loading && !isAuthenticated) {
       console.log('🔐 AuthGuard: Not authenticated, redirecting to auth screen');
+      console.log('📊 Auth state:', { initializing, isAuthenticated, hasUser: !!user, loading });
       router.replace('/auth');
     }
-  }, [loading, isAuthenticated, router]);
+  }, [initializing, isAuthenticated, loading, router]);
 
   // Show loading screen only during initial auth check and if not timed out
-  if (loading && !timeoutReached) {
+  if (initializing && !timeoutReached) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Cargando...</Text>

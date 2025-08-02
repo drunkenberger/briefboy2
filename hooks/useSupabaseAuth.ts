@@ -19,7 +19,7 @@ interface AuthActions {
   validateBetaCode: (code: string) => Promise<boolean>;
 }
 
-export function useSupabaseAuth(): AuthState & AuthActions {
+export function useSupabaseAuth(): AuthState & AuthActions & { initializing: boolean } {
   const [state, setState] = useState<AuthState>({
     user: null,
     profile: null,
@@ -59,6 +59,7 @@ export function useSupabaseAuth(): AuthState & AuthActions {
         }
 
         if (session?.user && mounted) {
+          console.log('🔑 Found existing session for:', session.user.email);
           // Get user profile
           const profile = await getProfile(session.user.id);
           
@@ -69,6 +70,7 @@ export function useSupabaseAuth(): AuthState & AuthActions {
             loading: false,
             isAuthenticated: true,
           });
+          console.log('✅ Auth state updated with existing session');
         }
         
         if (mounted) {
@@ -314,7 +316,8 @@ export function useSupabaseAuth(): AuthState & AuthActions {
 
   return {
     ...state,
-    loading: initializing ? true : state.loading, // Use initializing for initial load, state.loading for auth actions
+    loading: state.loading, // Only use state.loading for auth actions
+    initializing, // Expose initializing separately
     signUp: handleSignUp,
     signIn: handleSignIn,
     signOut: handleSignOut,

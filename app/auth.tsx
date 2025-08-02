@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   Alert,
   ActivityIndicator,
   StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { router } from 'expo-router';
@@ -16,14 +19,46 @@ import { router } from 'expo-router';
  * Authentication Screen - Login and Register
  */
 const AuthScreen: React.FC = () => {
-  const { signIn, signUp, loading } = useSupabaseAuth();
+  const { signIn, signUp, loading, isAuthenticated } = useSupabaseAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [betaCode, setBetaCode] = useState('');
   const [fullName, setFullName] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('🔄 Already authenticated, redirecting to tabs');
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated]);
+  
+  // Show loading while checking auth status
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <ActivityIndicator size="large" color="#FFD700" />
+          <Text style={[styles.subtitle, { marginTop: 20 }]}>
+            Verificando sesión...
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   const handleAuth = async () => {
+    // Check if Supabase is configured
+    if (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+      Alert.alert(
+        'Configuración Requerida',
+        'La aplicación no está configurada correctamente.\n\nNecesitas crear un archivo .env con:\n• EXPO_PUBLIC_SUPABASE_URL\n• EXPO_PUBLIC_SUPABASE_ANON_KEY\n\nContacta al administrador para obtener estas credenciales.',
+        [{ text: 'Entendido' }]
+      );
+      return;
+    }
+
     if (!email.trim() || !password.trim()) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
@@ -41,9 +76,17 @@ const AuthScreen: React.FC = () => {
         // Success alert is handled by the signUp function in useSupabaseAuth
       } else {
         console.log('🔐 Attempting sign in with:', { email: email.trim(), passwordLength: password.length });
-        await signIn(email.trim(), password);
+        const result = await signIn(email.trim(), password);
         console.log('✅ Sign in call completed successfully');
-        // The auth state change will automatically redirect when successful
+        console.log('🔍 Sign in result:', { hasUser: !!result });
+        
+        // Force navigation on successful login
+        if (result) {
+          console.log('🚀 Login successful, navigating to tabs...');
+          setTimeout(() => {
+            router.replace('/(tabs)');
+          }, 100);
+        }
       }
     } catch (error) {
       console.error('❌ Auth error in auth.tsx:', error);
@@ -52,10 +95,18 @@ const AuthScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
       
-      <View style={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>
             {isRegistering ? 'CREAR CUENTA' : 'INICIAR SESIÓN'}
@@ -125,7 +176,11 @@ const AuthScreen: React.FC = () => {
           </View>
 
           <Pressable
-            style={[styles.authButton, loading && styles.authButtonDisabled]}
+            style={({ pressed }) => [
+              styles.authButton, 
+              loading && styles.authButtonDisabled,
+              pressed && styles.authButtonPressed
+            ]}
             onPress={handleAuth}
             disabled={loading}
           >
@@ -158,8 +213,24 @@ const AuthScreen: React.FC = () => {
         >
           <Text style={styles.backButtonText}>← VOLVER</Text>
         </Pressable>
+        
+        {/* Temporary development bypass */}
+        {__DEV__ && (
+          <Pressable
+            style={[styles.backButton, { marginTop: 10, borderColor: '#FFD700' }]}
+            onPress={() => {
+              console.log('🚀 Dev bypass: Forcing navigation to tabs');
+              router.replace('/(tabs)');
+            }}
+          >
+            <Text style={[styles.backButtonText, { color: '#FFD700' }]}>
+              DEV: BYPASS LOGIN →
+            </Text>
+          </Pressable>
+        )}
       </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -167,6 +238,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,
@@ -226,6 +300,10 @@ const styles = StyleSheet.create({
   },
   authButtonDisabled: {
     opacity: 0.6,
+  },
+  authButtonPressed: {
+    backgroundColor: '#FFA500',
+    transform: [{ scale: 0.98 }],
   },
   authButtonText: {
     fontSize: 16,
